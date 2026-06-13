@@ -39,34 +39,14 @@ export default async function Home() {
 
   const agents = [
     {
-      id: "researcher",
-      name: "The Neuro-Researcher",
-      desc: "Deep-dives into scientific papers and synthesizes concepts from first principles.",
-      icon: <Brain size={24} />,
-      color: "var(--accent-teal)",
-      badge: "Vercel AI SDK",
-      stack: ["GPT-4o", "Gemini Pro", "Next.js"],
-      borderColor: "rgba(0, 242, 255, 0.2)"
-    },
-    {
-      id: "strategist",
-      name: "AI Business Architect",
-      desc: "Designs and outputs custom multi-agent collaboration workflows for business automation.",
-      icon: <Briefcase size={24} />,
-      color: "var(--accent-violet)",
-      badge: "LangChain",
-      stack: ["GPT-4o", "Llama-3", "LangGraph"],
-      borderColor: "rgba(188, 19, 254, 0.2)"
-    },
-    {
-      id: "simplifier",
-      name: "The Concept Simplifier",
-      desc: "Translates high-level quantum physics, AI algorithms, and scientific theories into intuitive analogies.",
-      icon: <Sparkles size={24} />,
-      color: "var(--accent-yellow)",
-      badge: "Vercel AI SDK",
-      stack: ["Claude 3.5 Sonnet", "Tailwind", "React"],
-      borderColor: "rgba(255, 183, 0, 0.2)"
+      id: "email-agent",
+      name: "Email Filtering Agent",
+      desc: "An enterprise-grade autonomous workflow intercepting emails, performing real-time zero-shot priority & sentiment classification via LLMs, logging metadata to Google Sheets, and applying context-aware tags.",
+      icon: <Mail size={24} />,
+      color: "var(--accent-green)",
+      badge: "Make.com + OpenAI",
+      stack: ["Make.com", "OpenAI GPT-4o", "Google Sheets", "Gmail API"],
+      borderColor: "rgba(57, 255, 20, 0.2)"
     }
   ];
 
@@ -114,10 +94,10 @@ export default async function Home() {
               </span>
             </div>
             <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>The Experimental Lab</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Interactive AI agents designed for complex cognitive tasks.</p>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Interactive AI workflows designed for complex cognitive tasks.</p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px" }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             {agents.map((agent) => (
               <div 
                 key={agent.id} 
@@ -127,7 +107,8 @@ export default async function Home() {
                   borderRadius: "24px", 
                   display: "flex", 
                   flexDirection: "column", 
-                  height: "100%",
+                  maxWidth: "500px",
+                  width: "100%",
                   borderLeft: `4px solid ${agent.color}`,
                   background: "rgba(10, 10, 12, 0.4)"
                 }}

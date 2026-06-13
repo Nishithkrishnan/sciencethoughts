@@ -90,7 +90,16 @@ export default function EmailFilterDemo() {
         </p>
 
         {/* Modular Workflow Visualizer */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginTop: "20px", background: "rgba(0,0,0,0.2)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.02)" }}>
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", 
+          gap: "12px", 
+          marginTop: "20px", 
+          background: "rgba(0,0,0,0.2)", 
+          padding: "16px", 
+          borderRadius: "10px", 
+          border: "1px solid rgba(255,255,255,0.02)" 
+        }}>
           <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", width: "38px", height: "38px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
               <Mail size={16} />
@@ -126,7 +135,11 @@ export default function EmailFilterDemo() {
       </div>
 
       {/* Simulator Playground Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "25px" }}>
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+        gap: "25px" 
+      }}>
         
         {/* Left Interactive Input Panel */}
         <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "15px", background: "rgba(10, 10, 14, 0.7)" }}>

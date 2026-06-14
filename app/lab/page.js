@@ -38,13 +38,13 @@ export default function LabPage() {
             <EmailFilterDemo />
           </div>
 
-          {/* Demo 2: Site QA RAG Agent */}
+          {/* Demo 2: Site QA Agent */}
           <div className="glass-panel" style={{ padding: "30px", background: "rgba(10, 10, 12, 0.4)" }}>
             <h2 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", marginBottom: "20px", color: "var(--accent-teal)" }}>
-              Cognitive QA Agent (RAG)
+              Cognitive QA Agent
             </h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "20px" }}>
-              This agent retrieves knowledge from our custom knowledge-base markdown document to answer questions about the site and portfolio in real time.
+              Interact directly with the cognitive portfolio assistant to ask questions about the site and portfolio.
             </p>
             <EmbeddedFlowiseChat />
           </div>

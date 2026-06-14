@@ -1,4 +1,5 @@
 import "./globals.css";
+import FlowiseChatbot from "../components/FlowiseChatbot";
 
 export const metadata = {
   title: "Science Thoughts - AI Agents & Human Insights",
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <FlowiseChatbot />
         {/* Navigation Header */}
         <header className="header">
           <div className="container header-container">

@@ -11,17 +11,40 @@ export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API submission
-    setTimeout(() => {
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "2e6029a9-dcec-40ea-88c8-cee99c15db69",
+          name: name,
+          email: email,
+          subject: `ScienceThoughts Contact: ${scope}`,
+          message: `Scope: ${scope}\n\nMessage: ${message}`,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setSubmitted(true);
+        setName("");
+        setEmail("");
+        setMessage("");
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      setSubmitted(true);
-      setName("");
-      setEmail("");
-      setMessage("");
-    }, 1200);
+    }
   };
 
   if (submitted) {

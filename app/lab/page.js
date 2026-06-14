@@ -2,6 +2,7 @@
 "use client";
 
 import EmailFilterDemo from "../../components/EmailFilterDemo";
+import SystemArchitecture from "../../components/SystemArchitecture";
 
 export default function LabPage() {
   return (
@@ -20,6 +21,7 @@ export default function LabPage() {
           Email Filtering Agent Demo
         </h1>
         <EmailFilterDemo />
+        <SystemArchitecture />
       </div>
     </div>
   );

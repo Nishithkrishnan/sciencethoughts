@@ -1,5 +1,6 @@
 import "./globals.css";
 import FlowiseChatbot from "../components/FlowiseChatbot";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Science Thoughts - AI Agents & Human Insights",
@@ -74,6 +75,7 @@ export default function RootLayout({ children }) {
             </div>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );

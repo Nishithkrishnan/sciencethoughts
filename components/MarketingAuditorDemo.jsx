@@ -16,8 +16,8 @@ export default function MarketingAuditorDemo() {
     setResult(null);
 
     try {
-      // Calls our local or cloud Python backend
-      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || "http://127.0.0.1:8000/audit";
+      // Calls our live cloud Python backend
+      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || "https://sciencethoughts-python3.onrender.com/audit";
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

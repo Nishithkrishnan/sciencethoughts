@@ -6,6 +6,27 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata = {
   title: "Science Thoughts - AI Agents & Human Insights",
   description: "A hybrid showcase where science meets AI. Explore autonomous agents, dynamic interfaces, and cutting-edge cognitive articles.",
+  openGraph: {
+    title: "Science Thoughts - AI Agent Laboratory",
+    description: "Explore my interactive portfolio of autonomous AI agents. Test out the Email Auto-Responder and the Real Estate Lead Auditor live.",
+    url: "https://sciencethoughts.com",
+    siteName: "Science Thoughts",
+    images: [
+      {
+        url: "https://sciencethoughts.com/og-image.jpg", // Add an og-image.jpg to your public folder later
+        width: 1200,
+        height: 630,
+        alt: "Science Thoughts AI Lab",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Science Thoughts - AI Agents",
+    description: "Explore my interactive portfolio of autonomous AI agents.",
+  },
   icons: {
     icon: "/favicon.ico",
   },

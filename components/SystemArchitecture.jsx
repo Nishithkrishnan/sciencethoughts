@@ -173,6 +173,90 @@ export default function SystemArchitecture() {
         </div>
       </section>
 
+      {/* Divider */}
+      <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, var(--border-color), transparent)" }}></div>
+
+      {/* 3. Real Estate Marketing Auditor Section */}
+      <section style={{ animation: "fadeIn 1.2s ease-out" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" }}>
+          <span style={{ fontSize: "0.75rem", background: "rgba(0, 210, 255, 0.08)", border: "1px solid rgba(0, 210, 255, 0.2)", color: "#00d2ff", padding: "4px 12px", borderRadius: "20px", fontWeight: "600", textTransform: "uppercase" }}>System Architecture 03</span>
+          <h2 style={{ fontSize: "1.8rem", fontWeight: "800", fontFamily: "var(--font-display)", margin: 0 }}>Real Estate Lead Auditor (Python)</h2>
+        </div>
+        
+        <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", fontSize: "1rem", marginBottom: "30px" }}>
+          A full-stack, enterprise-grade AI microservice. This agent acts as a world-class marketing copywriter, analyzing text for persuasiveness and strictly returning a JSON-structured audit using LangChain and Pydantic validation.
+        </p>
+
+        {/* Node diagram */}
+        <div style={{ 
+          background: "rgba(0,0,0,0.25)", 
+          padding: "30px", 
+          borderRadius: "16px", 
+          border: "1px solid var(--border-color)",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "20px",
+          alignItems: "center",
+          marginBottom: "35px",
+          position: "relative"
+        }}>
+          {/* Node 1 */}
+          <div className="glass-panel" style={{ padding: "20px", textAlign: "center", borderLeft: "3px solid #3a7bd5" }}>
+            <Layers size={28} style={{ color: "#3a7bd5", margin: "0 auto 10px auto" }} />
+            <h4 style={{ fontSize: "0.95rem", fontWeight: "700", marginBottom: "6px" }}>Next.js Client</h4>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>React UI captures input and sends async POST request.</p>
+          </div>
+          
+          <div style={{ display: "flex", justifyContent: "center", color: "var(--text-muted)" }}>
+            <ArrowRight className="md-arrow-right" />
+          </div>
+
+          {/* Node 2 */}
+          <div className="glass-panel" style={{ padding: "20px", textAlign: "center", borderLeft: "3px solid #00d2ff" }}>
+            <Cpu size={28} style={{ color: "#00d2ff", margin: "0 auto 10px auto" }} />
+            <h4 style={{ fontSize: "0.95rem", fontWeight: "700", marginBottom: "6px" }}>FastAPI Backend</h4>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Python microservice orchestrates the LangChain pipeline.</p>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", color: "var(--text-muted)" }}>
+            <ArrowRight className="md-arrow-right" />
+          </div>
+
+          {/* Node 3 */}
+          <div className="glass-panel" style={{ padding: "20px", textAlign: "center", borderLeft: "3px solid #ff4757" }}>
+            <CheckCircle size={28} style={{ color: "#ff4757", margin: "0 auto 10px auto" }} />
+            <h4 style={{ fontSize: "0.95rem", fontWeight: "700", marginBottom: "6px" }}>Pydantic Validation</h4>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Forces the LLM to return strict JSON (Score, Strengths, Rewrite).</p>
+          </div>
+        </div>
+
+        {/* Benefits Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "25px" }}>
+          <div className="glass" style={{ padding: "20px", borderRadius: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+               <Zap size={18} style={{ color: "#00d2ff" }} />
+              <h5 style={{ fontWeight: "700", fontSize: "0.95rem", margin: 0 }}>Business Impact</h5>
+            </div>
+            <ul style={{ paddingLeft: "18px", color: "var(--text-secondary)", fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "6px", margin: 0 }}>
+              <li><strong>Lead Recovery:</strong> Prevents thousands of dollars lost from unpersuasive Facebook or Google Ads.</li>
+              <li><strong>Data-Driven Decisions:</strong> Quantifies marketing copy with a mathematical score rather than guessing.</li>
+              <li><strong>Scale & Speed:</strong> Audits what would take a human consultant 30 minutes in less than 5 seconds.</li>
+            </ul>
+          </div>
+          <div className="glass" style={{ padding: "20px", borderRadius: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              <Database size={18} style={{ color: "#00d2ff" }} />
+              <h5 style={{ fontWeight: "700", fontSize: "0.95rem", margin: 0 }}>Technical Details</h5>
+            </div>
+            <ul style={{ paddingLeft: "18px", color: "var(--text-secondary)", fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "6px", margin: 0 }}>
+              <li>Fully custom backend built in <strong>Python</strong> using the <strong>FastAPI</strong> framework.</li>
+              <li>Utilizes <strong>LangChain Core</strong> and `PydanticOutputParser` to eliminate LLM hallucinations.</li>
+              <li>Designed as an independent microservice that can be deployed to Render or AWS.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

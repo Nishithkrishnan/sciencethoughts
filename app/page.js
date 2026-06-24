@@ -1,7 +1,7 @@
 import { getPosts } from "../lib/wordpress";
 import SearchInput from "../components/SearchInput";
 import ContactForm from "../components/ContactForm";
-import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2 } from "lucide-react";
+import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home } from "lucide-react";
 
 export default async function Home() {
   // Fetch recent posts from WordPress API
@@ -47,6 +47,16 @@ export default async function Home() {
       badge: "Make.com + OpenAI",
       stack: ["Make.com", "OpenAI GPT-4o", "Google Sheets", "Gmail API"],
       borderColor: "rgba(57, 255, 20, 0.2)"
+    },
+    {
+      id: "real-estate-agent",
+      name: "Real Estate QA Agent",
+      desc: "An autonomous Python engine using LangChain to audit marketing copy. Analyzes subjectivity, tone, and conversion mechanics against enterprise real estate data.",
+      icon: <Home size={24} />,
+      color: "var(--accent-teal)",
+      badge: "Python + LangChain",
+      stack: ["Next.js", "FastAPI", "Python", "LangChain Core"],
+      borderColor: "rgba(0, 242, 255, 0.2)"
     }
   ];
 
@@ -111,7 +121,7 @@ export default async function Home() {
             <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Interactive AI workflows designed for complex cognitive tasks.</p>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "30px", flexWrap: "wrap" }}>
             {agents.map((agent) => (
               <div 
                 key={agent.id} 

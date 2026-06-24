@@ -1,7 +1,7 @@
 import { getPosts } from "../lib/wordpress";
 import SearchInput from "../components/SearchInput";
 import ContactForm from "../components/ContactForm";
-import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail } from "lucide-react";
+import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2 } from "lucide-react";
 
 export default async function Home() {
   // Fetch recent posts from WordPress API
@@ -83,6 +83,20 @@ export default async function Home() {
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px)", backgroundSize: "40px 40px", maskImage: "radial-gradient(circle at 50% 50%, black, transparent 80%)", pointerEvents: "none" }}></div>
       </section>
 
+      {/* 1.5 Powered By Strip (Social Proof) */}
+      <section style={{ padding: "40px 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(5, 5, 8, 0.4)" }}>
+        <div className="container">
+          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Powered By Enterprise Infrastructure</p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "50px", flexWrap: "wrap", opacity: 0.35 }}>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>OpenAI</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Meta API</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>LangChain</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Vercel</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>FastAPI</span>
+          </div>
+        </div>
+      </section>
+
       {/* 2. Agent Showcase (The Lab) */}
       <section id="lab" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
@@ -139,8 +153,64 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 3. The Think Tank (Blog Feed) */}
-      <section id="blog" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
+      {/* 3. Productized Services */}
+      <section id="services" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: "60px" }}>
+             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
+              <span style={{ color: "var(--accent-green)", background: "rgba(57, 255, 20, 0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(57, 255, 20, 0.1)" }}>
+                <Briefcase size={24} />
+              </span>
+            </div>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Automation Services</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Stop buying generic software. Commission a custom autonomous system.</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px", alignItems: "stretch" }}>
+            {/* Service 1 */}
+            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>The Lead Qualifier</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹75,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>once</span></p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>A 24/7 WhatsApp AI agent that engages Facebook leads instantly, qualifies their budget, and routes them to your sales team.</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Instant 24/7 Response</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Knowledge-Restricted Vault</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Logs data to Google Sheets</li>
+              </ul>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Book Audit</a>
+            </div>
+
+            {/* Service 2 */}
+            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", display: "flex", flexDirection: "column", height: "100%" }}>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Customer Support Bot</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹50,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>once</span></p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Automate your most common customer inquiries on your website or WhatsApp to free up your human support staff.</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Trained on your FAQs</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-language support</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Seamless Human Handoff</li>
+              </ul>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Book Audit</a>
+            </div>
+
+            {/* Service 3 */}
+            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", display: "flex", flexDirection: "column", height: "100%" }}>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Bespoke Architecture</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Need a multi-agent system, an internal data analysis tool, or a complex API integration? Let's scope it out.</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom Tech Stack</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Internal Tooling</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> End-to-end deployment</li>
+              </ul>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto", background: "var(--bg-card)", border: "1px solid var(--border-color)" }}>Request Quote</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. The Think Tank (Blog Feed) */}
+      <section id="blog" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
           
           <div style={{ textAlign: "center", marginBottom: "60px" }}>
@@ -180,22 +250,42 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 4. Contact / Work With Me Section */}
-      <section id="contact" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
-        <div className="container" style={{ maxWidth: "800px" }}>
+      {/* 5. Contact / Work With Me Section */}
+      <section id="contact" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
+        <div className="container" style={{ maxWidth: "1000px" }}>
           
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
               <span style={{ color: "var(--accent-teal)", background: "rgba(0,242,255,0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(0,242,255,0.1)" }}>
-                <Mail size={24} />
+                <Calendar size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Work With Me</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Have an agentic AI workflow or technical writing requirement? Let's connect.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Book an AI Audit</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Pick a time on my calendar below, or send a direct message.</p>
           </div>
 
-          <div className="glass-panel" style={{ padding: "40px", background: "rgba(15, 15, 20, 0.6)" }}>
-            <ContactForm />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "40px", alignItems: "start" }}>
+            
+            {/* Calendly Column */}
+            <div className="glass-panel" style={{ padding: "0", background: "rgba(15, 15, 20, 0.6)", height: "700px", overflow: "hidden", border: "1px solid var(--border-color)" }}>
+              <iframe 
+                src="https://calendly.com/nishithmanu/30min?hide_event_type_details=1&hide_gdpr_banner=1" 
+                width="100%" 
+                height="100%" 
+                frameBorder="0"
+                style={{ border: "none" }}
+              ></iframe>
+            </div>
+
+            {/* Email Form Column */}
+            <div className="glass-panel" style={{ padding: "40px", background: "rgba(15, 15, 20, 0.6)" }}>
+              <h3 style={{ marginBottom: "20px", fontSize: "1.4rem", fontWeight: "700", fontFamily: "var(--font-display)" }}>Send an Inquiry</h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: "30px", lineHeight: "1.6" }}>
+                Not ready for a call? Send me a direct message regarding your technical requirements or automation needs.
+              </p>
+              <ContactForm />
+            </div>
+
           </div>
 
         </div>

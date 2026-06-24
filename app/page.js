@@ -1,7 +1,7 @@
 import { getPosts } from "../lib/wordpress";
 import SearchInput from "../components/SearchInput";
 import ContactForm from "../components/ContactForm";
-import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home } from "lucide-react";
+import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home as HomeIcon } from "lucide-react";
 
 export default async function Home() {
   // Fetch recent posts from WordPress API
@@ -52,7 +52,7 @@ export default async function Home() {
       id: "real-estate-agent",
       name: "Real Estate QA Agent",
       desc: "An autonomous Python engine using LangChain to audit marketing copy. Analyzes subjectivity, tone, and conversion mechanics against enterprise real estate data.",
-      icon: <Home size={24} />,
+      icon: <HomeIcon size={24} />,
       color: "var(--accent-teal)",
       badge: "Python + LangChain",
       stack: ["Next.js", "FastAPI", "Python", "LangChain Core"],

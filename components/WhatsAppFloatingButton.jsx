@@ -37,12 +37,12 @@ export default function WhatsAppFloatingButton() {
           whiteSpace: "nowrap",
         }}
       >
-        Chat with AI Agent
+        Chat with us
       </div>
 
       {/* Button */}
       <a
-        href="https://wa.me/15550118852"
+        href="https://wa.me/919952047109"
         target="_blank"
         rel="noopener noreferrer"
         onMouseEnter={() => setHovered(true)}
@@ -62,7 +62,7 @@ export default function WhatsAppFloatingButton() {
           transform: hovered ? "scale(1.1)" : "scale(1)",
           cursor: "pointer",
         }}
-        aria-label="Chat on WhatsApp with our AI Agent"
+        aria-label="Chat on WhatsApp"
       >
         {/* WhatsApp SVG Icon */}
         <svg

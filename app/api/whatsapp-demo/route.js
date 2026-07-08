@@ -12,7 +12,7 @@ export async function GET(req) {
   const challenge = searchParams.get('hub.challenge');
 
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log("Webhook verified successfully!");
+    console.log("Sandbox Demo Webhook verified successfully!");
     return new NextResponse(challenge, { status: 200 });
   } else {
     return new NextResponse('Forbidden', { status: 403 });
@@ -39,9 +39,9 @@ export async function POST(req) {
         const phone_number_id = value.metadata.phone_number_id;
 
         if (text) {
-          console.log(`Received message from ${from}: ${text}`);
+          console.log(`[DEMO ROUTE] Received message from ${from}: ${text}`);
           
-          // 1. Get autonomous response from OpenAI
+          // 1. Get autonomous response from OpenAI using the demo prompt
           const aiResponse = await getOpenAIResponse(text);
 
           // 2. Send the AI response back to the user via WhatsApp
@@ -53,7 +53,7 @@ export async function POST(req) {
       return new NextResponse('Not Found', { status: 404 });
     }
   } catch (error) {
-    console.error("Webhook Error:", error);
+    console.error("[DEMO ROUTE] Webhook Error:", error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
@@ -64,14 +64,19 @@ async function getOpenAIResponse(userMessage) {
     return "The ScienceThoughts AI brain is currently offline. Please provide your OpenAI API key in the environment variables.";
   }
 
-  const prompt = `You are the autonomous AI assistant for ScienceThoughts, an elite B2B AI Automation Agency. 
-Your goal is to answer questions concisely, professionally, and drive the user to book an AI audit call.
-Key Information:
-- We build custom LangChain autonomous agents for Real Estate and Hospitality businesses.
-- Our primary pitch: "We replace frustrating, rule-based chatbots with intelligent agents that plug directly into your WhatsApp and CRM, stopping you from bleeding expensive Meta Ad traffic."
-- Our pricing: ₹75,000 one-time setup + ₹15,000/month retainer.
-- Tone: Strict, highly competent, professional, no-bullshit.
-Do not hallucinate features. If they ask to book, tell them to visit sciencethoughts.com or drop their email.`;
+  const prompt = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad. 
+Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details.
+
+Key Projects:
+1. **Giridhari's Prospera County** (Kismatpur, near TSPA Junction): Premium villas and villa plots. Highlights: Secure gated community, world-class clubhouse, swimming pool, sports courts, and landscaped parks.
+2. **Giridhari's Skyscraper Residences** (Kismatpur): Upcoming modern high-rise apartments with panoramic views. Highlights: Excellent connectivity to the Financial District and Gachibowli, state-of-the-art amenities, and spacious floor plans.
+
+Rules:
+- Be polite, professional, and helpful. 
+- ALWAYS answer the user's questions first. 
+- If a user says casual things like "sent by mistake", respond naturally (e.g., "No problem at all! Let me know if you ever want to check out our villas or apartments in Hyderabad. Have a great day!").
+- Do NOT demand contact details (email/phone) in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- Keep responses concise (under 3 sentences per message).`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -93,7 +98,7 @@ Do not hallucinate features. If they ask to book, tell them to visit sciencethou
     const data = await response.json();
     return data.choices[0].message.content.trim();
   } catch (error) {
-    console.error("OpenAI Error:", error);
+    console.error("[DEMO ROUTE] OpenAI Error:", error);
     return "I am currently experiencing a network issue connecting to my logic center. Please try again in a moment.";
   }
 }
@@ -121,11 +126,11 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
 
     const result = await response.json();
     if (result.error) {
-      console.error("Meta API Error:", result.error);
+      console.error("[DEMO ROUTE] Meta API Error:", result.error);
     } else {
-      console.log(`Successfully replied to ${to}`);
+      console.log(`[DEMO ROUTE] Successfully replied to ${to}`);
     }
   } catch (error) {
-    console.error("Failed to send WhatsApp message:", error);
+    console.error("[DEMO ROUTE] Failed to send WhatsApp message:", error);
   }
 }

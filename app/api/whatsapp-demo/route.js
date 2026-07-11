@@ -46,32 +46,74 @@ export async function POST(req) {
         if (text) {
           console.log(`[DEMO ROUTE] Received message from ${from}: ${text}`);
           
-          // 1. Retrieve or initialize conversation history
+          // 1. Retrieve or initialize conversation session
           if (!conversationMemory.has(from)) {
-            conversationMemory.set(from, []);
+            conversationMemory.set(from, { companyId: null, history: [] });
           }
-          const history = conversationMemory.get(from);
-          history.push({ role: "user", content: text });
+          const session = conversationMemory.get(from);
+          const trimmedText = text.trim();
+
+          // Handle reset command
+          if (trimmedText.toLowerCase() === '/reset') {
+            session.companyId = null;
+            session.history = [];
+            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n\nReply with a number (*1-5*) to start the simulation!`;
+            await sendWhatsAppMessage(phone_number_id, from, greeting);
+            return new NextResponse('OK', { status: 200 });
+          }
+
+          // Handle selection mode
+          if (session.companyId === null) {
+            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5') {
+              session.companyId = trimmedText;
+              session.history = [];
+              const companies = {
+                '1': 'Giridhari Constructions',
+                '2': 'DAC Developers',
+                '3': 'ASBL Builders',
+                '4': 'Saritha Developers',
+                '5': 'Anvita Group'
+              };
+              const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
+              await sendWhatsAppMessage(phone_number_id, from, welcome);
+              return new NextResponse('OK', { status: 200 });
+            } else {
+              const greeting = `Welcome to the ScienceThoughts Demo Hub! Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n\nReply with a number (*1-5*) to start the simulation!`;
+              await sendWhatsAppMessage(phone_number_id, from, greeting);
+              return new NextResponse('OK', { status: 200 });
+            }
+          }
+
+          // Standard chat mode (we have a locked companyId)
+          session.history.push({ role: "user", content: text });
 
           // Keep history capped at the last 10 messages (5 turns) to prevent token bloat
-          if (history.length > 10) {
-            history.shift();
-            history.shift();
+          if (session.history.length > 10) {
+            session.history.shift();
+            session.history.shift();
           }
 
           // 2. Query OpenAI (using Structured Output JSON mode)
-          const aiPayload = await getOpenAIStructuredResponse(history);
+          const aiPayload = await getOpenAIStructuredResponse(session.history, session.companyId);
           const aiResponseText = aiPayload.reply;
           const leadData = aiPayload.lead_extracted;
 
           // 3. Save assistant response to memory
-          history.push({ role: "assistant", content: aiResponseText });
+          session.history.push({ role: "assistant", content: aiResponseText });
 
           // 4. Send the AI response back to the user via WhatsApp
           await sendWhatsAppMessage(phone_number_id, from, aiResponseText);
 
           // 5. If lead is qualified (Name + Phone found), push to Make CRM Webhook
           if (leadData && leadData.name && leadData.phone) {
+            const companies = {
+              '1': 'Giridhari Constructions',
+              '2': 'DAC Developers',
+              '3': 'ASBL Builders',
+              '4': 'Saritha Developers',
+              '5': 'Anvita Group'
+            };
+            leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
             await pushLeadToMake(leadData);
           }
@@ -87,7 +129,7 @@ export async function POST(req) {
   }
 }
 
-async function getOpenAIStructuredResponse(history) {
+async function getOpenAIStructuredResponse(history, companyId) {
   if (!OPENAI_API_KEY) {
     console.warn("OPENAI_API_KEY is not set. Returning fallback message.");
     return {
@@ -96,7 +138,10 @@ async function getOpenAIStructuredResponse(history) {
     };
   }
 
-  const systemInstruction = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad. 
+  let systemInstruction = "";
+
+  if (companyId === '1') {
+    systemInstruction = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad. 
 Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
 
 === PROJECT KNOWLEDGE BASE ===
@@ -137,6 +182,166 @@ Rules:
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.
 - "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+  } 
+  
+  else if (companyId === '2') {
+    systemInstruction = `You are the autonomous AI Sales Assistant for DAC Developers, a premium residential builder in Chennai.
+Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **DAC Prathyangira**
+   - **Location:** Sholinganallur, OMR (Chennai IT Corridor).
+   - **Project Type:** Premium 3 BHK luxury smart apartments.
+   - **Price Range:**
+     - 3 BHK Smart Apartments (1550 - 1800 sq.ft.): ₹1.15 Crore to ₹1.60 Crore.
+   - **Current Availability:**
+     - Out of 60 total units, only **6 luxury apartments** are currently available. Ready to occupy.
+   - **Key Amenities:** Smart home automation, state-of-the-art security, clubhouse, gym, indoor play area, landscaped terrace garden.
+   - **Nearby Facilities:** 15 mins to Chennai International Airport, direct corridor connection to top IT parks, 5 mins to major hospitals and international schools.
+
+2. **DAC Medallion**
+   - **Location:** Tambaram, Chennai.
+   - **Project Type:** Elegant 2 & 3 BHK residential apartments.
+   - **Price Range:**
+     - 2 BHK Apartments (1100 sq.ft.): ₹75 Lakhs to ₹85 Lakhs.
+     - 3 BHK Apartments (1400 sq.ft.): ₹95 Lakhs to ₹1.10 Crore.
+   - **Current Availability:**
+     - Under construction (Possession by Q3 2027). Currently **80% of units are already booked**.
+   - **Key Amenities:** Swimming pool, gym, mini-theatre, children's park, multi-purpose hall.
+   - **Nearby Facilities:** Tambaram Railway Station (8 mins), Madras Christian College (10 mins), Tambaram Hindu Mission Hospital (6 mins).
+
+=============================
+
+Rules:
+- Be polite, professional, and helpful. 
+- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- Keep responses concise (under 3 sentences per message).
+
+You must respond in JSON format with the following keys:
+- "reply": The natural language reply to the user.
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+  } 
+  
+  else if (companyId === '3') {
+    systemInstruction = `You are the autonomous AI Sales Assistant for ASBL Builders (Ashoka Builders), a luxury high-rise builder in Hyderabad.
+Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **ASBL Loft**
+   - **Location:** Financial District, Hyderabad (prime IT hub).
+   - **Project Type:** Luxury high-rise 3 BHK apartments.
+   - **Price Range:**
+     - 3 BHK Premium Units (1900 - 2400 sq.ft.): ₹1.65 Crore to ₹2.10 Crore.
+   - **Current Availability:**
+     - Completed project. Only **8 luxury units** are currently available for immediate purchase.
+   - **Key Amenities:** Double-height sky deck, Lakeview infinity pool, world-class sports courts, commercial retail zone in complex.
+   - **Nearby Facilities:** 2 mins walk to major IT Parks (Google, Microsoft), Gachibowli flyover (5 mins), Outer Ring Road Kokapet exit (6 mins).
+
+2. **ASBL Spire**
+   - **Location:** Kokapet, Hyderabad.
+   - **Project Type:** Ultra-luxury sky villas (3 BHK & 4 BHK).
+   - **Price Range:**
+     - 3 BHK Sky Villas (2500 sq.ft.): ₹1.90 Crore to ₹2.20 Crore.
+     - 4 BHK Sky Villas (3200 sq.ft.): ₹2.50 Crore to ₹2.90 Crore.
+   - **Current Availability:**
+     - Under construction (Possession Dec 2028). Pre-launch booking open. Currently **55% of inventory is booked**.
+   - **Key Amenities:** Private sky gardens, double-height ceilings, private elevator access, luxury salon & spa in clubhouse.
+   - **Nearby Facilities:** Financial District (5 mins drive), Rockwell International School (8 mins), Continental Hospital (10 mins).
+
+=============================
+
+Rules:
+- Be polite, professional, and helpful. 
+- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- Keep responses concise (under 3 sentences per message).
+
+You must respond in JSON format with the following keys:
+- "reply": The natural language reply to the user.
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+  } 
+  
+  else if (companyId === '4') {
+    systemInstruction = `You are the autonomous AI Sales Assistant for Saritha Developers, a modern residential builder in Bangalore.
+Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Saritha Sunshine**
+   - **Location:** Whitefield, Bangalore (ITPL corridor).
+   - **Project Type:** Premium 2 BHK and 3 BHK apartments.
+   - **Price Range:**
+     - 2 BHK Units (1200 sq.ft.): ₹82 Lakhs onwards.
+     - 3 BHK Units (1650 sq.ft.): ₹1.05 Crore to ₹1.15 Crore.
+   - **Current Availability:**
+     - Out of 100 total units, only **11 ready-to-move-in apartments** are currently available.
+   - **Key Amenities:** Clubhouse, gym, rooftop pool, multi-sports court, children's park.
+   - **Nearby Facilities:** ITPL Metro Station (5 mins), Columbia Asia Hospital (10 mins), Vydehi School (6 mins).
+
+2. **Saritha Serene**
+   - **Location:** Hope Farm Junction, Bangalore.
+   - **Project Type:** Luxury gated villa community.
+   - **Price Range:**
+     - 4 BHK Independent Villas: ₹2.20 Crore to ₹3.10 Crore.
+   - **Current Availability:**
+     - Under construction (Possession Q4 2027). Currently **40% of villas are booked**.
+   - **Key Amenities:** Central forest park, organic farming zone, world-class clubhouse, spa, swimming pool.
+   - **Nearby Facilities:** Whitefield Main Road (3 mins), ITPL (8 mins), Shell Tech Park (15 mins).
+
+=============================
+
+Rules:
+- Be polite, professional, and helpful. 
+- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- Keep responses concise (under 3 sentences per message).
+
+You must respond in JSON format with the following keys:
+- "reply": The natural language reply to the user.
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+  } 
+  
+  else if (companyId === '5') {
+    systemInstruction = `You are the autonomous AI Sales Assistant for Anvita Group, a premium gated community developer in Bangalore and Hyderabad.
+Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Anvita Parkside**
+   - **Location:** Kollur, Hyderabad (outer ring road exit).
+   - **Project Type:** Gated community 3 BHK apartments.
+   - **Price Range:**
+     - 3 BHK Spacious Units (1750 - 2100 sq.ft.): ₹1.10 Crore to ₹1.45 Crore.
+   - **Current Availability:**
+     - Out of 120 total units, only **15 premium apartments** are currently available.
+   - **Key Amenities:** 3-tier security, infinity pool, multi-cuisine restaurant inside clubhouse, kids play zone, gym.
+   - **Nearby Facilities:** Immediate access to Outer Ring Road (1 min), 18 mins to Financial District, Glendale Academy (8 mins).
+
+2. **Anvita Cove**
+   - **Location:** Kollur, Hyderabad.
+   - **Project Type:** Gated community ultra-luxury villas.
+   - **Price Range:**
+     - 4 BHK Independent Luxury Villas: ₹3.80 Crore to ₹4.90 Crore.
+   - **Current Availability:**
+     - Ready to move in. Only **3 luxury villas** are currently available.
+   - **Key Amenities:** Private pools for selected villas, massive club deck, sports facility, private home theatre.
+   - **Nearby Facilities:** Financial District (15 mins drive), Birla Open Minds School (6 mins), Continental Hospital (14 mins).
+
+=============================
+
+Rules:
+- Be polite, professional, and helpful. 
+- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- Keep responses concise (under 3 sentences per message).
+
+You must respond in JSON format with the following keys:
+- "reply": The natural language reply to the user.
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+  }
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -223,6 +428,7 @@ async function pushLeadToMake(leadData) {
         phone: leadData.phone,
         email: leadData.email,
         budget: leadData.budget,
+        builder: leadData.target_builder || "Giridhari Constructions",
         timestamp: new Date().toISOString()
       })
     });
@@ -236,3 +442,4 @@ async function pushLeadToMake(leadData) {
     console.error("[DEMO ROUTE] Failed to push lead to Make:", error);
   }
 }
+

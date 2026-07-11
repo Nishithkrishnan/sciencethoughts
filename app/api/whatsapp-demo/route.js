@@ -25,8 +25,8 @@ export async function GET(req) {
 }
 
 // Database Session helpers (Vercel KV with In-Memory fallback)
-const KV_URL = process.env.KV_REST_API_URL?.trim();
-const KV_TOKEN = process.env.KV_REST_API_TOKEN?.trim();
+const KV_URL = (process.env.KV_REST_API_URL || process.env.REDIS_REST_API_URL || process.env.REDIS_REST_URL || "").trim();
+const KV_TOKEN = (process.env.KV_REST_API_TOKEN || process.env.REDIS_REST_API_TOKEN || process.env.REDIS_REST_TOKEN || "").trim();
 
 async function getSession(from) {
   if (KV_URL && KV_TOKEN) {

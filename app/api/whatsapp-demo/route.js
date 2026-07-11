@@ -152,6 +152,7 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
   console.log(`[DEMO ROUTE] Debug Info:`);
   console.log(`- phone_number_id: ${phone_number_id}`);
   console.log(`- token prefix: ${WHATSAPP_ACCESS_TOKEN.substring(0, 15)}...`);
+  console.log(`- token suffix: ...${WHATSAPP_ACCESS_TOKEN.slice(-15)}`);
 
   try {
     const response = await fetch(`https://graph.facebook.com/v19.0/${phone_number_id}/messages`, {

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token";
-const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL;
+const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
+const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();
+const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL?.trim();
 
 // Simple in-memory cache to store conversation history (5 turns limit per user)
 // Key: phone number, Value: Array of chat messages [{ role, content }]

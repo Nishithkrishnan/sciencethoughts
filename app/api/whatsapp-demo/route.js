@@ -71,6 +71,7 @@ async function saveSession(from, session) {
 // POST method receives the inbound WhatsApp messages
 export async function POST(req) {
   try {
+    console.log(`[DEMO ROUTE] Database Config Debug: KV_URL is ${KV_URL ? 'DEFINED' : 'UNDEFINED'}, KV_TOKEN is ${KV_TOKEN ? 'DEFINED' : 'UNDEFINED'}`);
     const body = await req.json();
     
     // Validate that this is a WhatsApp API event

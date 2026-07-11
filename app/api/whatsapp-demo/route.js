@@ -148,8 +148,11 @@ export async function POST(req) {
           // 4. Send the AI response back to the user via WhatsApp
           await sendWhatsAppMessage(phone_number_id, from, aiResponseText);
 
-          // 5. If lead is qualified (Name + Phone found), push to Make CRM Webhook
-          if (leadData && leadData.name && leadData.phone) {
+          // 5. If lead is qualified (Name found), push to Make CRM Webhook
+          if (leadData && leadData.name) {
+            if (!leadData.phone) {
+              leadData.phone = from; // Auto-populate with incoming WhatsApp number
+            }
             const companies = {
               '1': 'Giridhari Constructions',
               '2': 'DAC Developers',
@@ -182,11 +185,10 @@ async function getOpenAIStructuredResponse(history, companyId) {
     };
   }
 
-  let systemInstruction = "";
+  let builderPrompt = "";
 
   if (companyId === '1') {
-    systemInstruction = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad. 
-Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+    builderPrompt = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad.
 
 === PROJECT KNOWLEDGE BASE ===
 
@@ -213,24 +215,11 @@ Your goal is to answer buyers' questions about our projects and guide them towar
    - **Nearby Facilities:** Financial District (18 mins drive), Glendale Academy (5 mins walk), Gandipet Park (8 mins).
 
 3. **Future Projects (Upcoming):**
-   - **Giridhari Chevella Meadows:** Premium agricultural farmhouse plots launching in Chevella (Q4 2026). Expected starting price: ₹65 Lakhs for 1/4 acre.
-
-=============================
-
-Rules:
-- Be polite, professional, and helpful. 
-- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
-- Keep responses concise (under 3 sentences per message).
-
-You must respond in JSON format with the following keys:
-- "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+   - **Giridhari Chevella Meadows:** Premium agricultural farmhouse plots launching in Chevella (Q4 2026). Expected starting price: ₹65 Lakhs for 1/4 acre.`;
   } 
   
   else if (companyId === '2') {
-    systemInstruction = `You are the autonomous AI Sales Assistant for DAC Developers, a premium residential builder in Chennai.
-Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+    builderPrompt = `You are the autonomous AI Sales Assistant for DAC Developers, a premium residential builder in Chennai.
 
 === PROJECT KNOWLEDGE BASE ===
 
@@ -253,24 +242,11 @@ Your goal is to answer buyers' questions about our projects and guide them towar
    - **Current Availability:**
      - Under construction (Possession by Q3 2027). Currently **80% of units are already booked**.
    - **Key Amenities:** Swimming pool, gym, mini-theatre, children's park, multi-purpose hall.
-   - **Nearby Facilities:** Tambaram Railway Station (8 mins), Madras Christian College (10 mins), Tambaram Hindu Mission Hospital (6 mins).
-
-=============================
-
-Rules:
-- Be polite, professional, and helpful. 
-- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
-- Keep responses concise (under 3 sentences per message).
-
-You must respond in JSON format with the following keys:
-- "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+   - **Nearby Facilities:** Tambaram Railway Station (8 mins), Madras Christian College (10 mins), Tambaram Hindu Mission Hospital (6 mins).`;
   } 
   
   else if (companyId === '3') {
-    systemInstruction = `You are the autonomous AI Sales Assistant for ASBL Builders (Ashoka Builders), a luxury high-rise builder in Hyderabad.
-Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+    builderPrompt = `You are the autonomous AI Sales Assistant for ASBL Builders (Ashoka Builders), a luxury high-rise builder in Hyderabad.
 
 === PROJECT KNOWLEDGE BASE ===
 
@@ -293,24 +269,11 @@ Your goal is to answer buyers' questions about our projects and guide them towar
    - **Current Availability:**
      - Under construction (Possession Dec 2028). Pre-launch booking open. Currently **55% of inventory is booked**.
    - **Key Amenities:** Private sky gardens, double-height ceilings, private elevator access, luxury salon & spa in clubhouse.
-   - **Nearby Facilities:** Financial District (5 mins drive), Rockwell International School (8 mins), Continental Hospital (10 mins).
-
-=============================
-
-Rules:
-- Be polite, professional, and helpful. 
-- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
-- Keep responses concise (under 3 sentences per message).
-
-You must respond in JSON format with the following keys:
-- "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+   - **Nearby Facilities:** Financial District (5 mins drive), Rockwell International School (8 mins), Continental Hospital (10 mins).`;
   } 
   
   else if (companyId === '4') {
-    systemInstruction = `You are the autonomous AI Sales Assistant for Saritha Developers, a modern residential builder in Bangalore.
-Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+    builderPrompt = `You are the autonomous AI Sales Assistant for Saritha Developers, a modern residential builder in Bangalore.
 
 === PROJECT KNOWLEDGE BASE ===
 
@@ -333,24 +296,11 @@ Your goal is to answer buyers' questions about our projects and guide them towar
    - **Current Availability:**
      - Under construction (Possession Q4 2027). Currently **40% of villas are booked**.
    - **Key Amenities:** Central forest park, organic farming zone, world-class clubhouse, spa, swimming pool.
-   - **Nearby Facilities:** Whitefield Main Road (3 mins), ITPL (8 mins), Shell Tech Park (15 mins).
-
-=============================
-
-Rules:
-- Be polite, professional, and helpful. 
-- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
-- Keep responses concise (under 3 sentences per message).
-
-You must respond in JSON format with the following keys:
-- "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+   - **Nearby Facilities:** Whitefield Main Road (3 mins), ITPL (8 mins), Shell Tech Park (15 mins).`;
   } 
   
   else if (companyId === '5') {
-    systemInstruction = `You are the autonomous AI Sales Assistant for Anvita Group, a premium gated community developer in Bangalore and Hyderabad.
-Your goal is to answer buyers' questions about our projects and guide them toward scheduling a site visit or leaving their contact details (Name, Phone, and Budget).
+    builderPrompt = `You are the autonomous AI Sales Assistant for Anvita Group, a premium gated community developer in Bangalore and Hyderabad.
 
 === PROJECT KNOWLEDGE BASE ===
 
@@ -372,20 +322,25 @@ Your goal is to answer buyers' questions about our projects and guide them towar
    - **Current Availability:**
      - Ready to move in. Only **3 luxury villas** are currently available.
    - **Key Amenities:** Private pools for selected villas, massive club deck, sports facility, private home theatre.
-   - **Nearby Facilities:** Financial District (15 mins drive), Birla Open Minds School (6 mins), Continental Hospital (14 mins).
+   - **Nearby Facilities:** Financial District (15 mins drive), Birla Open Minds School (6 mins), Continental Hospital (14 mins).`;
+  }
 
-=============================
+  const systemInstruction = `${builderPrompt}
 
-Rules:
+=== UNIVERSAL RULES & BEHAVIOR ===
 - Be polite, professional, and helpful. 
-- ALWAYS answer the user's questions first using the knowledge base above. If the customer asks for exact prices or remaining count, give them the exact numbers from the list above.
+- ALWAYS answer the user's questions first using the knowledge base.
+- **HOW TO HANDLE CALLBACKS/CALLS:** If the user asks for a call, callback, or asks for someone to call them:
+  1. Do NOT ask them for their phone number (the system already has it from their chat!).
+  2. Confirm warmly that our representative will call them at their current number shortly. For example: "Absolutely! I have scheduled a callback. Our representative will contact you shortly on this number."
+  3. If you do not know their name yet, ask: "Could I get your name so I know who our team should ask for?"
+  4. Once they share their name, output it in the JSON "name" field.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.
 - "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
-  }
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -486,4 +441,3 @@ async function pushLeadToMake(leadData) {
     console.error("[DEMO ROUTE] Failed to push lead to Make:", error);
   }
 }
-

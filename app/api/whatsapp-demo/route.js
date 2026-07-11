@@ -24,6 +24,50 @@ export async function GET(req) {
   }
 }
 
+// Database Session helpers (Vercel KV with In-Memory fallback)
+const KV_URL = process.env.KV_REST_API_URL?.trim();
+const KV_TOKEN = process.env.KV_REST_API_TOKEN?.trim();
+
+async function getSession(from) {
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/session:${from}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) {
+        return JSON.parse(data.result);
+      }
+    } catch (e) {
+      console.error("[DEMO ROUTE] KV getSession failed, falling back to memory:", e);
+    }
+  }
+
+  if (!conversationMemory.has(from)) {
+    conversationMemory.set(from, { companyId: null, history: [] });
+  }
+  return conversationMemory.get(from);
+}
+
+async function saveSession(from, session) {
+  if (KV_URL && KV_TOKEN) {
+    try {
+      await fetch(KV_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${KV_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(['SET', `session:${from}`, JSON.stringify(session), 'EX', '86400']) // expire in 24 hours
+      });
+      return;
+    } catch (e) {
+      console.error("[DEMO ROUTE] KV saveSession failed, falling back to memory:", e);
+    }
+  }
+  conversationMemory.set(from, session);
+}
+
 // POST method receives the inbound WhatsApp messages
 export async function POST(req) {
   try {
@@ -46,17 +90,15 @@ export async function POST(req) {
         if (text) {
           console.log(`[DEMO ROUTE] Received message from ${from}: ${text}`);
           
-          // 1. Retrieve or initialize conversation session
-          if (!conversationMemory.has(from)) {
-            conversationMemory.set(from, { companyId: null, history: [] });
-          }
-          const session = conversationMemory.get(from);
+          // 1. Retrieve conversation session
+          const session = await getSession(from);
           const trimmedText = text.trim();
 
           // Handle reset command
           if (trimmedText.toLowerCase() === '/reset') {
             session.companyId = null;
             session.history = [];
+            await saveSession(from, session);
             const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n\nReply with a number (*1-5*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
@@ -67,6 +109,7 @@ export async function POST(req) {
             if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5') {
               session.companyId = trimmedText;
               session.history = [];
+              await saveSession(from, session);
               const companies = {
                 '1': 'Giridhari Constructions',
                 '2': 'DAC Developers',
@@ -100,6 +143,7 @@ export async function POST(req) {
 
           // 3. Save assistant response to memory
           session.history.push({ role: "assistant", content: aiResponseText });
+          await saveSession(from, session);
 
           // 4. Send the AI response back to the user via WhatsApp
           await sendWhatsAppMessage(phone_number_id, from, aiResponseText);

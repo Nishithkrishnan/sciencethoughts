@@ -122,9 +122,11 @@ export async function POST(req) {
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });
             } else {
-              const greeting = `Welcome to the ScienceThoughts Demo Hub! Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n\nReply with a number (*1-5*) to start the simulation!`;
-              await sendWhatsAppMessage(phone_number_id, from, greeting);
-              return new NextResponse('OK', { status: 200 });
+              // Default to Giridhari Constructions (Option 1) for actual prospects who text 'Hi'
+              session.companyId = '1';
+              session.history = [];
+              await saveSession(from, session);
+              // Fall through to standard chat processing immediately so the bot replies as Giridhari
             }
           }
 

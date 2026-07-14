@@ -421,18 +421,18 @@ async function getOpenAIStructuredResponse(history, companyId) {
 
 === UNIVERSAL RULES & BEHAVIOR ===
 - Be polite, professional, and helpful. 
+- **FIRST MESSAGE GREETING:** If the user sends a simple greeting (like "Hi", "Hello", "Hey") for the very first message in the history, ALWAYS reply with: "Welcome to [Company Name]! How can I assist you today?" (Make sure to replace [Company Name] with the actual company you represent).
 - ALWAYS answer the user's questions first using the knowledge base.
 - **HOW TO HANDLE CALLBACKS/CALLS:** If the user asks for a call, callback, or asks for someone to call them:
-  1. Do NOT ask them for their phone number (the system already has it from their chat!).
-  2. Confirm warmly that our representative will call them at their current number shortly. For example: "Absolutely! I have scheduled a callback. Our representative will contact you shortly on this number."
-  3. If you do not know their name yet, ask: "Could I get your name so I know who our team should ask for?"
-  4. Once they share their name, output it in the JSON "name" field.
+  1. Do NOT ask them for their phone number (the system already has it!).
+  2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
+  3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget". If a key is not found or has not been shared yet, set its value to null.`;
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget", "preferred_time". If a key is not found or has not been shared yet, set its value to null.`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -519,6 +519,7 @@ async function pushLeadToMake(leadData) {
         phone: leadData.phone,
         email: leadData.email,
         budget: leadData.budget,
+        preferred_time: leadData.preferred_time || null,
         builder: leadData.target_builder || "Giridhari Constructions",
         timestamp: new Date().toISOString()
       })

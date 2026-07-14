@@ -100,14 +100,14 @@ export async function POST(req) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n\nReply with a number (*1-5*) to start the simulation!`;
+            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n\nReply with a number (*1-8*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
 
           // Handle selection mode
           if (session.companyId === null) {
-            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5') {
+            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5' || trimmedText === '6' || trimmedText === '7' || trimmedText === '8') {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
@@ -116,7 +116,10 @@ export async function POST(req) {
                 '2': 'DAC Developers',
                 '3': 'ASBL Builders',
                 '4': 'Saritha Developers',
-                '5': 'Anvita Group'
+                '5': 'Anvita Group',
+                '6': 'Radiance Realty',
+                '7': 'GP Homes',
+                '8': 'Navin Housing'
               };
               const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
@@ -161,7 +164,10 @@ export async function POST(req) {
               '2': 'DAC Developers',
               '3': 'ASBL Builders',
               '4': 'Saritha Developers',
-              '5': 'Anvita Group'
+              '5': 'Anvita Group',
+              '6': 'Radiance Realty',
+              '7': 'GP Homes',
+              '8': 'Navin Housing'
             };
             leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
@@ -326,6 +332,89 @@ async function getOpenAIStructuredResponse(history, companyId) {
      - Ready to move in. Only **3 luxury villas** are currently available.
    - **Key Amenities:** Private pools for selected villas, massive club deck, sports facility, private home theatre.
    - **Nearby Facilities:** Financial District (15 mins drive), Birla Open Minds School (6 mins), Continental Hospital (14 mins).`;
+  }
+  
+  else if (companyId === '6') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Radiance Realty, a premium residential builder in Chennai.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Radiance Mandarina**
+   - **Location:** Koyambedu, Chennai (near prime transport hubs).
+   - **Project Type:** Premium 2, 2.5 & 3 BHK high-rise apartments.
+   - **Price Range:**
+     - 2 BHK Units: ₹85 Lakhs to ₹1.10 Crore.
+     - 3 BHK Units: ₹1.30 Crore to ₹1.65 Crore.
+   - **Current Availability:**
+     - Out of 200 total units, only **8 apartments** are currently available. Ready to occupy.
+   - **Key Amenities:** Landscaped courtyard, fully equipped gym, luxury clubhouse, rooftop swimming pool, indoor games.
+   - **Nearby Facilities:** Koyambedu Metro Station (3 mins), Rohini Silver Screens (5 mins), VR Mall Chennai (8 mins).
+
+2. **Radiance Ivy Terrace**
+   - **Location:** Karapakkam, OMR (Chennai IT Corridor).
+   - **Project Type:** Luxury gated villa community (3 BHK & 4 BHK).
+   - **Price Range:**
+     - 3 BHK Independent Villas: ₹1.95 Crore onwards.
+     - 4 BHK Independent Villas: ₹2.40 Crore to ₹2.90 Crore.
+   - **Current Availability:**
+     - Under construction (Possession by Dec 2027). Currently **52% of villas are booked**.
+   - **Key Amenities:** Private garden space, reflexology pathway, mini-theater, organic waste converter, central park.
+   - **Nearby Facilities:** TCS Synergy Park (5 mins), Apollo Specialty Hospital (8 mins), Sathyabama University (10 mins).`;
+  }
+  
+  else if (companyId === '7') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for GP Homes, a modern and active residential builder in Chennai.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **GP Valencia**
+   - **Location:** Kallikuppam, Ambattur, Chennai.
+   - **Project Type:** Affordable premium 2 & 3 BHK apartments.
+   - **Price Range:**
+     - 2 BHK Units (900 - 1100 sq.ft.): ₹48 Lakhs to ₹58 Lakhs.
+     - 3 BHK Units (1250 - 1400 sq.ft.): ₹65 Lakhs to ₹75 Lakhs.
+   - **Current Availability:**
+     - Out of 48 total units, only **11 units** are available for immediate booking.
+   - **Key Amenities:** Children's play area, covered car parking, video door phone security, 24/7 power backup.
+   - **Nearby Facilities:** Ambattur OT Bus Stand (6 mins), Ambattur Railway Station (8 mins), Velammal School (5 mins).
+
+2. **GP Pearl**
+   - **Location:** Anna Nagar West Extension, Chennai.
+   - **Project Type:** Super-premium 3 BHK apartments.
+   - **Price Range:**
+     - 3 BHK Premium Residences (1450 - 1700 sq.ft.): ₹1.25 Crore to ₹1.45 Crore.
+   - **Current Availability:**
+     - Completed and ready to move in. Only **3 premium apartments** are left in inventory!
+   - **Key Amenities:** Passenger lift access, security kiosk, modular kitchen provisions, CCTV coverage.
+   - **Nearby Facilities:** Syndicate Colony Park (1 min walk), VR Mall (10 mins drive), Kendriya Vidyalaya School (8 mins).`;
+  }
+  
+  else if (companyId === '8') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Navin Housing (Navin's), a highly respected high-rise developer in Chennai.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Navin's Starwood Towers**
+   - **Location:** Vengaivasal, near Medavakkam, Chennai (East IT Corridor).
+   - **Project Type:** Premium high-rise 2 & 3 BHK apartments.
+   - **Price Range:**
+     - 2 BHK Units: ₹62 Lakhs to ₹75 Lakhs.
+     - 3 BHK Units: ₹85 Lakhs to ₹1.10 Crore.
+   - **Current Availability:**
+     - Ready to move in. **14 units** are available in the newly launched phase.
+   - **Key Amenities:** 15,000 sq.ft. clubhouse, swimming pool, pharmacy, laundry, indoor badminton courts, gym.
+   - **Nearby Facilities:** Tambaram Railway Station (15 mins), Global Hospital (12 mins), Velammal New-Gen School (5 mins).
+
+2. **Navin's Whiteberry**
+   - **Location:** Moolakadai, Madhavaram, Chennai.
+   - **Project Type:** Modern high-rise 2 & 3 BHK luxury residences.
+   - **Price Range:**
+     - 2 BHK Luxury Units: ₹70 Lakhs to ₹82 Lakhs.
+     - 3 BHK Luxury Units: ₹95 Lakhs to ₹1.25 Crore.
+   - **Current Availability:**
+     - Under construction (Possession in Dec 2026). Currently **70% of inventory is booked**.
+   - **Key Amenities:** Skywalk garden, rooftop terrace party area, EV charging points, fully-equipped gym.
+   - **Nearby Facilities:** Madhavaram Bus Terminus (10 mins), Metro Rail Station (5 mins walk), Don Bosco School (8 mins).`;
   }
 
   const systemInstruction = `${builderPrompt}

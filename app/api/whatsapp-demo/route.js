@@ -100,14 +100,14 @@ export async function POST(req) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n\nReply with a number (*1-8*) to start the simulation!`;
+            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n\nReply with a number (*1-9*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
 
           // Handle selection mode
           if (session.companyId === null) {
-            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5' || trimmedText === '6' || trimmedText === '7' || trimmedText === '8') {
+            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5' || trimmedText === '6' || trimmedText === '7' || trimmedText === '8' || trimmedText === '9') {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
@@ -119,7 +119,8 @@ export async function POST(req) {
                 '5': 'Anvita Group',
                 '6': 'Radiance Realty',
                 '7': 'GP Homes',
-                '8': 'Navin Housing'
+                '8': 'Navin Housing',
+                '9': 'Mango Alibaug Villas'
               };
               const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
@@ -167,7 +168,8 @@ export async function POST(req) {
               '5': 'Anvita Group',
               '6': 'Radiance Realty',
               '7': 'GP Homes',
-              '8': 'Navin Housing'
+              '8': 'Navin Housing',
+              '9': 'Mango Alibaug Villas'
             };
             leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
@@ -416,6 +418,29 @@ async function getOpenAIStructuredResponse(history, companyId) {
    - **Key Amenities:** Skywalk garden, rooftop terrace party area, EV charging points, fully-equipped gym.
    - **Nearby Facilities:** Madhavaram Bus Terminus (10 mins), Metro Rail Station (5 mins walk), Don Bosco School (8 mins).`;
   }
+  
+  else if (companyId === '9') {
+    builderPrompt = `You are the autonomous AI Booking Assistant for Mango Alibaug Villas (operated by Viridis Domus Estates), a collection of premium, private luxury beach homes in Alibaug.
+
+=== PROPERTY KNOWLEDGE BASE ===
+
+1. **Mango Beach House (Kihim Beach)**
+   - **Location:** Kihim, Alibaug (3 mins walk from the beach, 20 mins drive from Mandwa Jetty).
+   - **Property Type:** Luxury 4-BHK private pool villa set in a lush mango orchard.
+   - **Rates:** ₹28,000 per night (weekday) / ₹35,000 per night (weekend - Fri/Sat). Entire villa booking only.
+   - **Key Features:** Private swimming pool, massive lawn, pool table, table tennis, fully air-conditioned, high-speed Wi-Fi, 100% power backup (generator).
+   - **Capacity:** Sleeps up to 12 guests comfortably. Extra beds can be arranged for ₹1,500/night per guest.
+   - **Chef & Meals:** A private chef is available. Meal packages are ₹1,500 per adult per day (includes breakfast, lunch, high tea, dinner - local Konkani/Seafood/North Indian cuisine). Or guests can order à la carte.
+   - **House Rules:** Pet-friendly (₹1,000 pet cleaning fee), check-in at 1:00 PM, check-out at 10:00 AM, quiet hours start at 10:00 PM (no loud music outdoors).
+
+2. **Mango Villa Bougainvillea (Zirad)**
+   - **Location:** Zirad, Alibaug (quiet countryside, 15 mins drive from Mandwa Jetty).
+   - **Property Type:** Mediterranean-style luxury 5-BHK private villa.
+   - **Rates:** ₹32,000 per night (weekday) / ₹42,000 per night (weekend).
+   - **Key Features:** Private pool, private chef kitchen, massive terraces, organic vegetable garden, cycles for guest use.
+   - **Capacity:** Sleeps up to 15 guests.
+   - **House Rules:** Not pet-friendly, check-in at 2:00 PM, check-out at 11:00 AM.`;
+  }
 
   const systemInstruction = `${builderPrompt}
 
@@ -427,7 +452,12 @@ async function getOpenAIStructuredResponse(history, companyId) {
   1. Do NOT ask them for their phone number (the system already has it!).
   2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
   3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?"
+- **HOW TO HANDLE BOOKINGS/RESERVATIONS (Option 9):** If the guest wants to book or check availability for the villas:
+  1. Ask for their check-in and checkout dates, and the number of guests.
+  2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
+  3. Once they provide the dates, name, and email, confirm warmly that their pending booking request has been logged and our manager will contact them to confirm.
+  4. Map these details to the JSON: name, email, budget (set to the estimated total booking cost, e.g. nights * rate), and preferred_time (format as: "Dates: [check-in to check-out], Guests: [count]").
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For Option 9, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:

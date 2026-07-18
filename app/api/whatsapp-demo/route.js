@@ -100,14 +100,15 @@ export async function POST(req) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n\nReply with a number (*1-9*) to start the simulation!`;
+            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n10. *Century Real Estate* (Bangalore)\n11. *Adarsh Developers* (Bangalore)\n12. *Aparna Constructions* (Hyderabad)\n13. *Sumadhura Group* (Bangalore/Hyderabad)\n14. *My Home Constructions* (Hyderabad)\n15. *Brigade Group* (Bangalore)\n16. *BBG India* (South India)\n17. *Arvind SmartSpaces* (South/West)\n\nReply with a number (*1-17*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
 
           // Handle selection mode
           if (session.companyId === null) {
-            if (trimmedText === '1' || trimmedText === '2' || trimmedText === '3' || trimmedText === '4' || trimmedText === '5' || trimmedText === '6' || trimmedText === '7' || trimmedText === '8' || trimmedText === '9') {
+            const num = parseInt(trimmedText);
+            if (!isNaN(num) && num >= 1 && num <= 17) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
@@ -120,7 +121,15 @@ export async function POST(req) {
                 '6': 'Radiance Realty',
                 '7': 'GP Homes',
                 '8': 'Navin Housing',
-                '9': 'Mango Alibaug Villas'
+                '9': 'Mango Alibaug Villas',
+                '10': 'Century Real Estate',
+                '11': 'Adarsh Developers',
+                '12': 'Aparna Constructions',
+                '13': 'Sumadhura Group',
+                '14': 'My Home Constructions',
+                '15': 'Brigade Group',
+                '16': 'BBG India',
+                '17': 'Arvind SmartSpaces'
               };
               const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
@@ -169,7 +178,15 @@ export async function POST(req) {
               '6': 'Radiance Realty',
               '7': 'GP Homes',
               '8': 'Navin Housing',
-              '9': 'Mango Alibaug Villas'
+              '9': 'Mango Alibaug Villas',
+              '10': 'Century Real Estate',
+              '11': 'Adarsh Developers',
+              '12': 'Aparna Constructions',
+              '13': 'Sumadhura Group',
+              '14': 'My Home Constructions',
+              '15': 'Brigade Group',
+              '16': 'BBG India',
+              '17': 'Arvind SmartSpaces'
             };
             leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
@@ -440,6 +457,166 @@ async function getOpenAIStructuredResponse(history, companyId) {
    - **Key Features:** Private pool, private chef kitchen, massive terraces, organic vegetable garden, cycles for guest use.
    - **Capacity:** Sleeps up to 15 guests.
    - **House Rules:** Not pet-friendly, check-in at 2:00 PM, check-out at 11:00 AM.`;
+  }
+  
+  else if (companyId === '10') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Century Real Estate, one of Bangalore's most respected developers.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Century Ethos**
+   - **Location:** Hebbal, Bangalore.
+   - **Project Type:** Ultra-luxury 3 & 4 BHK apartments.
+   - **Price Range:** ₹2.80 Crore to ₹4.50 Crore.
+   - **Key Amenities:** 50,000 sq.ft. clubhouse, indoor heated pool, squash courts, banquet halls.
+   - **Current Availability:** Under construction. 18 exclusive units left in Tower C.
+
+2. **Century Breeze**
+   - **Location:** Jakkur, Bangalore.
+   - **Project Type:** Premium 2 & 3 BHK apartments.
+   - **Price Range:** ₹95 Lakhs to ₹1.40 Crore.
+   - **Key Amenities:** Swimming pool, tennis court, senior citizen zone, kids play area.
+   - **Current Availability:** Ready to move in. Only 5 units left.`;
+  }
+
+  else if (companyId === '11') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Adarsh Developers, renowned for their premium gated communities in Bangalore.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Adarsh Sanctuary**
+   - **Location:** Off Sarjapur Road, Bangalore.
+   - **Project Type:** Eco-luxury 3 & 4 BHK villas in a forest-themed community.
+   - **Price Range:** ₹3.20 Crore to ₹4.80 Crore.
+   - **Key Amenities:** Forest trails, outdoor gym, organic gardens, luxury clubhouse, swimming pool.
+   - **Current Availability:** Mid-stage construction. Phase 2 booking active.
+
+2. **Adarsh Palm Meadows**
+   - **Location:** Whitefield, Bangalore.
+   - **Project Type:** Ultra-premium luxury villas.
+   - **Price Range:** ₹5.50 Crore to ₹8.50 Crore.
+   - **Key Amenities:** Grand clubhouse, tennis courts, multi-cuisine restaurant, fully equipped health club.
+   - **Current Availability:** Ready to occupy. Resale/final builder units available.`;
+  }
+
+  else if (companyId === '12') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Aparna Constructions, a leading high-rise developer in Hyderabad.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Aparna Sarovar Zenith**
+   - **Location:** Nallagandla, Gachibowli, Hyderabad.
+   - **Project Type:** Premium eco-friendly 2, 3 & 4 BHK apartments.
+   - **Price Range:** ₹1.10 Crore to ₹2.20 Crore.
+   - **Key Amenities:** Double-height lobbies, state-of-the-art sports complex, organic waste converters, pools.
+   - **Current Availability:** Ready to move in. Final inventory active.
+
+2. **Aparna Zenon**
+   - **Location:** Puppalaguda, near Financial District, Hyderabad.
+   - **Project Type:** High-tech 2 & 3 BHK smart residences.
+   - **Price Range:** ₹95 Lakhs to ₹1.60 Crore.
+   - **Key Amenities:** Smart home features, temperature-controlled pool, reflexology pathways, indoor games.
+   - **Current Availability:** Under construction (Possession Dec 2026).`;
+  }
+
+  else if (companyId === '13') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Sumadhura Group, delivering premium apartments in Bangalore & Hyderabad.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Sumadhura Folium**
+   - **Location:** Whitefield, Bangalore.
+   - **Project Type:** Luxury 2, 3 & 4 BHK apartments.
+   - **Price Range:** ₹1.20 Crore to ₹2.40 Crore.
+   - **Key Amenities:** Massive central park, pet park, working pods, grand infinity pool, cycling tracks.
+   - **Current Availability:** Early-stage construction. Bookings open for Phase 1.
+
+2. **Sumadhura Horizon**
+   - **Location:** Kondapur, near HITEC City, Hyderabad.
+   - **Project Type:** Premium high-rise 2 & 3 BHK apartments.
+   - **Price Range:** ₹95 Lakhs to ₹1.50 Crore.
+   - **Key Amenities:** Rooftop sky lounge, virtual gaming room, badminton court, state-of-the-art gym.
+   - **Current Availability:** Ready to move in. 90% inventory booked.`;
+  }
+
+  else if (companyId === '14') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for My Home Constructions, Hyderabad's premier high-rise developer.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **My Home Avatar**
+   - **Location:** Puppalaguda, Hyderabad.
+   - **Project Type:** Gated township with 2 & 3 BHK high-rise apartments.
+   - **Price Range:** ₹85 Lakhs to ₹1.40 Crore.
+   - **Key Amenities:** Twin clubhouses, tennis academy, shopping arcade, vast green spaces.
+   - **Current Availability:** Ready to occupy. 15 units remaining.
+
+2. **My Home Nishada**
+   - **Location:** Kokapet, Financial District, Hyderabad.
+   - **Project Type:** Ultra-luxury lakefront 3 & 4 BHK residences.
+   - **Price Range:** ₹2.10 Crore to ₹3.80 Crore.
+   - **Key Amenities:** Lakeview deck, temperature-controlled pool, private mini-theater, guest suites.
+   - **Current Availability:** Under construction (Possession Dec 2025).`;
+  }
+
+  else if (companyId === '15') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Brigade Group, a premier developer in South India.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Brigade Cornerstone Utopia**
+   - **Location:** Varthur-Gunjur Road, Bangalore.
+   - **Project Type:** High-tech integrated township with 1, 2 & 3 BHK homes.
+   - **Price Range:** ₹65 Lakhs to ₹1.50 Crore.
+   - **Key Amenities:** Commercial complex, shopping high-street, amphitheater, sky gardens, massive sports arena.
+   - **Current Availability:** Under construction. Gated blocks ready for registration.
+
+2. **Brigade El Dorado**
+   - **Location:** Aerospace Park, Bagalur, Bangalore.
+   - **Project Type:** Premium affordable luxury 2 & 3 BHK residences.
+   - **Price Range:** ₹45 Lakhs to ₹75 Lakhs.
+   - **Key Amenities:** 10-acre central park, cricket pitch, swimming pools, pet corner, convenience store.
+   - **Current Availability:** Booking active for the Helium tower.`;
+  }
+
+  else if (companyId === '16') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for BBG India (Building Blocks Group), a leader in open plot land development.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **BBG True Gold**
+   - **Location:** Shadnagar, near Hyderabad.
+   - **Project Type:** DTCP-approved open villa plots.
+   - **Price Range:** ₹12 Lakhs to ₹25 Lakhs per plot.
+   - **Key Infrastructure:** Wide internal BT roads, overhead water tank, underground drainage, electricity, perimeter fencing.
+   - **Current Availability:** Ready for registration. Immediate possession.
+
+2. **BBG True Solitaire**
+   - **Location:** Sadashivpet, Mumbai Highway, Hyderabad.
+   - **Project Type:** Premium layout open plots.
+   - **Price Range:** ₹8 Lakhs to ₹18 Lakhs per plot.
+   - **Key Infrastructure:** Gated entrance, 24/7 security, avenue plantation, water pipe connection to each plot.
+   - **Current Availability:** Booking active. Special spot booking discount.`;
+  }
+
+  else if (companyId === '17') {
+    builderPrompt = `You are the autonomous AI Sales Assistant for Arvind SmartSpaces, the real estate wing of the Arvind group.
+
+=== PROJECT KNOWLEDGE BASE ===
+
+1. **Arvind Uplands**
+   - **Location:** Adrej, Ahmedabad / Goa.
+   - **Project Type:** Premium golf-themed villas.
+   - **Price Range:** ₹1.80 Crore to ₹3.50 Crore.
+   - **Key Amenities:** 9-hole executive golf course, Disney-themed kids play area, premium lifestyle club.
+   - **Current Availability:** Ready to build plots & villas.
+
+2. **Arvind Greatlands**
+   - **Location:** Devanahalli, North Bangalore.
+   - **Project Type:** Premium villa plots.
+   - **Price Range:** ₹50 Lakhs to ₹95 Lakhs.
+   - **Key Amenities:** Eco-resort, health center, sports courts, organic orchards, central lake.
+   - **Current Availability:** Phase 1 booking open.`;
   }
 
   const systemInstruction = `${builderPrompt}

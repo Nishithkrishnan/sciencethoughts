@@ -124,7 +124,7 @@ export async function POST(req) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n10. *Century Real Estate* (Bangalore)\n11. *Adarsh Developers* (Bangalore)\n12. *Aparna Constructions* (Hyderabad)\n13. *Sumadhura Group* (Bangalore/Hyderabad)\n14. *My Home Constructions* (Hyderabad)\n15. *Brigade Group* (Bangalore)\n16. *BBG India* (South India)\n17. *Arvind SmartSpaces* (South/West)\n\nReply with a number (*1-17*) to start the simulation!`;
+            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n10. *Century Real Estate* (Bangalore)\n11. *Adarsh Developers* (Bangalore)\n12. *Aparna Constructions* (Hyderabad)\n13. *Sumadhura Group* (Bangalore/Hyderabad)\n14. *My Home Constructions* (Hyderabad)\n15. *Brigade Group* (Bangalore)\n16. *BBG India* (South India)\n17. *Arvind SmartSpaces* (South/West)\n18. *The Machan* (Lonavala - Treehouse Resort)\n19. *Lost Traveller* (Goa - Luxury Villas)\n20. *Arco Iris Homestay* (South Goa - Heritage Stay)\n21. *Destiny Farmstay* (Ooty - Experiential Resort)\n\nReply with a number (*1-21*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
@@ -132,7 +132,7 @@ export async function POST(req) {
           // Handle selection mode
           if (session.companyId === null) {
             const num = parseInt(trimmedText);
-            if (!isNaN(num) && num >= 1 && num <= 17) {
+            if (!isNaN(num) && num >= 1 && num <= 21) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
@@ -153,7 +153,11 @@ export async function POST(req) {
                 '14': 'My Home Constructions',
                 '15': 'Brigade Group',
                 '16': 'BBG India',
-                '17': 'Arvind SmartSpaces'
+                '17': 'Arvind SmartSpaces',
+                '18': 'The Machan',
+                '19': 'Lost Traveller',
+                '20': 'Arco Iris Homestay',
+                '21': 'Destiny Farmstay'
               };
               const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
@@ -210,7 +214,11 @@ export async function POST(req) {
               '14': 'My Home Constructions',
               '15': 'Brigade Group',
               '16': 'BBG India',
-              '17': 'Arvind SmartSpaces'
+              '17': 'Arvind SmartSpaces',
+              '18': 'The Machan',
+              '19': 'Lost Traveller',
+              '20': 'Arco Iris Homestay',
+              '21': 'Destiny Farmstay'
             };
             leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
@@ -643,6 +651,62 @@ async function getOpenAIStructuredResponse(history, companyId) {
    - **Current Availability:** Phase 1 booking open.`;
   }
 
+  else if (companyId === '18') {
+    builderPrompt = `You are the autonomous AI Booking Assistant for The Machan, an exclusive eco-resort in Lonavala featuring luxury treehouses.
+
+=== PROPERTY KNOWLEDGE BASE ===
+
+1. **Canopy Machan & Starlight Machan**
+   - **Location:** Atvan, Lonavala (30 mins from Lonavala station).
+   - **Property Type:** Luxury eco-friendly treehouses suspended 30 to 45 feet above the forest canopy.
+   - **Rates:** ₹18,000 per night (weekday) / ₹26,000 per night (weekend - Fri/Sat). Includes complimentary breakfast.
+   - **Key Features:** Private deck with panoramic valley views, outdoor bathtub, glass walls, 100% off-grid solar power.
+   - **Capacity:** Sleeps up to 3 adults.
+   - **House Rules:** Check-in at 2:00 PM, check-out at 11:00 AM. No pets allowed to protect local wildlife. Dining available at executive forest restaurant.`;
+  }
+
+  else if (companyId === '19') {
+    builderPrompt = `You are the autonomous AI Booking Assistant for Lost Traveller, managing curated luxury private pool villas in Goa.
+
+=== PROPERTY KNOWLEDGE BASE ===
+
+1. **Villa Azure (Vagator, North Goa)**
+   - **Location:** Vagator, North Goa (5 mins from Ozran Beach & Titlie).
+   - **Property Type:** Luxury 4-BHK private pool villa with modern Goan architecture.
+   - **Rates:** ₹35,000 per night (weekday) / ₹45,000 per night (weekend). Entire villa booking only.
+   - **Key Features:** Private swimming pool, gazebo, 24/7 caretaker, high-speed Wi-Fi, generator backup.
+   - **Capacity:** Sleeps up to 10 guests.
+   - **House Rules:** Pet-friendly, check-in at 2:00 PM, check-out at 11:00 AM. Private chef on call (₹3,000/day).`;
+  }
+
+  else if (companyId === '20') {
+    builderPrompt = `You are the autonomous AI Booking Assistant for Arco Iris Boutique Homestay, a restored 200-year-old Portuguese heritage home in South Goa.
+
+=== PROPERTY KNOWLEDGE BASE ===
+
+1. **Arco Iris Heritage Rooms**
+   - **Location:** Curtorim, South Goa (peaceful countryside overlooking a seasonal lake).
+   - **Property Type:** Restored 18th-century Portuguese manor with 5 color-themed luxury bedrooms.
+   - **Rates:** ₹7,500 per room per night (weekday) / ₹9,500 per night (weekend). Includes breakfast.
+   - **Key Features:** Sprawling balcão (verandah), library, lakeview gardens, home-cooked authentic Goan meals prepared by the host.
+   - **Capacity:** 2 adults per room. Extra bed ₹1,200.
+   - **House Rules:** Pet-friendly, check-in at 1:00 PM, check-out at 11:00 AM. Quiet, heritage experience.`;
+  }
+
+  else if (companyId === '21') {
+    builderPrompt = `You are the autonomous AI Booking Assistant for Destiny Farmstay (operated by Little Earth Group), a wilderness farm resort in Ooty.
+
+=== PROPERTY KNOWLEDGE BASE ===
+
+1. **Destiny Farmstay Resort**
+   - **Location:** Avalanche Valley, Ooty (25 mins from Ooty town, surrounded by lake & hills).
+   - **Property Type:** Experiential lakeview farm resort with stable & agricultural farm.
+   - **Rates:** ₹8,500 per room per night (weekday) / ₹11,500 per night (weekend).
+   - **Key Features:** Horse riding, dairy farm tours, fishing, spa, adventure zipline, bonfire evenings.
+   - **Capacity:** Up to 3 guests per room.
+   - **House Rules:** Check-in at 12:00 PM, check-out at 10:00 AM. Family & kid friendly.`;
+  }
+
   const systemInstruction = `${builderPrompt}
 
 === UNIVERSAL RULES & BEHAVIOR ===
@@ -653,12 +717,12 @@ async function getOpenAIStructuredResponse(history, companyId) {
   1. Do NOT ask them for their phone number (the system already has it!).
   2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
   3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
-- **HOW TO HANDLE BOOKINGS/RESERVATIONS (Option 9):** If the guest wants to book or check availability for the villas:
+- **HOW TO HANDLE BOOKINGS/RESERVATIONS (Options 9, 18, 19, 20, 21):** If the guest wants to book or check availability for the villas/resorts:
   1. Ask for their check-in and checkout dates, and the number of guests.
   2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
   3. Once they provide the dates, name, and email, confirm warmly that their pending booking request has been logged and our manager will contact them to confirm.
   4. Map these details to the JSON: name, email, budget (set to the estimated total booking cost, e.g. nights * rate), and preferred_time (format as: "Dates: [check-in to check-out], Guests: [count]").
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For Option 9, ask: "Would you like me to check availability or block your booking dates?")
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For Options 9 & 18-21, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:

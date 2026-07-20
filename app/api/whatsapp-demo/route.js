@@ -68,11 +68,35 @@ async function saveSession(from, session) {
   conversationMemory.set(from, session);
 }
 
-// POST method receives the inbound WhatsApp messages
+// POST method receives inbound WhatsApp messages or Web Chat requests
 export async function POST(req) {
   try {
     console.log(`[DEMO ROUTE] Database Config Debug: KV_URL is ${KV_URL ? 'DEFINED' : 'UNDEFINED'}, KV_TOKEN is ${KV_TOKEN ? 'DEFINED' : 'UNDEFINED'}`);
     const body = await req.json();
+
+    // Handle Direct Web Chat Requests from sciencethoughts.com website widget
+    if (body.webChatMode) {
+      const { text, companyId = "15", history = [] } = body;
+      const formattedHistory = history.length > 0 ? history : [{ role: "user", content: text }];
+      const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId);
+      
+      // If lead extracted, attempt to push to CRM
+      if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
+        const companies = {
+          '1': 'Giridhari Constructions', '2': 'DAC Developers', '3': 'ASBL Builders',
+          '4': 'Saritha Developers', '5': 'Anvita Group', '6': 'Radiance Realty',
+          '7': 'GP Homes', '8': 'Navin Housing', '9': 'Mango Alibaug Villas',
+          '10': 'Century Real Estate', '11': 'Adarsh Developers', '12': 'Aparna Constructions',
+          '13': 'Sumadhura Group', '14': 'My Home Constructions', '15': 'Brigade Group',
+          '16': 'BBG India', '17': 'Arvind SmartSpaces'
+        };
+        aiPayload.lead_extracted.target_builder = companies[companyId] || 'Web Demo Lead';
+        aiPayload.lead_extracted.phone = 'Web Visitor';
+        await pushLeadToMake(aiPayload.lead_extracted);
+      }
+
+      return NextResponse.json(aiPayload);
+    }
     
     // Validate that this is a WhatsApp API event
     if (body.object === 'whatsapp_business_account') {

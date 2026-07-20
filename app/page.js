@@ -1,6 +1,7 @@
 import { getPosts } from "../lib/wordpress";
 import SearchInput from "../components/SearchInput";
 import ContactForm from "../components/ContactForm";
+import InteractiveWebDemo from "../components/InteractiveWebDemo";
 import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home as HomeIcon } from "lucide-react";
 
 export default async function Home() {
@@ -160,6 +161,23 @@ export default async function Home() {
             ))}
           </div>
 
+        </div>
+      </section>
+
+      {/* Live Web Chat Demo Section */}
+      <section id="live-demo" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(10, 15, 25, 0.4)" }}>
+        <div className="container" style={{ maxWidth: "900px" }}>
+          <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
+              <span style={{ color: "var(--accent-teal)", background: "rgba(0, 242, 255, 0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(0, 242, 255, 0.1)" }}>
+                <Sparkles size={24} />
+              </span>
+            </div>
+            <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "12px" }}>Test Our AI Concierge Live</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>Interact with our enterprise real-time RAG engine directly from your browser.</p>
+          </div>
+
+          <InteractiveWebDemo />
         </div>
       </section>
 

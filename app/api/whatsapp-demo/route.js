@@ -135,11 +135,11 @@ export async function POST(req) {
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });
             } else {
-              // Default to Giridhari Constructions (Option 1) for actual prospects who text 'Hi'
-              session.companyId = '1';
+              // Default to Brigade Group (Option 15) for actual prospects who text 'Hi'
+              session.companyId = '15';
               session.history = [];
               await saveSession(from, session);
-              // Fall through to standard chat processing immediately so the bot replies as Giridhari
+              // Fall through to standard chat processing immediately so the bot replies as Brigade Group
             }
           }
 

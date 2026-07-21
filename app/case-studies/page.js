@@ -9,16 +9,16 @@ export default function CaseStudies() {
       {/* Hero Section */}
       <section style={{ padding: "140px 0 80px 0", position: "relative", overflow: "hidden" }}>
         <div className="container" style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-color)", padding: "8px 18px", borderRadius: "30px", marginBottom: "25px", animation: "slideUp 0.6s ease-out" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-color)", padding: "8px 18px", borderRadius: "30px", marginBottom: "25px" }}>
             <Activity size={14} className="animate-pulse-glow" style={{ color: "var(--accent-teal)" }} />
             <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", letterSpacing: "0.05em" }}>PERFORMANCE BENCHMARKS</span>
           </div>
 
-          <h1 style={{ fontSize: "3.8rem", fontWeight: "900", fontFamily: "var(--font-display)", letterSpacing: "-0.03em", lineHeight: "1.1", marginBottom: "25px", animation: "slideUp 0.8s ease-out" }}>
+          <h1 style={{ fontSize: "3.8rem", fontWeight: "900", fontFamily: "var(--font-display)", letterSpacing: "-0.03em", lineHeight: "1.1", marginBottom: "25px" }}>
             Real Estate <span className="gradient-text">Case Studies</span>
           </h1>
 
-          <p style={{ fontSize: "1.2rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400", animation: "slideUp 1s ease-out" }}>
+          <p style={{ fontSize: "1.2rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400" }}>
             How top developers use our zero-hallucination RAG engines to cut response times from hours to seconds and capture 100% of after-hours ad traffic.
           </p>
         </div>
@@ -150,5 +150,3 @@ export default function CaseStudies() {
     </div>
   );
 }
-   
- 

@@ -59,11 +59,42 @@ export default function CaseStudies() {
                   </div>
                 </div>
 
-                <ul style={{ listStyle: "none", padding: 0, margin: "0", color: "var(--text-secondary)", fontSize: "1rem" }}>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "1rem" }}>
                   <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Zero Data Retention:</strong> Fully compliant with enterprise data privacy standards.</li>
                   <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Instant CRM Sync:</strong> Pushes qualified leads directly to LeadSquared via Make.com webhooks.</li>
                   <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Multi-lingual Edge:</strong> Seamlessly processes code-switched Hinglish inquiries.</li>
                 </ul>
+
+                {/* Impact Comparison Matrix */}
+                <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>Before vs. After Impact Matrix</h3>
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", color: "var(--text-muted)" }}>
+                        <th style={{ padding: "10px" }}>Metric</th>
+                        <th style={{ padding: "10px" }}>Traditional Form</th>
+                        <th style={{ padding: "10px", color: "var(--accent-teal)" }}>ScienceThoughts AI</th>
+                      </tr>
+                    </thead>
+                    <tbody style={{ color: "var(--text-secondary)" }}>
+                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <td style={{ padding: "10px", fontWeight: "600" }}>Speed to Lead</td>
+                        <td style={{ padding: "10px" }}>4.2 Hours</td>
+                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>1.8 Seconds</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <td style={{ padding: "10px", fontWeight: "600" }}>After-Hours Capture</td>
+                        <td style={{ padding: "10px" }}>8% (Drop-off)</td>
+                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>94% Instant Chat</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: "10px", fontWeight: "600" }}>CRM Sync Delay</td>
+                        <td style={{ padding: "10px" }}>24-48 Hours</td>
+                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>Instant (&lt; 2s)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Right Column: Live Demo Component */}

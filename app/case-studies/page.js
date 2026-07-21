@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ArrowRight, CheckCircle2, Building, Zap, MessageSquare } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, Briefcase } from "lucide-react";
 import InteractiveWebDemo from "../../components/InteractiveWebDemo";
 
 export default function CaseStudies() {
@@ -33,7 +33,7 @@ export default function CaseStudies() {
               {/* Left Column: Content */}
               <div style={{ flex: "1 1 500px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-                  <Building size={28} color="var(--accent-teal)" />
+                  <Briefcase size={28} color="var(--accent-teal)" />
                   <h2 style={{ fontSize: "2.2rem", fontWeight: "800", fontFamily: "var(--font-display)", margin: 0 }}>Brigade Group</h2>
                 </div>
                 <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", marginBottom: "30px", fontWeight: "500", textTransform: "uppercase", letterSpacing: "0.05em" }}>Enterprise Architecture Proof-of-Concept</p>
@@ -88,7 +88,7 @@ export default function CaseStudies() {
             {/* ASBL */}
             <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <Zap size={24} color="var(--accent-violet)" />
+                <Briefcase size={24} color="var(--accent-violet)" />
                 <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>ASBL Builders</h3>
               </div>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>HYDERABAD | LUXURY APARTMENTS</p>
@@ -103,7 +103,7 @@ export default function CaseStudies() {
             {/* Century Real Estate */}
             <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--accent-green)", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <MessageSquare size={24} color="var(--accent-green)" />
+                <Briefcase size={24} color="var(--accent-green)" />
                 <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>Century Real Estate</h3>
               </div>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>BANGALORE | PREMIUM HOUSING</p>
@@ -118,7 +118,7 @@ export default function CaseStudies() {
             {/* Saritha Developers */}
             <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <Building size={24} color="var(--text-muted)" />
+                <Briefcase size={24} color="var(--text-muted)" />
                 <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>Saritha Developers</h3>
               </div>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>BANGALORE | TECH CORRIDOR</p>

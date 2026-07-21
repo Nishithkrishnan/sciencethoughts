@@ -181,6 +181,19 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* 2.5 Case Studies & Benchmarks */}
+      <section id="case-studies-cta" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
+        <div className="container" style={{ textAlign: "center" }}>
+          <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>See Real Impact</h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "700px", margin: "0 auto 30px auto" }}>
+            Explore our architectural benchmarks and case studies showcasing how zero-hallucination RAG engines eliminate lead leakage for enterprise developers like Brigade Group and ASBL.
+          </p>
+          <a href="/case-studies" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
+            View Case Studies <ArrowRight size={18} />
+          </a>
+        </div>
+      </section>
+
       {/* 3. Productized Services */}
       <section id="services" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container">

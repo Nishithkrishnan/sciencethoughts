@@ -14,6 +14,14 @@ export default function InteractiveWebDemo() {
 
   const companies = {
     "15": "Brigade Group (Bangalore)",
+    "1": "Giridhari Constructions (Hyd)",
+    "2": "DAC Developers (Chennai)",
+    "3": "ASBL Builders (Hyderabad)",
+    "4": "Saritha Developers (Bangalore)",
+    "5": "Anvita Group (Bangalore)",
+    "6": "Radiance Realty (Chennai)",
+    "7": "GP Homes (Chennai)",
+    "8": "Navin Housing (Chennai)",
     "10": "Century Real Estate (Bangalore)",
     "11": "Adarsh Developers (Bangalore)",
     "12": "Aparna Constructions (Hyderabad)",
@@ -21,7 +29,11 @@ export default function InteractiveWebDemo() {
     "14": "My Home Constructions (Hyd)",
     "16": "BBG India (South Plot Layouts)",
     "17": "Arvind SmartSpaces (Golf Villas)",
-    "9": "Mango Alibaug Villas (Luxury Stays)"
+    "9": "Mango Alibaug Villas (Alibaug Stay)",
+    "18": "The Machan (Lonavala Resort)",
+    "19": "Lost Traveller (Goa Villas)",
+    "20": "Arco Iris Homestay (Goa Heritage)",
+    "21": "Destiny Farmstay (Ooty Resort)"
   };
 
   useEffect(() => {
@@ -32,8 +44,14 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
+    const isHospitality = ["9", "18", "19", "20", "21"].includes(newId);
+    
+    const welcomeMsg = isHospitality
+      ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`
+      : `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+
     setMessages([
-      { role: "assistant", content: `Welcome to ${companyName}! How can I assist you with our active projects today?` }
+      { role: "assistant", content: welcomeMsg }
     ]);
   };
 
@@ -75,8 +93,14 @@ export default function InteractiveWebDemo() {
 
   const handleReset = () => {
     const companyName = companies[companyId].split(" (")[0];
+    const isHospitality = ["9", "18", "19", "20", "21"].includes(companyId);
+    
+    const welcomeMsg = isHospitality
+      ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`
+      : `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+
     setMessages([
-      { role: "assistant", content: `Welcome to ${companyName}! How can I assist you with our active projects today?` }
+      { role: "assistant", content: welcomeMsg }
     ]);
   };
 

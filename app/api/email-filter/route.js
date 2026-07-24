@@ -15,18 +15,20 @@ export async function POST(req) {
       });
     }
 
-    let resultJson;
+    let resultJson = null;
+    let fallbackToSim = true;
 
+    // Try live LLM execution first if enabled and keys are present
     if (liveAgentsEnabled && (process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY)) {
-      // Use Live LLM to analyze the email
-      let modelInstance;
-      if (process.env.GEMINI_API_KEY) {
-        modelInstance = google("gemini-2.5-flash");
-      } else {
-        modelInstance = openai("gpt-4o");
-      }
+      try {
+        let modelInstance;
+        if (process.env.GEMINI_API_KEY) {
+          modelInstance = google("gemini-2.5-flash");
+        } else {
+          modelInstance = openai("gpt-4o");
+        }
 
-      const prompt = `
+        const prompt = `
 You are an advanced email filtering AI Agent designed to run inside a Make.com workflow.
 Analyze the following email content and extract structured fields in JSON format:
 1. "category": A classification (e.g., "Inquiry", "Support", "Marketing", "Urgent", "Personal", "Spam", "Billing").
@@ -41,27 +43,21 @@ Email Content:
 "${emailText}"
 `;
 
-      const { text } = await generateText({
-        model: modelInstance,
-        prompt: prompt,
-      });
+        const { text } = await generateText({
+          model: modelInstance,
+          prompt: prompt,
+        });
 
-      // Try to parse clean JSON from model response
-      try {
         const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
         resultJson = JSON.parse(cleanText);
+        fallbackToSim = false; // Succeeded!
       } catch (err) {
-        // Fallback if parsing fails
-        resultJson = {
-          category: "Inquiry",
-          sentiment: "Neutral",
-          summary: "Could not generate structured summary.",
-          priority: "Medium",
-          actionTaken: "Cataloged in Google Sheets & labeled in Gmail",
-        };
+        console.error("[EMAIL-FILTER] Live LLM generation failed, falling back to simulation:", err);
       }
-    } else {
-      // High-fidelity simulation mode
+    }
+
+    // High-fidelity simulation mode fallback (crash-proof)
+    if (fallbackToSim || !resultJson) {
       const lower = emailText.toLowerCase();
 
       if (lower.includes("invoice") || lower.includes("billing") || lower.includes("payment") || lower.includes("receipt")) {
@@ -72,7 +68,7 @@ Email Content:
           priority: "Medium",
           actionTaken: "Logged in Accounting Sheet & Labeled as 'AI Filtered'",
         };
-      } else if (lower.includes("urgent") || lower.includes("asap") || lower.includes("broken") || lower.includes("error") || lower.includes("crash")) {
+      } else if (lower.includes("urgent") || lower.includes("asap") || lower.includes("broken") || lower.includes("error") || lower.includes("crash") || lower.includes("503")) {
         resultJson = {
           category: "Urgent Support",
           sentiment: "Negative / Frustrated",
@@ -80,7 +76,7 @@ Email Content:
           priority: "High",
           actionTaken: "High-Priority Sheet Logged, Slack Notification sent, & Labeled as 'AI Filtered'",
         };
-      } else if (lower.includes("subscribe") || lower.includes("sale") || lower.includes("discount") || lower.includes("click here") || lower.includes("newsletter")) {
+      } else if (lower.includes("subscribe") || lower.includes("sale") || lower.includes("discount") || lower.includes("click here") || lower.includes("newsletter") || lower.includes("pitch")) {
         resultJson = {
           category: "Marketing",
           sentiment: "Positive / Promotional",

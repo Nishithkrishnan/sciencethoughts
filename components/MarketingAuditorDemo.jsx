@@ -16,8 +16,8 @@ export default function MarketingAuditorDemo() {
     setResult(null);
 
     try {
-      // Calls our live cloud Python backend
-      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || "https://sciencethoughts-python3.onrender.com/audit";
+      // Calls our native Next.js API endpoint
+      const apiUrl = "/api/audit-copy";
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

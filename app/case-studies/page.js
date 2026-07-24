@@ -165,6 +165,45 @@ export default function CaseStudies() {
         </div>
       </section>
 
+      {/* WhatsApp Demo Play Sandbox */}
+      <section className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
+        <div className="container" style={{ textAlign: "center" }}>
+          <div className="glass" style={{ padding: "40px", borderRadius: "24px", maxWidth: "800px", margin: "0 auto", border: "1px solid rgba(37, 211, 102, 0.2)" }}>
+            <h2 style={{ fontSize: "2rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+              <span style={{ color: "#25D366" }}>📱</span> Test WhatsApp Cloud Integration
+            </h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "30px" }}>
+              Experience the absolute speed, multilingual accuracy, and conversion-flow triggers directly on your phone. Chat with our active sandbox agent representing any of our 21 demo businesses.
+            </p>
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", alignItems: "center" }}>
+              <a 
+                href="https://wa.me/15550118852?text=%2Freset" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ 
+                  display: "inline-flex", 
+                  alignItems: "center", 
+                  gap: "10px", 
+                  padding: "16px 32px", 
+                  background: "#25D366", 
+                  color: "#ffffff", 
+                  borderRadius: "12px", 
+                  fontSize: "1.05rem", 
+                  fontWeight: "700", 
+                  boxShadow: "0 0 20px rgba(37, 211, 102, 0.4)",
+                  textDecoration: "none"
+                }}
+              >
+                Chat on WhatsApp
+              </a>
+            </div>
+            <div style={{ marginTop: "20px", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+              *Type <strong>/reset</strong> inside the chat to select a business code (1 to 21) at any time.
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="section-padding" style={{ background: "rgba(0, 242, 255, 0.03)", borderTop: "1px solid var(--border-color)", borderBottom: "1px solid var(--border-color)" }}>
         <div className="container" style={{ textAlign: "center" }}>

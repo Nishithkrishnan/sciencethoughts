@@ -88,7 +88,9 @@ export async function POST(req) {
           '7': 'GP Homes', '8': 'Navin Housing', '9': 'Mango Alibaug Villas',
           '10': 'Century Real Estate', '11': 'Adarsh Developers', '12': 'Aparna Constructions',
           '13': 'Sumadhura Group', '14': 'My Home Constructions', '15': 'Brigade Group',
-          '16': 'BBG India', '17': 'Arvind SmartSpaces'
+          '16': 'BBG India', '17': 'Arvind SmartSpaces', '18': 'The Machan',
+          '19': 'Lost Traveller', '20': 'Arco Iris Homestay', '21': 'Destiny Farmstay',
+          'agency': 'ScienceThoughts AI Agency'
         };
         aiPayload.lead_extracted.target_builder = companies[companyId] || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
@@ -118,9 +120,17 @@ export async function POST(req) {
           // 1. Retrieve conversation session
           const session = await getSession(from);
           const trimmedText = text.trim();
+          
+          // Route permanent number ID to ScienceThoughts AI agency assistant
+          const PERMANENT_PHONE_NUMBER_ID = (process.env.PERMANENT_PHONE_NUMBER_ID || "").trim();
+          const isPermanentNumber = PERMANENT_PHONE_NUMBER_ID && (phone_number_id === PERMANENT_PHONE_NUMBER_ID);
 
-          // Handle reset command
-          if (trimmedText.toLowerCase() === '/reset') {
+          if (isPermanentNumber) {
+            session.companyId = 'agency';
+          }
+
+          // Handle reset command (disabled for the permanent number)
+          if (trimmedText.toLowerCase() === '/reset' && !isPermanentNumber) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
@@ -218,7 +228,8 @@ export async function POST(req) {
               '18': 'The Machan',
               '19': 'Lost Traveller',
               '20': 'Arco Iris Homestay',
-              '21': 'Destiny Farmstay'
+              '21': 'Destiny Farmstay',
+              'agency': 'ScienceThoughts AI Agency'
             };
             leadData.target_builder = companies[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
@@ -705,6 +716,39 @@ async function getOpenAIStructuredResponse(history, companyId) {
    - **Key Features:** Horse riding, dairy farm tours, fishing, spa, adventure zipline, bonfire evenings.
    - **Capacity:** Up to 3 guests per room.
    - **House Rules:** Check-in at 12:00 PM, check-out at 10:00 AM. Family & kid friendly.`;
+  }
+  
+  else if (companyId === 'agency') {
+    builderPrompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
+
+=== AGENCY KNOWLEDGE BASE ===
+1. **Our Mission & Value Proposition:**
+   - We build custom, high-performance, zero-hallucination Conversational AI Assistants for high-value industries like Real Estate developers and Luxury Hospitality stays.
+   - We eliminate lead leakage by responding to inbound customer queries in under 1.8 seconds and syncing qualified lead data directly to enterprise CRMs (Salesforce, SAP C4C, LeadSquared) in real-time.
+   - Our agents are compliant with the Digital Personal Data Protection (DPDP) Act 2023.
+
+2. **Core Features of Our AI Assistants:**
+   - **Grounded RAG Logic:** Kept strictly at Temperature 0.0 to prevent false pricing or amenity claims.
+   - **Regional & Bilingual Fluency:** Fluently speaks English, Hindi, Hinglish, Tamil, and Kannada.
+   - **Automatic CRM Webhooks:** Connects to CRM systems to log prospects instantly.
+   - **Human-in-the-Loop Handoff:** Handover triggers when complex pricing discounts or custom negotiations are requested.
+
+3. **Our Onboarding & Pilot Offer:**
+   - We offer a custom **14-day Staging Sandbox pilot** for qualified businesses to test our agents for free before signing a paid retainer.
+   - Standard pricing: Setup fee starts at ₹75,000 / $1,000 (one-time) + a monthly maintenance retainer.
+
+4. **Booking / Contact Details:**
+   - Founder: Nishith Krishnan.
+   - Direct Meeting Link: Clients can book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
+   - Direct Email: info@sciencethoughts.com
+
+=== CONVERSION GOAL ===
+- Your goal is to qualify the prospect by asking for their:
+  1. Name
+  2. Business/Company Name
+  3. Industry (e.g., Real Estate or Stay Owner)
+- Once you have their business type, invite them to book a 30-minute discovery call using the link: https://calendly.com/nishithmanu/30min
+- Be professional, strategic, and concise (under 3 sentences).`;
   }
 
   const systemInstruction = `${builderPrompt}

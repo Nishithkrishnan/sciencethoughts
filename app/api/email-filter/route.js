@@ -56,43 +56,62 @@ Email Content:
       }
     }
 
-    // High-fidelity simulation mode fallback (crash-proof)
+    // High-fidelity simulation mode fallback (dynamic & responsive)
     if (fallbackToSim || !resultJson) {
       const lower = emailText.toLowerCase();
-
-      if (lower.includes("invoice") || lower.includes("billing") || lower.includes("payment") || lower.includes("receipt")) {
-        resultJson = {
-          category: "Billing",
-          sentiment: "Neutral",
-          summary: "An invoice or billing transaction statement requiring financial log updates.",
-          priority: "Medium",
-          actionTaken: "Logged in Accounting Sheet & Labeled as 'AI Filtered'",
-        };
-      } else if (lower.includes("urgent") || lower.includes("asap") || lower.includes("broken") || lower.includes("error") || lower.includes("crash") || lower.includes("503")) {
-        resultJson = {
-          category: "Urgent Support",
-          sentiment: "Negative / Frustrated",
-          summary: "Time-critical system error or immediate request demanding fast support resolution.",
-          priority: "High",
-          actionTaken: "High-Priority Sheet Logged, Slack Notification sent, & Labeled as 'AI Filtered'",
-        };
+      
+      // Extract subject line or first line
+      const lines = emailText.split('\n');
+      const subjectLine = lines.find(l => l.toLowerCase().startsWith('subject:')) || lines[0] || '';
+      const cleanSubject = subjectLine.replace(/subject:/i, '').trim().substring(0, 80);
+      
+      let category = "General Inquiry";
+      let sentiment = "Neutral";
+      let priority = "Medium";
+      let actionTaken = "Logged in Operations Google Sheet & Labeled as 'AI Filtered'";
+      
+      // Dynamic Category & Priority based on keywords
+      if (lower.includes("invoice") || lower.includes("billing") || lower.includes("payment") || lower.includes("receipt") || lower.includes("pricing")) {
+        category = "Billing";
+        priority = "Medium";
+        actionTaken = "Logged in Accounting Sheet & Labeled as 'AI Filtered'";
+      } else if (lower.includes("urgent") || lower.includes("asap") || lower.includes("broken") || lower.includes("error") || lower.includes("crash") || lower.includes("503") || lower.includes("fail") || lower.includes("bug")) {
+        category = "Urgent Support";
+        priority = "High";
+        sentiment = "Negative / Frustrated";
+        actionTaken = "High-Priority Sheet Logged, Slack Notification sent, & Labeled as 'AI Filtered'";
       } else if (lower.includes("subscribe") || lower.includes("sale") || lower.includes("discount") || lower.includes("click here") || lower.includes("newsletter") || lower.includes("pitch")) {
-        resultJson = {
-          category: "Marketing",
-          sentiment: "Positive / Promotional",
-          summary: "Promotional marketing communication, newsletter, or sales outreach campaign.",
-          priority: "Low",
-          actionTaken: "Archived/Cataloged in Marketing Logs & Labeled as 'AI Filtered'",
-        };
-      } else {
-        resultJson = {
-          category: "General Inquiry",
-          sentiment: "Neutral",
-          summary: "General inquiry or project correspondence needing standard review.",
-          priority: "Medium",
-          actionTaken: "Logged in Operations Google Sheet & Labeled as 'AI Filtered'",
-        };
+        category = "Marketing";
+        priority = "Low";
+        sentiment = "Positive / Promotional";
+        actionTaken = "Archived/Cataloged in Marketing Logs & Labeled as 'AI Filtered'";
+      } else if (lower.includes("consult") || lower.includes("partnership") || lower.includes("collab") || lower.includes("meeting") || lower.includes("calendly") || lower.includes("schedule")) {
+        category = "Business Partnership";
+        priority = "High";
+        sentiment = "Positive";
+        actionTaken = "Logged in CRM Pipeline, Scheduled Follow-up & Labeled as 'AI Filtered'";
       }
+      
+      // Dynamic Sentiment heuristics
+      if (sentiment === "Neutral") {
+        if (lower.includes("thanks") || lower.includes("thank you") || lower.includes("great") || lower.includes("awesome") || lower.includes("happy") || lower.includes("pleased")) {
+          sentiment = "Positive";
+        } else if (lower.includes("angry") || lower.includes("disappointed") || lower.includes("bad") || lower.includes("issue") || lower.includes("fail")) {
+          sentiment = "Negative";
+        }
+      }
+      
+      const summary = cleanSubject 
+        ? `Automated analysis of incoming email payload regarding: "${cleanSubject}".`
+        : `General operations review log for incoming message pipeline.`;
+
+      resultJson = {
+        category,
+        sentiment,
+        summary,
+        priority,
+        actionTaken
+      };
     }
 
     return new Response(JSON.stringify(resultJson), {

@@ -33,7 +33,12 @@ export default function InteractiveWebDemo() {
     "18": "The Machan (Lonavala Resort)",
     "19": "Lost Traveller (Goa Villas)",
     "20": "Arco Iris Homestay (Goa Heritage)",
-    "21": "Destiny Farmstay (Ooty Resort)"
+    "21": "Destiny Farmstay (Ooty Resort)",
+    "22": "Eko Stay (Lonavala/Goa Villas)",
+    "23": "The Rentalgram (Family Villas)",
+    "24": "Melhor Stays (Goa Beach Villas)",
+    "25": "StayVista (Premium Villa Chain)",
+    "26": "SaffronStays (Premium Villa Network)"
   };
 
   useEffect(() => {
@@ -46,7 +51,7 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "20", "21"].includes(newId);
+    const isHospitality = ["9", "18", "19", "20", "21", "22", "23", "24", "25", "26"].includes(newId);
     
     const welcomeMsg = isHospitality
       ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`

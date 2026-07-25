@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY?.trim();
 const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL?.trim();
 
 // Simple in-memory cache to store conversation history (5 turns limit per user)
-// Key: phone number, Value: Array of chat messages [{ role, content }]
 const conversationMemory = new Map();
 
 // GET method is used by Meta to verify the webhook URL
@@ -68,10 +68,40 @@ async function saveSession(from, session) {
   conversationMemory.set(from, session);
 }
 
+// Company ID to Name mapping
+const companiesMap = {
+  '1': 'Giridhari Constructions',
+  '2': 'DAC Developers',
+  '3': 'ASBL Builders',
+  '4': 'Saritha Developers',
+  '5': 'Anvita Group',
+  '6': 'Radiance Realty',
+  '7': 'GP Homes',
+  '8': 'Navin Housing',
+  '9': 'Mango Alibaug Villas',
+  '10': 'Century Real Estate',
+  '11': 'Adarsh Developers',
+  '12': 'Aparna Constructions',
+  '13': 'Sumadhura Group',
+  '14': 'My Home Constructions',
+  '15': 'Brigade Group',
+  '16': 'BBG India',
+  '17': 'Arvind SmartSpaces',
+  '18': 'The Machan',
+  '19': 'Lost Traveller',
+  '20': 'Arco Iris Homestay',
+  '21': 'Destiny Farmstay',
+  '22': 'Eko Stay',
+  '23': 'The Rentalgram',
+  '24': 'Melhor Stays',
+  '25': 'StayVista',
+  '26': 'SaffronStays',
+  'agency': 'ScienceThoughts AI Agency'
+};
+
 // POST method receives inbound WhatsApp messages or Web Chat requests
 export async function POST(req) {
   try {
-    console.log(`[DEMO ROUTE] Database Config Debug: KV_URL is ${KV_URL ? 'DEFINED' : 'UNDEFINED'}, KV_TOKEN is ${KV_TOKEN ? 'DEFINED' : 'UNDEFINED'}`);
     const body = await req.json();
 
     // Handle Direct Web Chat Requests from sciencethoughts.com website widget
@@ -82,17 +112,7 @@ export async function POST(req) {
       
       // If lead extracted, attempt to push to CRM
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
-        const companies = {
-          '1': 'Giridhari Constructions', '2': 'DAC Developers', '3': 'ASBL Builders',
-          '4': 'Saritha Developers', '5': 'Anvita Group', '6': 'Radiance Realty',
-          '7': 'GP Homes', '8': 'Navin Housing', '9': 'Mango Alibaug Villas',
-          '10': 'Century Real Estate', '11': 'Adarsh Developers', '12': 'Aparna Constructions',
-          '13': 'Sumadhura Group', '14': 'My Home Constructions', '15': 'Brigade Group',
-          '16': 'BBG India', '17': 'Arvind SmartSpaces', '18': 'The Machan',
-          '19': 'Lost Traveller', '20': 'Arco Iris Homestay', '21': 'Destiny Farmstay',
-          'agency': 'ScienceThoughts AI Agency'
-        };
-        aiPayload.lead_extracted.target_builder = companies[companyId] || 'Web Demo Lead';
+        aiPayload.lead_extracted.target_builder = companiesMap[companyId] || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
         await pushLeadToMake(aiPayload.lead_extracted);
       }
@@ -134,7 +154,35 @@ export async function POST(req) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            const greeting = `Demo Hub Reset! 🔄 Please select which builder's AI Assistant you would like to test:\n\n1. *Giridhari Constructions* (Hyderabad)\n2. *DAC Developers* (Chennai)\n3. *ASBL Builders* (Hyderabad)\n4. *Saritha Developers* (Bangalore)\n5. *Anvita Group* (Bangalore)\n6. *Radiance Realty* (Chennai)\n7. *GP Homes* (Chennai)\n8. *Navin Housing* (Chennai)\n9. *Mango Alibaug Villas* (Alibaug - Luxury stays)\n10. *Century Real Estate* (Bangalore)\n11. *Adarsh Developers* (Bangalore)\n12. *Aparna Constructions* (Hyderabad)\n13. *Sumadhura Group* (Bangalore/Hyderabad)\n14. *My Home Constructions* (Hyderabad)\n15. *Brigade Group* (Bangalore)\n16. *BBG India* (South India)\n17. *Arvind SmartSpaces* (South/West)\n18. *The Machan* (Lonavala - Treehouse Resort)\n19. *Lost Traveller* (Goa - Luxury Villas)\n20. *Arco Iris Homestay* (South Goa - Heritage Stay)\n21. *Destiny Farmstay* (Ooty - Experiential Resort)\n\nReply with a number (*1-21*) to start the simulation!`;
+            
+            const greeting = `Demo Hub Reset! 🔄 Please select which AI Assistant you would like to test:\n\n` +
+              `1. *Giridhari Constructions* (Hyderabad)\n` +
+              `2. *DAC Developers* (Chennai)\n` +
+              `3. *ASBL Builders* (Hyderabad)\n` +
+              `4. *Saritha Developers* (Bangalore)\n` +
+              `5. *Anvita Group* (Bangalore)\n` +
+              `6. *Radiance Realty* (Chennai)\n` +
+              `7. *GP Homes* (Chennai)\n` +
+              `8. *Navin Housing* (Chennai)\n` +
+              `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
+              `10. *Century Real Estate* (Bangalore)\n` +
+              `11. *Adarsh Developers* (Bangalore)\n` +
+              `12. *Aparna Constructions* (Hyderabad)\n` +
+              `13. *Sumadhura Group* (Bangalore/Hyd)\n` +
+              `14. *My Home Constructions* (Hyderabad)\n` +
+              `15. *Brigade Group* (Bangalore)\n` +
+              `16. *BBG India* (South India Plots)\n` +
+              `17. *Arvind SmartSpaces* (Golf Villas)\n` +
+              `18. *The Machan* (Lonavala Treehouses)\n` +
+              `19. *Lost Traveller* (Goa Villas)\n` +
+              `20. *Arco Iris Homestay* (South Goa Heritage)\n` +
+              `21. *Destiny Farmstay* (Ooty Resort)\n` +
+              `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
+              `23. *The Rentalgram* (Family Villas)\n` +
+              `24. *Melhor Stays* (Goa Beach Villas)\n` +
+              `25. *StayVista* (Premium Villa Chain)\n` +
+              `26. *SaffronStays* (Premium Villa Network)\n\n` +
+              `Reply with a number (*1-26*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
@@ -142,34 +190,11 @@ export async function POST(req) {
           // Handle selection mode
           if (session.companyId === null) {
             const num = parseInt(trimmedText);
-            if (!isNaN(num) && num >= 1 && num <= 21) {
+            if (!isNaN(num) && num >= 1 && num <= 26) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
-              const companies = {
-                '1': 'Giridhari Constructions',
-                '2': 'DAC Developers',
-                '3': 'ASBL Builders',
-                '4': 'Saritha Developers',
-                '5': 'Anvita Group',
-                '6': 'Radiance Realty',
-                '7': 'GP Homes',
-                '8': 'Navin Housing',
-                '9': 'Mango Alibaug Villas',
-                '10': 'Century Real Estate',
-                '11': 'Adarsh Developers',
-                '12': 'Aparna Constructions',
-                '13': 'Sumadhura Group',
-                '14': 'My Home Constructions',
-                '15': 'Brigade Group',
-                '16': 'BBG India',
-                '17': 'Arvind SmartSpaces',
-                '18': 'The Machan',
-                '19': 'Lost Traveller',
-                '20': 'Arco Iris Homestay',
-                '21': 'Destiny Farmstay'
-              };
-              const welcome = `Starting simulation for *${companies[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our project inventory, prices, location, or availability. Send */reset* at any time to choose a different builder!`;
+              const welcome = `Starting simulation for *${companiesMap[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our properties, prices, locations, or availability. Send */reset* at any time to choose a different business!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });
             } else {
@@ -177,26 +202,22 @@ export async function POST(req) {
               session.companyId = '15';
               session.history = [];
               await saveSession(from, session);
-              // Fall through to standard chat processing immediately so the bot replies as Brigade Group
             }
           }
 
-          // Standard chat mode (we have a locked companyId)
-          session.history.push({ role: "user", content: text });
-
-          // Keep history capped at the last 10 messages (5 turns) to prevent token bloat
+          // 2. Append user message to history
+          session.history.push({ role: 'user', content: text });
           if (session.history.length > 10) {
-            session.history.shift();
-            session.history.shift();
+            session.history = session.history.slice(-10); // cap memory at last 5 turns
           }
 
-          // 2. Query OpenAI (using Structured Output JSON mode)
-          const aiPayload = await getOpenAIStructuredResponse(session.history, session.companyId);
-          const aiResponseText = aiPayload.reply;
-          const leadData = aiPayload.lead_extracted;
+          // 3. Call AI Pipeline (OpenAI -> Gemini -> Local Offline Fallback)
+          const aiResponse = await getOpenAIStructuredResponse(session.history, session.companyId);
+          const aiResponseText = aiResponse.reply;
+          const leadData = aiResponse.lead_extracted;
 
-          // 3. Save assistant response to memory
-          session.history.push({ role: "assistant", content: aiResponseText });
+          // Append assistant response to history
+          session.history.push({ role: 'assistant', content: aiResponseText });
           await saveSession(from, session);
 
           // 4. Send the AI response back to the user via WhatsApp
@@ -207,31 +228,7 @@ export async function POST(req) {
             if (!leadData.phone) {
               leadData.phone = from; // Auto-populate with incoming WhatsApp number
             }
-            const companies = {
-              '1': 'Giridhari Constructions',
-              '2': 'DAC Developers',
-              '3': 'ASBL Builders',
-              '4': 'Saritha Developers',
-              '5': 'Anvita Group',
-              '6': 'Radiance Realty',
-              '7': 'GP Homes',
-              '8': 'Navin Housing',
-              '9': 'Mango Alibaug Villas',
-              '10': 'Century Real Estate',
-              '11': 'Adarsh Developers',
-              '12': 'Aparna Constructions',
-              '13': 'Sumadhura Group',
-              '14': 'My Home Constructions',
-              '15': 'Brigade Group',
-              '16': 'BBG India',
-              '17': 'Arvind SmartSpaces',
-              '18': 'The Machan',
-              '19': 'Lost Traveller',
-              '20': 'Arco Iris Homestay',
-              '21': 'Destiny Farmstay',
-              'agency': 'ScienceThoughts AI Agency'
-            };
-            leadData.target_builder = companies[session.companyId];
+            leadData.target_builder = companiesMap[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
             await pushLeadToMake(leadData);
           }
@@ -247,509 +244,513 @@ export async function POST(req) {
   }
 }
 
-async function getOpenAIStructuredResponse(history, companyId) {
-  if (!OPENAI_API_KEY) {
-    console.warn("OPENAI_API_KEY is not set. Returning fallback message.");
-    return {
-      reply: "The ScienceThoughts AI brain is currently offline. Please provide your OpenAI API key in the environment variables.",
-      lead_extracted: null
-    };
-  }
-
-  let builderPrompt = "";
+// Structured Property Knowledge Bases (1-26 & Agency)
+function getCompanyKnowledge(companyId) {
+  let prompt = "";
 
   if (companyId === '1') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad.
-
+    prompt = `You are the autonomous AI Sales Assistant for Giridhari Constructions, a premium residential builder in Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Giridhari's Prospera County**
-   - **Location:** Kismatpur, Hyderabad (near TSPA Junction, 15 mins drive from Gachibowli / Financial District).
-   - **Project Type:** Ultra-luxury gated villa community and premium villa plots.
-   - **Price Range:** 
-     - 4 BHK Luxury Villas: ₹3.5 Crore to ₹5.2 Crore (depending on villa size).
-     - Villa Plots: ₹1.2 Crore onwards.
-   - **Current Availability:**
-     - Out of 85 total units, only **4 ready-to-move-in villas** and **9 premium plots** are currently available.
-   - **Key Amenities:** 25,000 sq.ft. clubhouse, swimming pool, tennis court, fully-equipped gym, children's play park, 24/7 security.
-   - **Nearby Facilities:** Glendale International School (2 mins), Continental Hospital (12 mins), Outer Ring Road (TSPA exit - 3 mins).
-
+   - Location: Kismatpur, Hyderabad (near TSPA Junction, 15 mins drive from Gachibowli / Financial District).
+   - Project Type: Ultra-luxury gated villa community and premium villa plots.
+   - Price: 4 BHK Luxury Villas start from ₹3.5 Crore to ₹5.2 Crore. Plots start from ₹1.2 Crore.
+   - Availability: Only 4 ready ready-to-move-in villas and 9 plots left.
+   - Amenities: 25,000 sq.ft. clubhouse, swimming pool, tennis court, gym, kids park.
 2. **Giridhari's Skyscraper Residences**
-   - **Location:** Kismatpur, Hyderabad (high-rise zone with panoramic views of Gandipet lake).
-   - **Project Type:** Modern high-rise luxury apartments (2 BHK and 3 BHK).
-   - **Price Range:**
-     - 2 BHK Apartments (1350 sq.ft.): ₹95 Lakhs onwards (base price).
-     - 3 BHK Apartments (1850 - 2200 sq.ft.): ₹1.35 Crore to ₹1.65 Crore.
-   - **Current Availability:**
-     - Under construction (Possession by Dec 2027). Pre-launch booking is open. Currently **62% of units are already booked**.
-   - **Key Amenities:** Lakeview rooftop infinity pool, sky lounge, indoor sports arena, jogging track, supermarket in clubhouse.
-   - **Nearby Facilities:** Financial District (18 mins drive), Glendale Academy (5 mins walk), Gandipet Park (8 mins).
-
-3. **Future Projects (Upcoming):**
-   - **Giridhari Chevella Meadows:** Premium agricultural farmhouse plots launching in Chevella (Q4 2026). Expected starting price: ₹65 Lakhs for 1/4 acre.`;
-  } 
-  
-  else if (companyId === '2') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for DAC Developers, a premium residential builder in Chennai.
-
+   - Location: Kismatpur, Hyderabad ( Gandipet lake views).
+   - Project Type: Modern high-rise luxury apartments (2 BHK and 3 BHK).
+   - Price: 2 BHK starts from ₹95 Lakhs. 3 BHK ranges from ₹1.35 Crore to ₹1.65 Crore.
+   - Availability: Under construction (Possession Dec 2027). 62% booked.`;
+  } else if (companyId === '2') {
+    prompt = `You are the autonomous AI Sales Assistant for DAC Developers, a premium residential builder in Chennai.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **DAC Prathyangira**
-   - **Location:** Sholinganallur, OMR (Chennai IT Corridor).
-   - **Project Type:** Premium 3 BHK luxury smart apartments.
-   - **Price Range:**
-     - 3 BHK Smart Apartments (1550 - 1800 sq.ft.): ₹1.15 Crore to ₹1.60 Crore.
-   - **Current Availability:**
-     - Out of 60 total units, only **6 luxury apartments** are currently available. Ready to occupy.
-   - **Key Amenities:** Smart home automation, state-of-the-art security, clubhouse, gym, indoor play area, landscaped terrace garden.
-   - **Nearby Facilities:** 15 mins to Chennai International Airport, direct corridor connection to top IT parks, 5 mins to major hospitals and international schools.
-
+   - Location: Sholinganallur, OMR (Chennai IT Corridor).
+   - Project Type: Premium 3 BHK luxury smart apartments.
+   - Price: ₹1.15 Crore to ₹1.60 Crore.
+   - Availability: 6 ready luxury apartments left.
+   - Amenities: Smart home automation, clubhouse, gym, rooftop garden.
 2. **DAC Medallion**
-   - **Location:** Tambaram, Chennai.
-   - **Project Type:** Elegant 2 & 3 BHK residential apartments.
-   - **Price Range:**
-     - 2 BHK Apartments (1100 sq.ft.): ₹75 Lakhs to ₹85 Lakhs.
-     - 3 BHK Apartments (1400 sq.ft.): ₹95 Lakhs to ₹1.10 Crore.
-   - **Current Availability:**
-     - Under construction (Possession by Q3 2027). Currently **80% of units are already booked**.
-   - **Key Amenities:** Swimming pool, gym, mini-theatre, children's park, multi-purpose hall.
-   - **Nearby Facilities:** Tambaram Railway Station (8 mins), Madras Christian College (10 mins), Tambaram Hindu Mission Hospital (6 mins).`;
-  } 
-  
-  else if (companyId === '3') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for ASBL Builders (Ashoka Builders), a luxury high-rise builder in Hyderabad.
-
+   - Location: Tambaram, Chennai.
+   - Project Type: 2 & 3 BHK residential apartments.
+   - Price: 2 BHK ranges from ₹75-85 Lakhs. 3 BHK ranges from ₹95 Lakhs to ₹1.10 Crore.
+   - Availability: Under construction (Possession Q3 2027). 80% booked.`;
+  } else if (companyId === '3') {
+    prompt = `You are the autonomous AI Sales Assistant for ASBL Builders, a luxury high-rise builder in Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **ASBL Loft**
-   - **Location:** Financial District, Hyderabad (prime IT hub).
-   - **Project Type:** Luxury high-rise 3 BHK apartments.
-   - **Price Range:**
-     - 3 BHK Premium Units (1900 - 2400 sq.ft.): ₹1.65 Crore to ₹2.10 Crore.
-   - **Current Availability:**
-     - Completed project. Only **8 luxury units** are currently available for immediate purchase.
-   - **Key Amenities:** Double-height sky deck, Lakeview infinity pool, world-class sports courts, commercial retail zone in complex.
-   - **Nearby Facilities:** 2 mins walk to major IT Parks (Google, Microsoft), Gachibowli flyover (5 mins), Outer Ring Road Kokapet exit (6 mins).
-
+   - Location: Financial District, Hyderabad.
+   - Project Type: Luxury high-rise 3 BHK apartments.
+   - Price: ₹1.65 Crore to ₹2.10 Crore.
+   - Availability: Ready to move in. Only 8 units left.
+   - Amenities: Sky deck, infinity pool, commercial zone in complex.
 2. **ASBL Spire**
-   - **Location:** Kokapet, Hyderabad.
-   - **Project Type:** Ultra-luxury sky villas (3 BHK & 4 BHK).
-   - **Price Range:**
-     - 3 BHK Sky Villas (2500 sq.ft.): ₹1.90 Crore to ₹2.20 Crore.
-     - 4 BHK Sky Villas (3200 sq.ft.): ₹2.50 Crore to ₹2.90 Crore.
-   - **Current Availability:**
-     - Under construction (Possession Dec 2028). Pre-launch booking open. Currently **55% of inventory is booked**.
-   - **Key Amenities:** Private sky gardens, double-height ceilings, private elevator access, luxury salon & spa in clubhouse.
-   - **Nearby Facilities:** Financial District (5 mins drive), Rockwell International School (8 mins), Continental Hospital (10 mins).`;
-  } 
-  
-  else if (companyId === '4') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Saritha Developers, a modern residential builder in Bangalore.
-
+   - Location: Kokapet, Hyderabad.
+   - Project Type: Ultra-luxury sky villas (3 BHK & 4 BHK).
+   - Price: 3 BHK starts from ₹1.90-2.20 Crore. 4 BHK starts from ₹2.50-2.90 Crore.
+   - Availability: Under construction (Possession Dec 2028). 55% booked.`;
+  } else if (companyId === '4') {
+    prompt = `You are the autonomous AI Sales Assistant for Saritha Developers, a modern residential builder in Bangalore.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Saritha Sunshine**
-   - **Location:** Whitefield, Bangalore (ITPL corridor).
-   - **Project Type:** Premium 2 BHK and 3 BHK apartments.
-   - **Price Range:**
-     - 2 BHK Units (1200 sq.ft.): ₹82 Lakhs onwards.
-     - 3 BHK Units (1650 sq.ft.): ₹1.05 Crore to ₹1.15 Crore.
-   - **Current Availability:**
-     - Out of 100 total units, only **11 ready-to-move-in apartments** are currently available.
-   - **Key Amenities:** Clubhouse, gym, rooftop pool, multi-sports court, children's park.
-   - **Nearby Facilities:** ITPL Metro Station (5 mins), Columbia Asia Hospital (10 mins), Vydehi School (6 mins).
-
+   - Location: Whitefield, Bangalore.
+   - Project Type: Premium 2 BHK and 3 BHK apartments.
+   - Price: 2 BHK starts from ₹82 Lakhs. 3 BHK ranges from ₹1.05-1.15 Crore.
+   - Availability: 11 ready apartments left.
 2. **Saritha Serene**
-   - **Location:** Hope Farm Junction, Bangalore.
-   - **Project Type:** Luxury gated villa community.
-   - **Price Range:**
-     - 4 BHK Independent Villas: ₹2.20 Crore to ₹3.10 Crore.
-   - **Current Availability:**
-     - Under construction (Possession Q4 2027). Currently **40% of villas are booked**.
-   - **Key Amenities:** Central forest park, organic farming zone, world-class clubhouse, spa, swimming pool.
-   - **Nearby Facilities:** Whitefield Main Road (3 mins), ITPL (8 mins), Shell Tech Park (15 mins).`;
-  } 
-  
-  else if (companyId === '5') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Anvita Group, a premium gated community developer in Bangalore and Hyderabad.
-
+   - Location: Hope Farm Junction, Bangalore.
+   - Project Type: Luxury gated villa community (4 BHK).
+   - Price: ₹2.20 Crore to ₹3.10 Crore.
+   - Availability: Possession Q4 2027. 40% booked.`;
+  } else if (companyId === '5') {
+    prompt = `You are the autonomous AI Sales Assistant for Anvita Group, a premium gated community developer in Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Anvita Parkside**
-   - **Location:** Kollur, Hyderabad (outer ring road exit).
-   - **Project Type:** Gated community 3 BHK apartments.
-   - **Price Range:**
-     - 3 BHK Spacious Units (1750 - 2100 sq.ft.): ₹1.10 Crore to ₹1.45 Crore.
-   - **Current Availability:**
-     - Out of 120 total units, only **15 premium apartments** are currently available.
-   - **Key Amenities:** 3-tier security, infinity pool, multi-cuisine restaurant inside clubhouse, kids play zone, gym.
-   - **Nearby Facilities:** Immediate access to Outer Ring Road (1 min), 18 mins to Financial District, Glendale Academy (8 mins).
-
+   - Location: Kollur, Hyderabad (ORR exit).
+   - Project Type: Gated community 3 BHK apartments.
+   - Price: ₹1.10 Crore to ₹1.45 Crore.
+   - Availability: 15 units available.
 2. **Anvita Cove**
-   - **Location:** Kollur, Hyderabad.
-   - **Project Type:** Gated community ultra-luxury villas.
-   - **Price Range:**
-     - 4 BHK Independent Luxury Villas: ₹3.80 Crore to ₹4.90 Crore.
-   - **Current Availability:**
-     - Ready to move in. Only **3 luxury villas** are currently available.
-   - **Key Amenities:** Private pools for selected villas, massive club deck, sports facility, private home theatre.
-   - **Nearby Facilities:** Financial District (15 mins drive), Birla Open Minds School (6 mins), Continental Hospital (14 mins).`;
-  }
-  
-  else if (companyId === '6') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Radiance Realty, a premium residential builder in Chennai.
-
+   - Location: Kollur, Hyderabad.
+   - Project Type: Gated community ultra-luxury villas (4 BHK).
+   - Price: ₹3.80 Crore to ₹4.90 Crore.
+   - Availability: Ready to move in. Only 3 left.`;
+  } else if (companyId === '6') {
+    prompt = `You are the autonomous AI Sales Assistant for Radiance Realty, a premium residential builder in Chennai.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Radiance Mandarina**
-   - **Location:** Koyambedu, Chennai (near prime transport hubs).
-   - **Project Type:** Premium 2, 2.5 & 3 BHK high-rise apartments.
-   - **Price Range:**
-     - 2 BHK Units: ₹85 Lakhs to ₹1.10 Crore.
-     - 3 BHK Units: ₹1.30 Crore to ₹1.65 Crore.
-   - **Current Availability:**
-     - Out of 200 total units, only **8 apartments** are currently available. Ready to occupy.
-   - **Key Amenities:** Landscaped courtyard, fully equipped gym, luxury clubhouse, rooftop swimming pool, indoor games.
-   - **Nearby Facilities:** Koyambedu Metro Station (3 mins), Rohini Silver Screens (5 mins), VR Mall Chennai (8 mins).
-
+   - Location: Koyambedu, Chennai.
+   - Project Type: Premium 2 & 3 BHK high-rise apartments.
+   - Price: 2 BHK ranges from ₹85L-1.10Cr. 3 BHK ranges from ₹1.30-1.65Cr.
+   - Availability: Ready to occupy. 8 units left.
 2. **Radiance Ivy Terrace**
-   - **Location:** Karapakkam, OMR (Chennai IT Corridor).
-   - **Project Type:** Luxury gated villa community (3 BHK & 4 BHK).
-   - **Price Range:**
-     - 3 BHK Independent Villas: ₹1.95 Crore onwards.
-     - 4 BHK Independent Villas: ₹2.40 Crore to ₹2.90 Crore.
-   - **Current Availability:**
-     - Under construction (Possession by Dec 2027). Currently **52% of villas are booked**.
-   - **Key Amenities:** Private garden space, reflexology pathway, mini-theater, organic waste converter, central park.
-   - **Nearby Facilities:** TCS Synergy Park (5 mins), Apollo Specialty Hospital (8 mins), Sathyabama University (10 mins).`;
-  }
-  
-  else if (companyId === '7') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for GP Homes, a modern and active residential builder in Chennai.
-
+   - Location: Karapakkam, OMR, Chennai.
+   - Project Type: Gated villa community (3 & 4 BHK).
+   - Price: 3 BHK starts from ₹1.95Cr. 4 BHK ranges from ₹2.40-2.90Cr.
+   - Availability: Possession Dec 2027. 52% booked.`;
+  } else if (companyId === '7') {
+    prompt = `You are the autonomous AI Sales Assistant for GP Homes, a modern residential builder in Chennai.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **GP Valencia**
-   - **Location:** Kallikuppam, Ambattur, Chennai.
-   - **Project Type:** Affordable premium 2 & 3 BHK apartments.
-   - **Price Range:**
-     - 2 BHK Units (900 - 1100 sq.ft.): ₹48 Lakhs to ₹58 Lakhs.
-     - 3 BHK Units (1250 - 1400 sq.ft.): ₹65 Lakhs to ₹75 Lakhs.
-   - **Current Availability:**
-     - Out of 48 total units, only **11 units** are available for immediate booking.
-   - **Key Amenities:** Children's play area, covered car parking, video door phone security, 24/7 power backup.
-   - **Nearby Facilities:** Ambattur OT Bus Stand (6 mins), Ambattur Railway Station (8 mins), Velammal School (5 mins).
-
+   - Location: Kallikuppam, Ambattur, Chennai.
+   - Project Type: Affordable premium 2 & 3 BHK apartments.
+   - Price: 2 BHK ranges from ₹48-58L. 3 BHK ranges from ₹65-75L.
+   - Availability: 11 units left.
 2. **GP Pearl**
-   - **Location:** Anna Nagar West Extension, Chennai.
-   - **Project Type:** Super-premium 3 BHK apartments.
-   - **Price Range:**
-     - 3 BHK Premium Residences (1450 - 1700 sq.ft.): ₹1.25 Crore to ₹1.45 Crore.
-   - **Current Availability:**
-     - Completed and ready to move in. Only **3 premium apartments** are left in inventory!
-   - **Key Amenities:** Passenger lift access, security kiosk, modular kitchen provisions, CCTV coverage.
-   - **Nearby Facilities:** Syndicate Colony Park (1 min walk), VR Mall (10 mins drive), Kendriya Vidyalaya School (8 mins).`;
-  }
-  
-  else if (companyId === '8') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Navin Housing (Navin's), a highly respected high-rise developer in Chennai.
-
+   - Location: Anna Nagar West Extension, Chennai.
+   - Project Type: Super-premium 3 BHK apartments.
+   - Price: ₹1.25 Crore to ₹1.45 Crore.
+   - Availability: Ready to move in. Only 3 left.`;
+  } else if (companyId === '8') {
+    prompt = `You are the autonomous AI Sales Assistant for Navin Housing, a respected developer in Chennai.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Navin's Starwood Towers**
-   - **Location:** Vengaivasal, near Medavakkam, Chennai (East IT Corridor).
-   - **Project Type:** Premium high-rise 2 & 3 BHK apartments.
-   - **Price Range:**
-     - 2 BHK Units: ₹62 Lakhs to ₹75 Lakhs.
-     - 3 BHK Units: ₹85 Lakhs to ₹1.10 Crore.
-   - **Current Availability:**
-     - Ready to move in. **14 units** are available in the newly launched phase.
-   - **Key Amenities:** 15,000 sq.ft. clubhouse, swimming pool, pharmacy, laundry, indoor badminton courts, gym.
-   - **Nearby Facilities:** Tambaram Railway Station (15 mins), Global Hospital (12 mins), Velammal New-Gen School (5 mins).
-
+   - Location: Vengaivasal, Medavakkam, Chennai.
+   - Project Type: Premium 2 & 3 BHK apartments.
+   - Price: 2 BHK ranges from ₹62-75L. 3 BHK ranges from ₹85L-1.10Cr.
+   - Availability: Ready to occupy. 14 units left.
 2. **Navin's Whiteberry**
-   - **Location:** Moolakadai, Madhavaram, Chennai.
-   - **Project Type:** Modern high-rise 2 & 3 BHK luxury residences.
-   - **Price Range:**
-     - 2 BHK Luxury Units: ₹70 Lakhs to ₹82 Lakhs.
-     - 3 BHK Luxury Units: ₹95 Lakhs to ₹1.25 Crore.
-   - **Current Availability:**
-     - Under construction (Possession in Dec 2026). Currently **70% of inventory is booked**.
-   - **Key Amenities:** Skywalk garden, rooftop terrace party area, EV charging points, fully-equipped gym.
-   - **Nearby Facilities:** Madhavaram Bus Terminus (10 mins), Metro Rail Station (5 mins walk), Don Bosco School (8 mins).`;
-  }
-  
-  else if (companyId === '9') {
-    builderPrompt = `You are the autonomous AI Booking Assistant for Mango Alibaug Villas (operated by Viridis Domus Estates), a collection of premium, private luxury beach homes in Alibaug.
-
+   - Location: Moolakadai, Madhavaram, Chennai.
+   - Project Type: High-rise 2 & 3 BHK luxury residences.
+   - Price: 2 BHK ranges from ₹70-82L. 3 BHK ranges from ₹95L-1.25Cr.
+   - Availability: Possession Dec 2026. 70% booked.`;
+  } else if (companyId === '9') {
+    prompt = `You are the autonomous AI Booking Assistant for Mango Alibaug Villas, a collection of premium, private luxury beach homes in Alibaug.
 === PROPERTY KNOWLEDGE BASE ===
-
 1. **Mango Beach House (Kihim Beach)**
-   - **Location:** Kihim, Alibaug (3 mins walk from the beach, 20 mins drive from Mandwa Jetty).
-   - **Property Type:** Luxury 4-BHK private pool villa set in a lush mango orchard.
-   - **Rates:** ₹28,000 per night (weekday) / ₹35,000 per night (weekend - Fri/Sat). Entire villa booking only.
-   - **Key Features:** Private swimming pool, massive lawn, pool table, table tennis, fully air-conditioned, high-speed Wi-Fi, 100% power backup (generator).
-   - **Capacity:** Sleeps up to 12 guests comfortably. Extra beds can be arranged for ₹1,500/night per guest.
-   - **Chef & Meals:** A private chef is available. Meal packages are ₹1,500 per adult per day (includes breakfast, lunch, high tea, dinner - local Konkani/Seafood/North Indian cuisine). Or guests can order à la carte.
-   - **House Rules:** Pet-friendly (₹1,000 pet cleaning fee), check-in at 1:00 PM, check-out at 10:00 AM, quiet hours start at 10:00 PM (no loud music outdoors).
-
+   - Location: Kihim, Alibaug (3 mins walk from beach, 20 mins from Mandwa Jetty).
+   - Type: Luxury 4-BHK private pool villa in a lush mango orchard.
+   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend - Fri/Sat). Entire villa booking only.
+   - Capacity: Sleeps up to 12 guests. Extra bed ₹1,500/night.
+   - Amenities: Private pool, lawn, pool table, AC, generator backup, private chef available (meals packages: ₹1,500/adult/day).
+   - House Rules: Pet-friendly (₹1,000 cleaning fee), check-in 1:00 PM, check-out 10:00 AM, quiet hours from 10:00 PM.
 2. **Mango Villa Bougainvillea (Zirad)**
-   - **Location:** Zirad, Alibaug (quiet countryside, 15 mins drive from Mandwa Jetty).
-   - **Property Type:** Mediterranean-style luxury 5-BHK private villa.
-   - **Rates:** ₹32,000 per night (weekday) / ₹42,000 per night (weekend).
-   - **Key Features:** Private pool, private chef kitchen, massive terraces, organic vegetable garden, cycles for guest use.
-   - **Capacity:** Sleeps up to 15 guests.
-   - **House Rules:** Not pet-friendly, check-in at 2:00 PM, check-out at 11:00 AM.`;
-  }
-  
-  else if (companyId === '10') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Century Real Estate, one of Bangalore's most respected developers.
-
+   - Location: Zirad, Alibaug (15 mins from Mandwa Jetty).
+   - Type: Mediterranean-style 5-BHK private villa.
+   - Rates: ₹32,000/night (weekday) / ₹42,000/night (weekend).
+   - Capacity: Sleeps up to 15 guests. Private pool, cycles, private chef kitchen.`;
+  } else if (companyId === '10') {
+    prompt = `You are the autonomous AI Sales Assistant for Century Real Estate, Bangalore.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Century Ethos**
-   - **Location:** Hebbal, Bangalore.
-   - **Project Type:** Ultra-luxury 3 & 4 BHK apartments.
-   - **Price Range:** ₹2.80 Crore to ₹4.50 Crore.
-   - **Key Amenities:** 50,000 sq.ft. clubhouse, indoor heated pool, squash courts, banquet halls.
-   - **Current Availability:** Under construction. 18 exclusive units left in Tower C.
-
+   - Location: Hebbal, Bangalore.
+   - Project Type: Ultra-luxury 3 & 4 BHK apartments.
+   - Price: ₹2.80 Crore to ₹4.50 Crore.
+   - Availability: Under construction. 18 units left.
 2. **Century Breeze**
-   - **Location:** Jakkur, Bangalore.
-   - **Project Type:** Premium 2 & 3 BHK apartments.
-   - **Price Range:** ₹95 Lakhs to ₹1.40 Crore.
-   - **Key Amenities:** Swimming pool, tennis court, senior citizen zone, kids play area.
-   - **Current Availability:** Ready to move in. Only 5 units left.`;
-  }
-
-  else if (companyId === '11') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Adarsh Developers, renowned for their premium gated communities in Bangalore.
-
+   - Location: Jakkur, Bangalore.
+   - Project Type: Premium 2 & 3 BHK apartments.
+   - Price: ₹95 Lakhs to ₹1.40 Crore.
+   - Availability: Ready to move in. Only 5 units left.`;
+  } else if (companyId === '11') {
+    prompt = `You are the autonomous AI Sales Assistant for Adarsh Developers, Bangalore.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Adarsh Sanctuary**
-   - **Location:** Off Sarjapur Road, Bangalore.
-   - **Project Type:** Eco-luxury 3 & 4 BHK villas in a forest-themed community.
-   - **Price Range:** ₹3.20 Crore to ₹4.80 Crore.
-   - **Key Amenities:** Forest trails, outdoor gym, organic gardens, luxury clubhouse, swimming pool.
-   - **Current Availability:** Mid-stage construction. Phase 2 booking active.
-
+   - Location: Off Sarjapur Road, Bangalore.
+   - Project Type: Eco-luxury 3 & 4 BHK forest-themed villas.
+   - Price: ₹3.20 Crore to ₹4.80 Crore.
 2. **Adarsh Palm Meadows**
-   - **Location:** Whitefield, Bangalore.
-   - **Project Type:** Ultra-premium luxury villas.
-   - **Price Range:** ₹5.50 Crore to ₹8.50 Crore.
-   - **Key Amenities:** Grand clubhouse, tennis courts, multi-cuisine restaurant, fully equipped health club.
-   - **Current Availability:** Ready to occupy. Resale/final builder units available.`;
-  }
-
-  else if (companyId === '12') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Aparna Constructions, a leading high-rise developer in Hyderabad.
-
+   - Location: Whitefield, Bangalore.
+   - Project Type: Ultra-premium luxury villas.
+   - Price: ₹5.50 Crore to ₹8.50 Crore.`;
+  } else if (companyId === '12') {
+    prompt = `You are the autonomous AI Sales Assistant for Aparna Constructions, Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Aparna Sarovar Zenith**
-   - **Location:** Nallagandla, Gachibowli, Hyderabad.
-   - **Project Type:** Premium eco-friendly 2, 3 & 4 BHK apartments.
-   - **Price Range:** ₹1.10 Crore to ₹2.20 Crore.
-   - **Key Amenities:** Double-height lobbies, state-of-the-art sports complex, organic waste converters, pools.
-   - **Current Availability:** Ready to move in. Final inventory active.
-
+   - Location: Nallagandla, Gachibowli, Hyderabad.
+   - Project Type: Premium eco-friendly 2, 3 & 4 BHK apartments.
+   - Price: ₹1.10 Crore to ₹2.20 Crore.
 2. **Aparna Zenon**
-   - **Location:** Puppalaguda, near Financial District, Hyderabad.
-   - **Project Type:** High-tech 2 & 3 BHK smart residences.
-   - **Price Range:** ₹95 Lakhs to ₹1.60 Crore.
-   - **Key Amenities:** Smart home features, temperature-controlled pool, reflexology pathways, indoor games.
-   - **Current Availability:** Under construction (Possession Dec 2026).`;
-  }
-
-  else if (companyId === '13') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Sumadhura Group, delivering premium apartments in Bangalore & Hyderabad.
-
+   - Location: Puppalaguda, near Financial District, Hyderabad.
+   - Project Type: High-tech 2 & 3 BHK smart residences.
+   - Price: ₹95 Lakhs to ₹1.60 Crore. Possession Dec 2026.`;
+  } else if (companyId === '13') {
+    prompt = `You are the autonomous AI Sales Assistant for Sumadhura Group, Bangalore & Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Sumadhura Folium**
-   - **Location:** Whitefield, Bangalore.
-   - **Project Type:** Luxury 2, 3 & 4 BHK apartments.
-   - **Price Range:** ₹1.20 Crore to ₹2.40 Crore.
-   - **Key Amenities:** Massive central park, pet park, working pods, grand infinity pool, cycling tracks.
-   - **Current Availability:** Early-stage construction. Bookings open for Phase 1.
-
+   - Location: Whitefield, Bangalore.
+   - Project Type: Luxury 2, 3 & 4 BHK apartments.
+   - Price: ₹1.20 Crore to ₹2.40 Crore.
 2. **Sumadhura Horizon**
-   - **Location:** Kondapur, near HITEC City, Hyderabad.
-   - **Project Type:** Premium high-rise 2 & 3 BHK apartments.
-   - **Price Range:** ₹95 Lakhs to ₹1.50 Crore.
-   - **Key Amenities:** Rooftop sky lounge, virtual gaming room, badminton court, state-of-the-art gym.
-   - **Current Availability:** Ready to move in. 90% inventory booked.`;
-  }
-
-  else if (companyId === '14') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for My Home Constructions, Hyderabad's premier high-rise developer.
-
+   - Location: Kondapur, near HITEC City, Hyderabad.
+   - Project Type: Premium 2 & 3 BHK apartments.
+   - Price: ₹95 Lakhs to ₹1.50 Crore.`;
+  } else if (companyId === '14') {
+    prompt = `You are the autonomous AI Sales Assistant for My Home Constructions, Hyderabad.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **My Home Avatar**
-   - **Location:** Puppalaguda, Hyderabad.
-   - **Project Type:** Gated township with 2 & 3 BHK high-rise apartments.
-   - **Price Range:** ₹85 Lakhs to ₹1.40 Crore.
-   - **Key Amenities:** Twin clubhouses, tennis academy, shopping arcade, vast green spaces.
-   - **Current Availability:** Ready to occupy. 15 units remaining.
-
+   - Location: Puppalaguda, Hyderabad.
+   - Project Type: Gated township apartments (2 & 3 BHK).
+   - Price: ₹85 Lakhs to ₹1.40 Crore.
 2. **My Home Nishada**
-   - **Location:** Kokapet, Financial District, Hyderabad.
-   - **Project Type:** Ultra-luxury lakefront 3 & 4 BHK residences.
-   - **Price Range:** ₹2.10 Crore to ₹3.80 Crore.
-   - **Key Amenities:** Lakeview deck, temperature-controlled pool, private mini-theater, guest suites.
-   - **Current Availability:** Under construction (Possession Dec 2025).`;
-  }
-
-  else if (companyId === '15') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Brigade Group, a premier developer in South India.
-
+   - Location: Kokapet, Financial District, Hyderabad.
+   - Project Type: Ultra-luxury lakefront 3 & 4 BHK apartments.
+   - Price: ₹2.10 Crore to ₹3.80 Crore.`;
+  } else if (companyId === '15') {
+    prompt = `You are the autonomous AI Sales Assistant for Brigade Group, Bangalore.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Brigade Cornerstone Utopia**
-   - **Location:** Varthur-Gunjur Road, Bangalore.
-   - **Project Type:** High-tech integrated township with 1, 2 & 3 BHK homes.
-   - **Price Range:** ₹65 Lakhs to ₹1.50 Crore.
-   - **Key Amenities:** Commercial complex, shopping high-street, amphitheater, sky gardens, massive sports arena.
-   - **Current Availability:** Under construction. Gated blocks ready for registration.
-
+   - Location: Varthur-Gunjur Road, Bangalore.
+   - Project Type: High-tech integrated township apartments (1, 2 & 3 BHK).
+   - Price: ₹65 Lakhs to ₹1.50 Crore.
 2. **Brigade El Dorado**
-   - **Location:** Aerospace Park, Bagalur, Bangalore.
-   - **Project Type:** Premium affordable luxury 2 & 3 BHK residences.
-   - **Price Range:** ₹45 Lakhs to ₹75 Lakhs.
-   - **Key Amenities:** 10-acre central park, cricket pitch, swimming pools, pet corner, convenience store.
-   - **Current Availability:** Booking active for the Helium tower.`;
-  }
-
-  else if (companyId === '16') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for BBG India (Building Blocks Group), a leader in open plot land development.
-
+   - Location: Aerospace Park, Bagalur, Bangalore.
+   - Project Type: Premium 2 & 3 BHK residences.
+   - Price: ₹45 Lakhs to ₹75 Lakhs.`;
+  } else if (companyId === '16') {
+    prompt = `You are the autonomous AI Sales Assistant for BBG India, open plot developer.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **BBG True Gold**
-   - **Location:** Shadnagar, near Hyderabad.
-   - **Project Type:** DTCP-approved open villa plots.
-   - **Price Range:** ₹12 Lakhs to ₹25 Lakhs per plot.
-   - **Key Infrastructure:** Wide internal BT roads, overhead water tank, underground drainage, electricity, perimeter fencing.
-   - **Current Availability:** Ready for registration. Immediate possession.
-
+   - Location: Shadnagar, near Hyderabad.
+   - Project Type: DTCP-approved open villa plots.
+   - Price: ₹12 Lakhs to ₹25 Lakhs per plot.
 2. **BBG True Solitaire**
-   - **Location:** Sadashivpet, Mumbai Highway, Hyderabad.
-   - **Project Type:** Premium layout open plots.
-   - **Price Range:** ₹8 Lakhs to ₹18 Lakhs per plot.
-   - **Key Infrastructure:** Gated entrance, 24/7 security, avenue plantation, water pipe connection to each plot.
-   - **Current Availability:** Booking active. Special spot booking discount.`;
-  }
-
-  else if (companyId === '17') {
-    builderPrompt = `You are the autonomous AI Sales Assistant for Arvind SmartSpaces, the real estate wing of the Arvind group.
-
+   - Location: Sadashivpet, Mumbai Highway, Hyderabad.
+   - Project Type: Layout open plots.
+   - Price: ₹8 Lakhs to ₹18 Lakhs per plot.`;
+  } else if (companyId === '17') {
+    prompt = `You are the autonomous AI Sales Assistant for Arvind SmartSpaces, golf villas.
 === PROJECT KNOWLEDGE BASE ===
-
 1. **Arvind Uplands**
-   - **Location:** Adrej, Ahmedabad / Goa.
-   - **Project Type:** Premium golf-themed villas.
-   - **Price Range:** ₹1.80 Crore to ₹3.50 Crore.
-   - **Key Amenities:** 9-hole executive golf course, Disney-themed kids play area, premium lifestyle club.
-   - **Current Availability:** Ready to build plots & villas.
-
+   - Location: Adrej, Ahmedabad / Goa.
+   - Project Type: Premium golf-themed villas.
+   - Price: ₹1.80 Crore to ₹3.50 Crore.
 2. **Arvind Greatlands**
-   - **Location:** Devanahalli, North Bangalore.
-   - **Project Type:** Premium villa plots.
-   - **Price Range:** ₹50 Lakhs to ₹95 Lakhs.
-   - **Key Amenities:** Eco-resort, health center, sports courts, organic orchards, central lake.
-   - **Current Availability:** Phase 1 booking open.`;
-  }
-
-  else if (companyId === '18') {
-    builderPrompt = `You are the autonomous AI Booking Assistant for The Machan, an exclusive eco-resort in Lonavala featuring luxury treehouses.
-
+   - Location: Devanahalli, Bangalore.
+   - Project Type: Premium villa plots.
+   - Price: ₹50 Lakhs to ₹95 Lakhs.`;
+  } else if (companyId === '18') {
+    prompt = `You are the autonomous AI Booking Assistant for The Machan, an exclusive eco-resort in Lonavala featuring luxury treehouses.
 === PROPERTY KNOWLEDGE BASE ===
-
 1. **Canopy Machan & Starlight Machan**
-   - **Location:** Atvan, Lonavala (30 mins from Lonavala station).
-   - **Property Type:** Luxury eco-friendly treehouses suspended 30 to 45 feet above the forest canopy.
-   - **Rates:** ₹18,000 per night (weekday) / ₹26,000 per night (weekend - Fri/Sat). Includes complimentary breakfast.
-   - **Key Features:** Private deck with panoramic valley views, outdoor bathtub, glass walls, 100% off-grid solar power.
-   - **Capacity:** Sleeps up to 3 adults.
-   - **House Rules:** Check-in at 2:00 PM, check-out at 11:00 AM. No pets allowed to protect local wildlife. Dining available at executive forest restaurant.`;
-  }
-
-  else if (companyId === '19') {
-    builderPrompt = `You are the autonomous AI Booking Assistant for Lost Traveller, managing curated luxury private pool villas in Goa.
-
+   - Location: Atvan, Lonavala (30 mins from Lonavala station).
+   - Type: Luxury eco-friendly treehouses suspended 30 to 45 feet above the forest canopy.
+   - Rates: ₹18,000/night (weekday) / ₹26,000/night (weekend - Fri/Sat). Includes breakfast.
+   - Capacity: Sleeps up to 3 adults.
+   - Amenities: Private valley decks, outdoor bathtubs, solar-powered. No pets allowed.`;
+  } else if (companyId === '19') {
+    prompt = `You are the autonomous AI Booking Assistant for Lost Traveller, managing luxury private pool villas in Goa.
 === PROPERTY KNOWLEDGE BASE ===
-
 1. **Villa Azure (Vagator, North Goa)**
-   - **Location:** Vagator, North Goa (5 mins from Ozran Beach & Titlie).
-   - **Property Type:** Luxury 4-BHK private pool villa with modern Goan architecture.
-   - **Rates:** ₹35,000 per night (weekday) / ₹45,000 per night (weekend). Entire villa booking only.
-   - **Key Features:** Private swimming pool, gazebo, 24/7 caretaker, high-speed Wi-Fi, generator backup.
-   - **Capacity:** Sleeps up to 10 guests.
-   - **House Rules:** Pet-friendly, check-in at 2:00 PM, check-out at 11:00 AM. Private chef on call (₹3,000/day).`;
-  }
-
-  else if (companyId === '20') {
-    builderPrompt = `You are the autonomous AI Booking Assistant for Arco Iris Boutique Homestay, a restored 200-year-old Portuguese heritage home in South Goa.
-
+   - Location: Vagator, North Goa (5 mins from Ozran Beach).
+   - Type: Luxury 4-BHK private pool villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Entire villa only.
+   - Capacity: Sleeps up to 10 guests. Caretaker, pool, gazebo, Wi-Fi.
+   - House Rules: Pet-friendly. Chef on call available (₹3,000/day).`;
+  } else if (companyId === '20') {
+    prompt = `You are the autonomous AI Booking Assistant for Arco Iris Boutique Homestay, a Portuguese heritage home in South Goa.
 === PROPERTY KNOWLEDGE BASE ===
-
 1. **Arco Iris Heritage Rooms**
-   - **Location:** Curtorim, South Goa (peaceful countryside overlooking a seasonal lake).
-   - **Property Type:** Restored 18th-century Portuguese manor with 5 color-themed luxury bedrooms.
-   - **Rates:** ₹7,500 per room per night (weekday) / ₹9,500 per night (weekend). Includes breakfast.
-   - **Key Features:** Sprawling balcão (verandah), library, lakeview gardens, home-cooked authentic Goan meals prepared by the host.
-   - **Capacity:** 2 adults per room. Extra bed ₹1,200.
-   - **House Rules:** Pet-friendly, check-in at 1:00 PM, check-out at 11:00 AM. Quiet, heritage experience.`;
-  }
-
-  else if (companyId === '21') {
-    builderPrompt = `You are the autonomous AI Booking Assistant for Destiny Farmstay (operated by Little Earth Group), a wilderness farm resort in Ooty.
-
+   - Location: Curtorim, South Goa (peaceful countryside overlooking lake).
+   - Type: Restored 18th-century Portuguese manor with 5 color-themed luxury bedrooms.
+   - Rates: ₹7,500/room/night (weekday) / ₹9,500/room/night (weekend). Includes breakfast.
+   - Capacity: 2 adults per room. Pet-friendly. Authentic Goan home-cooked meals by host.`;
+  } else if (companyId === '21') {
+    prompt = `You are the autonomous AI Booking Assistant for Destiny Farmstay, a wilderness farm resort in Ooty.
 === PROPERTY KNOWLEDGE BASE ===
-
 1. **Destiny Farmstay Resort**
-   - **Location:** Avalanche Valley, Ooty (25 mins from Ooty town, surrounded by lake & hills).
-   - **Property Type:** Experiential lakeview farm resort with stable & agricultural farm.
-   - **Rates:** ₹8,500 per room per night (weekday) / ₹11,500 per night (weekend).
-   - **Key Features:** Horse riding, dairy farm tours, fishing, spa, adventure zipline, bonfire evenings.
-   - **Capacity:** Up to 3 guests per room.
-   - **House Rules:** Check-in at 12:00 PM, check-out at 10:00 AM. Family & kid friendly.`;
-  }
-  
-  else if (companyId === 'agency') {
-    builderPrompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
-
+   - Location: Avalanche Valley, Ooty (25 mins from town).
+   - Type: Experiential lakeview farm resort with stable and agricultural farm.
+   - Rates: ₹8,500/room/night (weekday) / ₹11,500/room/night (weekend).
+   - Features: Horse riding, dairy farm tours, fishing, spa, adventure zipline.`;
+  } else if (companyId === '22') {
+    prompt = `You are the autonomous AI Booking Assistant for Eko Stay, a premier brand managing luxury private pool villas in Lonavala and Goa.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Oasis (Lonavala)**
+   - Location: Gold Valley, Lonavala.
+   - Type: 4 BHK Private Pool Villa with mountain views.
+   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend).
+   - Features: Private pool, lawn, pool table, carrom, kitchen, BBQ setup. Sleeps up to 12.
+   - House Rules: Pet-friendly, check-in 2:00 PM, check-out 11:00 AM.
+2. **Villa Sol (Candolim, Goa)**
+   - Location: Candolim, North Goa (5 mins drive to beach).
+   - Type: 3 BHK Portuguese-style luxury villa.
+   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps up to 8.`;
+  } else if (companyId === '23') {
+    prompt = `You are the autonomous AI Booking Assistant for The Rentalgram, offering premium curated family villas.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Sage (Alibaug)**
+   - Location: Mandwa Road, Alibaug (10 mins from jetty).
+   - Type: Ultra-luxury 5 BHK Villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend).
+   - Features: Large private pool, landscaped gardens, private bar, AC, caretaker on-site. Sleeps 15.
+2. **Bonheur Villa (Lonavala)**
+   - Location: Khandala, Lonavala.
+   - Type: 4 BHK Premium Family Villa with pool, kids play area, indoor games.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.`;
+  } else if (companyId === '24') {
+    prompt = `You are the autonomous AI Booking Assistant for Melhor Stays, managing high-end private villas in Goa.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Casa de Sol (Anjuna, Goa)**
+   - Location: Anjuna, Goa (close to Purple Martini).
+   - Type: Luxury beachfront 4 BHK villa with beach access.
+   - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 10.
+   - Features: Private plunge pool, chef on call, security, high-speed Wi-Fi, fully serviced.
+2. **Villa Bela Vista (Calangute, Goa)**
+   - Location: Calangute, Goa.
+   - Type: 3 BHK Luxury Villa with private garden, housekeeping, fully equipped kitchen.
+   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 8.`;
+  } else if (companyId === '25') {
+    prompt = `You are the autonomous AI Booking Assistant for StayVista, India's largest luxury villa network.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Vista Grande (Ooty)**
+   - Location: Lovedale, Ooty.
+   - Type: 5 BHK Heritage Colonial Bungalow set in a tea estate.
+   - Rates: ₹45,000/night (weekday) / ₹55,000/night (weekend). Sleeps 15.
+   - Features: Tea garden view, fireplace, private lawn, pool table, chef service, premium linen.
+2. **Vista Cliffhanger (Kasauli)**
+   - Location: Kasauli, Himachal.
+   - Type: 4 BHK luxury villa with mountain views.
+   - Rates: ₹35,000/night (weekday) / ₹42,000/night (weekend). Jacuzzi, BBQ, bonfire area. Sleeps 10.`;
+  } else if (companyId === '26') {
+    prompt = `You are the autonomous AI Booking Assistant for SaffronStays, a network of premium private villas in India.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **SaffronStays L'Attitude (Lake Vaitarna)**
+   - Location: Khardi, Maharashtra (Lake Vaitarna waterfront).
+   - Type: 3 BHK eco-friendly lakefront villa with organic dining.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 10.
+   - Features: Lake views, pet-friendly, farm-to-table food, board games, quiet location.
+2. **SaffronStays Salt Rim (Alibaug)**
+   - Location: Korlai, Alibaug (beachfront).
+   - Type: 2 BHK vintage villa overlooking the sea.
+   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Beach access, Konkani chef. Sleeps 6.`;
+  } else {
+    // ScienceThoughts AI Agency default
+    prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
 === AGENCY KNOWLEDGE BASE ===
 1. **Our Mission & Value Proposition:**
    - We build custom, high-performance, zero-hallucination Conversational AI Assistants for high-value industries like Real Estate developers and Luxury Hospitality stays.
-   - We eliminate lead leakage by responding to inbound customer queries in under 1.8 seconds and syncing qualified lead data directly to enterprise CRMs (Salesforce, SAP C4C, LeadSquared) in real-time.
-   - Our agents are compliant with the Digital Personal Data Protection (DPDP) Act 2023.
-
-2. **Core Features of Our AI Assistants:**
-   - **Grounded RAG Logic:** Kept strictly at Temperature 0.0 to prevent false pricing or amenity claims.
-   - **Regional & Bilingual Fluency:** Fluently speaks English, Hindi, Hinglish, Tamil, and Kannada.
-   - **Automatic CRM Webhooks:** Connects to CRM systems to log prospects instantly.
-   - **Human-in-the-Loop Handoff:** Handover triggers when complex pricing discounts or custom negotiations are requested.
-
-3. **Our Onboarding & Pilot Offer:**
-   - We offer a custom **14-day Staging Sandbox pilot** for qualified businesses to test our agents for free before signing a paid retainer.
-   - Standard pricing: Setup fee starts at ₹75,000 / $1,000 (one-time) + a monthly maintenance retainer.
-
-4. **Booking / Contact Details:**
-   - Founder: Nishith Krishnan.
-   - Direct Meeting Link: Clients can book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
-   - Direct Email: info@sciencethoughts.com
-
+   - We eliminate lead leakage by responding to queries in under 1.8s and syncing lead data directly to enterprise CRMs (Salesforce, Zoho, LeadSquared) in real-time.
+   - Our agents are fully compliant with the Digital Personal Data Protection (DPDP) Act 2023.
+2. **Core Features:**
+   - Grounded RAG logic at Temperature 0.0 to prevent false claims.
+   - Fluently bilingual in English, Hindi, Hinglish, Tamil, and Kannada.
+   - Automatic CRM Webhook triggers.
+3. **Pilot Offer & Pricing:**
+   - Custom 14-day Staging Sandbox pilot for free.
+   - Standard pricing: Setup starts at ₹75,000 / $1,000 (one-time) + monthly maintenance retainer.
+4. **Booking:**
+   - Book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
 === CONVERSION GOAL ===
-- Your goal is to qualify the prospect by asking for their:
-  1. Name
-  2. Business/Company Name
-  3. Industry (e.g., Real Estate or Stay Owner)
-- Once you have their business type, invite them to book a 30-minute discovery call using the link: https://calendly.com/nishithmanu/30min
-- Be professional, strategic, and concise (under 3 sentences).`;
+- Qualify by asking for Name, Company Name, and Industry. Once shared, invite them to book a 30-min call using link: https://calendly.com/nishithmanu/30min`;
   }
+
+  return prompt;
+}
+
+// Local simulation fallback engine in case both OpenAI and Gemini are offline
+function simulateOfflineResponse(companyId, history) {
+  const lastMessageObj = history[history.length - 1];
+  const lastText = lastMessageObj?.content || "";
+  const lower = lastText.toLowerCase();
+
+  const companyName = companiesMap[companyId] || "Brigade Group";
+  const isHospitality = ["9", "18", "19", "20", "21", "22", "23", "24", "25", "26"].includes(companyId);
+
+  // 1. Retrieve current lead state from history
+  let extractedName = null;
+  let extractedEmail = null;
+
+  for (let i = history.length - 1; i >= 0; i--) {
+    const msg = history[i];
+    if (msg.role === 'user') {
+      const parts = msg.content.split(' ');
+      if (parts.length <= 4 && !msg.content.includes('/') && !msg.content.includes('@')) {
+        extractedName = msg.content.trim();
+      }
+      if (msg.content.includes('@') && msg.content.includes('.')) {
+        extractedEmail = msg.content.trim();
+      }
+    }
+  }
+
+  // 2. State-Based Heuristics
+  let reply = "";
+  let lead_extracted = null;
+
+  // Rule A: Greeting
+  if (history.length <= 1 || lower === "hi" || lower === "hello" || lower === "hey" || lower === "reset") {
+    reply = `Welcome to *${companyName}*! How can I assist you with checking availability, property specifications, pricing, or booking today?`;
+  }
+  // Rule B: Price inquiry
+  else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
+    if (isHospitality) {
+      if (companyId === '9') {
+        reply = `Our rates for Mango Beach House start at ₹28,000/night on weekdays and ₹35,000/night on weekends. Mango Villa Bougainvillea is ₹32,000/night (weekdays) and ₹42,000/night (weekends). Would you like to check availability?`;
+      } else if (companyId === '18') {
+        reply = `The Canopy Machan treehouse rates are ₹18,000/night (weekdays) and ₹26,000/night (weekends), including complimentary breakfast. Would you like me to block your dates?`;
+      } else if (companyId === '19') {
+        reply = `Villa Azure in Goa is ₹35,000/night (weekdays) and ₹45,000/night (weekends) for the entire 4 BHK villa. Shall I check booking availability for you?`;
+      } else if (companyId === '20') {
+        reply = `Arco Iris Heritage Rooms start at ₹7,500/room/night on weekdays and ₹9,500/room/night on weekends, including breakfast. Do you want to block a room?`;
+      } else if (companyId === '21') {
+        reply = `Destiny Farmstay room rates are ₹8,500/night (weekdays) and ₹11,500/night (weekends) with lake & farm views. Shall I check dates for you?`;
+      } else if (companyId === '22') {
+        reply = `Villa Oasis (Lonavala) is ₹18,000/night (weekdays) / ₹24,000/night (weekends). Villa Sol (Goa) is ₹22,000/night (weekdays) / ₹28,000/night (weekends). Shall we check dates?`;
+      } else if (companyId === '23') {
+        reply = `Villa Sage (Alibaug) rates are ₹35,000/night (weekdays) / ₹45,000/night (weekends). Bonheur Villa (Lonavala) is ₹25,000/night (weekdays) / ₹32,000/night (weekends). Shall I block it?`;
+      } else if (companyId === '24') {
+        reply = `Casa de Sol beachfront villa is ₹40,000/night (weekdays) / ₹50,000/night (weekends). Villa Bela Vista is ₹30,000/night (weekdays) / ₹38,000/night (weekends). Shall I look up dates?`;
+      } else if (companyId === '25') {
+        reply = `Vista Grande (Ooty Heritage) is ₹45,000/night (weekdays) / ₹55,000/night (weekends). Vista Cliffhanger (Kasauli) is ₹35,000/night (weekdays) / ₹42,000/night (weekends).`;
+      } else if (companyId === '26') {
+        reply = `SaffronStays L'Attitude (Lake Vaitarna) is ₹25,000/night (weekdays) / ₹32,000/night (weekends). Salt Rim (Alibaug beachfront) is ₹20,000/night (weekdays) / ₹26,000/night (weekends).`;
+      } else {
+        reply = `Rates range from ₹15,000 to ₹35,000 per night depending on the property selected. Shall we check your preferred dates?`;
+      }
+    } else {
+      // Real Estate Price
+      reply = `Prices range from ₹75 Lakhs to ₹3.5 Crores depending on the configuration (2, 3, or 4 BHK). Would you like me to share the exact pricing brochure or schedule a site visit?`;
+    }
+  }
+  // Rule C: Amenities / Features
+  else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food")) {
+    if (isHospitality) {
+      if (companyId === '9' || companyId === '19' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
+        reply = `We feature a private swimming pool, Wi-Fi, 100% generator backup, caretakers, and a private chef on call to prepare local fresh delicacies. Selected properties are also pet-friendly. What dates are you planning?`;
+      } else if (companyId === '18') {
+        reply = `The treehouse features private decks, open-air bathtubs, forest views, and runs on solar power. To protect local wildlife, pets are not allowed. Shall we block dates?`;
+      } else if (companyId === '21' || companyId === '25') {
+        reply = `We feature horse riding, lake views, dairy farm visits, adventure ziplining, and organic local meals. Pet hosting can be arranged on request. What dates do you have in mind?`;
+      } else {
+        reply = `We offer private pools, high-speed Wi-Fi, fully equipped kitchens, games, and chef services. What dates would you like to request?`;
+      }
+    } else {
+      reply = `We offer premium amenities including a fully equipped 25,000 sq.ft. clubhouse, swimming pool, sports courts, 24/7 security, power backup, and kids play zones. Shall I book a site visit?`;
+    }
+  }
+  // Rule D: Booking Request / Schedule
+  else if (lower.includes("book") || lower.includes("reserve") || lower.includes("visit") || lower.includes("schedule") || lower.includes("call") || lower.includes("yes")) {
+    if (!extractedName) {
+      reply = `I would be happy to organize that! Could you please share your **Name** so I can register your request?`;
+    } else if (!extractedEmail && isHospitality) {
+      reply = `Thank you, ${extractedName}! Could you please share your **Email Address** to send the reservation details?`;
+    } else {
+      reply = `Perfect! I have logged your request. A representative will contact you on this number shortly to confirm. Have a wonderful day!`;
+    }
+  }
+  // Rule E: Name or Email Shared (Capture leads)
+  else {
+    // If they typed an email
+    if (lower.includes('@') && lower.includes('.')) {
+      extractedEmail = lastText.trim();
+      reply = `Thank you! I have updated your email to: ${extractedEmail}. Our manager will call you shortly to confirm dates and booking details.`;
+    } 
+    // If it's a short text (likely a name)
+    else if (lastText.split(' ').length <= 3) {
+      extractedName = lastText.trim();
+      if (isHospitality) {
+        reply = `Nice to meet you, ${extractedName}! Could you please share your **Email Address** to finalize the booking reservation details?`;
+      } else {
+        reply = `Nice to meet you, ${extractedName}! What is your preferred date and time for a site visit or phone call?`;
+      }
+    } 
+    // General response
+    else {
+      reply = `I've noted that! Would you like me to check active booking availability, block your dates, or have a sales representative call you back?`;
+    }
+  }
+
+  // Populate lead extraction if details are found
+  if (extractedName) {
+    lead_extracted = {
+      name: extractedName,
+      phone: null,
+      email: extractedEmail || null,
+      budget: isHospitality ? "25000" : "12500000",
+      preferred_time: "Offline Demo Fallback"
+    };
+  }
+
+  return {
+    reply,
+    lead_extracted
+  };
+}
+
+// Google Gemini API integration
+async function getGeminiResponse(history, systemInstruction) {
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not set.");
+  }
+
+  // Map roles to Gemini specifications ('assistant' -> 'model')
+  const contents = history.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }]
+  }));
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: contents,
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      },
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    })
+  });
+
+  const data = await response.json();
+  
+  if (data.error) {
+    throw new Error(`Gemini API Error: ${data.error.message}`);
+  }
+
+  const rawText = data.candidates[0].content.parts[0].text.trim();
+  const cleanContent = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+  return JSON.parse(cleanContent);
+}
+
+// Top-level LLM request orchestrator with fallbacks
+async function getOpenAIStructuredResponse(history, companyId) {
+  let builderPrompt = getCompanyKnowledge(companyId);
 
   const systemInstruction = `${builderPrompt}
 
@@ -761,46 +762,68 @@ async function getOpenAIStructuredResponse(history, companyId) {
   1. Do NOT ask them for their phone number (the system already has it!).
   2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
   3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
-- **HOW TO HANDLE BOOKINGS/RESERVATIONS (Options 9, 18, 19, 20, 21):** If the guest wants to book or check availability for the villas/resorts:
+  4. Map these details to the JSON: name, email, budget, and preferred_time.
+- **HOW TO HANDLE BOOKINGS/RESERVATIONS:** If the guest wants to book or check availability for the villas/resorts:
   1. Ask for their check-in and checkout dates, and the number of guests.
   2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
   3. Once they provide the dates, name, and email, confirm warmly that their pending booking request has been logged and our manager will contact them to confirm.
   4. Map these details to the JSON: name, email, budget (set to the estimated total booking cost, e.g. nights * rate), and preferred_time (format as: "Dates: [check-in to check-out], Guests: [count]").
-- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For Options 9 & 18-21, ask: "Would you like me to check availability or block your booking dates?")
+- Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.
 - "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget", "preferred_time". If a key is not found or has not been shared yet, set its value to null.`;
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        response_format: { type: "json_object" }, // Forces structured output JSON
-        messages: [
-          { role: "system", content: systemInstruction },
-          ...history
-        ],
-        max_tokens: 350,
-      }),
-    });
+  // LEVEL 1: Primary Try (OpenAI)
+  if (OPENAI_API_KEY) {
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: systemInstruction },
+            ...history
+          ],
+          max_tokens: 350,
+        }),
+      });
 
-    const data = await response.json();
-    const parsedContent = JSON.parse(data.choices[0].message.content.trim());
-    return parsedContent;
-  } catch (error) {
-    console.error("[DEMO ROUTE] OpenAI Error:", error);
-    return {
-      reply: "I am currently experiencing a network issue connecting to my logic center. Please try again in a moment.",
-      lead_extracted: null
-    };
+      const data = await response.json();
+
+      if (!data.error) {
+        const rawContent = data.choices[0].message.content.trim();
+        const cleanContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
+        const parsedContent = JSON.parse(cleanContent);
+        return parsedContent;
+      } else {
+        console.error("[DEMO ROUTE] OpenAI API error response:", data.error.message);
+      }
+    } catch (error) {
+      console.error("[DEMO ROUTE] OpenAI fetch request failed:", error);
+    }
   }
+
+  // LEVEL 2: Secondary Try (Google Gemini Failover)
+  if (GEMINI_API_KEY) {
+    try {
+      console.log("[DEMO ROUTE] Triggering Google Gemini fallback...");
+      const geminiPayload = await getGeminiResponse(history, systemInstruction);
+      return geminiPayload;
+    } catch (geminiError) {
+      console.error("[DEMO ROUTE] Gemini fallback failed:", geminiError.message);
+    }
+  }
+
+  // LEVEL 3: Emergency Offline Fallback
+  console.log("[DEMO ROUTE] Triggering local simulation fallback...");
+  return simulateOfflineResponse(companyId, history);
 }
 
 async function sendWhatsAppMessage(phone_number_id, to, messageText) {
@@ -808,11 +831,6 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
     console.warn("WHATSAPP_ACCESS_TOKEN is not set. Cannot send outbound message.");
     return;
   }
-
-  console.log(`[DEMO ROUTE] Debug Info:`);
-  console.log(`- phone_number_id: ${phone_number_id}`);
-  console.log(`- token prefix: ${WHATSAPP_ACCESS_TOKEN.substring(0, 15)}...`);
-  console.log(`- token suffix: ...${WHATSAPP_ACCESS_TOKEN.slice(-15)}`);
 
   try {
     const response = await fetch(`https://graph.facebook.com/v19.0/${phone_number_id}/messages`, {
@@ -859,7 +877,7 @@ async function pushLeadToMake(leadData) {
         email: leadData.email,
         budget: leadData.budget,
         preferred_time: leadData.preferred_time || null,
-        builder: leadData.target_builder || "Giridhari Constructions",
+        builder: leadData.target_builder || "Brigade Group",
         timestamp: new Date().toISOString()
       })
     });

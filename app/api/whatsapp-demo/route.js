@@ -640,6 +640,14 @@ function simulateOfflineResponse(companyId, history) {
   if (history.length <= 1 || lower === "hi" || lower === "hello" || lower === "hey" || lower === "reset") {
     reply = `Welcome to *${companyName}*! How can I assist you with checking availability, property specifications, pricing, or booking today?`;
   }
+  // Rule A.5: Same-session booking check
+  else if (lower.includes("booked already") || lower.includes("already booked") || lower.includes("booked for us") || lower.includes("you booked") || lower.includes("you register")) {
+    if (extractedName) {
+      reply = `Yes, absolutely! I have registered your pending booking request under the name *${extractedName}* ${extractedEmail ? `(Email: ${extractedEmail})` : ''}. Our manager will call you on this number shortly to finalize your stay.`;
+    } else {
+      reply = `I can certainly verify that for you. Could you please share your Name or check-in dates so I can check my active logs?`;
+    }
+  }
   // Rule B: Price inquiry
   else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
     if (isHospitality) {
@@ -794,6 +802,7 @@ async function getOpenAIStructuredResponse(history, companyId) {
   1. Ask for their check-in and checkout dates, and the number of guests.
   2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
   3. Once they provide the dates, name, and email, confirm warmly that their pending booking request has been logged and our manager will contact them to confirm.
+- **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 

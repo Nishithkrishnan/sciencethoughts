@@ -89,7 +89,7 @@ const companiesMap = {
   '17': 'Arvind SmartSpaces',
   '18': 'The Machan',
   '19': 'Lost Traveller',
-  '20': 'Arco Iris Homestay',
+  '20': 'Arcoiris Gifting',
   '21': 'Destiny Farmstay',
   '22': 'Eko Stay',
   '23': 'The Rentalgram',
@@ -175,7 +175,7 @@ export async function POST(req) {
               `17. *Arvind SmartSpaces* (Golf Villas)\n` +
               `18. *The Machan* (Lonavala Treehouses)\n` +
               `19. *Lost Traveller* (Goa Villas)\n` +
-              `20. *Arco Iris Homestay* (South Goa Heritage)\n` +
+              `20. *Arcoiris Gifting* (Corporate Gifting Mumbai)\n` +
               `21. *Destiny Farmstay* (Ooty Resort)\n` +
               `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
               `23. *The Rentalgram* (Family Villas)\n` +
@@ -479,13 +479,19 @@ function getCompanyKnowledge(companyId) {
    - Capacity: Sleeps up to 10 guests. Caretaker, pool, gazebo, Wi-Fi.
    - House Rules: Pet-friendly. Chef on call available (₹3,000/day).`;
   } else if (companyId === '20') {
-    prompt = `You are the autonomous AI Booking Assistant for Arco Iris Boutique Homestay, a Portuguese heritage home in South Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Arco Iris Heritage Rooms**
-   - Location: Curtorim, South Goa (peaceful countryside overlooking lake).
-   - Type: Restored 18th-century Portuguese manor with 5 color-themed luxury bedrooms.
-   - Rates: ₹7,500/room/night (weekday) / ₹9,500/room/night (weekend). Includes breakfast.
-   - Capacity: 2 adults per room. Pet-friendly. Authentic Goan home-cooked meals by host.`;
+    prompt = `You are the autonomous AI Sales Assistant for Arcoiris Gifting, a premium corporate and customized gifting company in Mumbai.
+=== BUSINESS KNOWLEDGE BASE ===
+1. **Services & Products**
+   - **Employee Welcome Kits:** Tech items, customized notebooks, bottles, apparel (starts at ₹800/kit).
+   - **Festive & Celebration Hampers:** Gourmet items, luxury chocolates, sustainable items (starts at ₹1,200/hamper).
+   - **Eco-Friendly / Sustainable Gifts:** Cork diaries, bamboo bottles, seed papers.
+   - **Custom Branded Merchandise:** Branded T-shirts, hoodies, mugs, leather organizers.
+2. **Order Logistics & Pricing**
+   - **MOQ (Minimum Order Quantity):** 50 units for customized branding.
+   - **Pricing:** Depends entirely on custom contents and order volume. Delivery available PAN-India.
+   - **Office Location:** Andheri West, Mumbai.
+=== CONVERSION GOAL ===
+- Answer queries, ask for their estimated quantity, and guide them to share their Name, Corporate Email, and Company Name so we can send a custom catalog and quote.`;
   } else if (companyId === '21') {
     prompt = `You are the autonomous AI Booking Assistant for Destiny Farmstay, a wilderness farm resort in Ooty.
 === PROPERTY KNOWLEDGE BASE ===
@@ -493,7 +499,9 @@ function getCompanyKnowledge(companyId) {
    - Location: Avalanche Valley, Ooty (25 mins from town).
    - Type: Experiential lakeview farm resort with stable and agricultural farm.
    - Rates: ₹8,500/room/night (weekday) / ₹11,500/room/night (weekend).
-   - Features: Horse riding, dairy farm tours, fishing, spa, adventure zipline.`;
+   - Amenities: Stables, farming tours, fishing, spa, adventure zipline. (Note: No swimming pool, we have a pristine natural lake instead).
+   - Meals & Chef: On-site farm-to-table restaurant. Chef serves all meals (breakfast included, lunch/dinner package: ₹1,200/person/day).
+   - Pets: Extremely pet-friendly! Free entry for pets, with wide open lawns for them to play.`;
   } else if (companyId === '22') {
     prompt = `You are the autonomous AI Booking Assistant for Eko Stay, a premier brand managing luxury private pool villas in Lonavala and Goa.
 === PROPERTY KNOWLEDGE BASE ===
@@ -501,12 +509,16 @@ function getCompanyKnowledge(companyId) {
    - Location: Gold Valley, Lonavala.
    - Type: 4 BHK Private Pool Villa with mountain views.
    - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend).
-   - Features: Private pool, lawn, pool table, carrom, kitchen, BBQ setup. Sleeps up to 12.
-   - House Rules: Pet-friendly, check-in 2:00 PM, check-out 11:00 AM.
+   - Amenities: Private pool, lawn, pool table, carrom, kitchen, BBQ setup. Sleeps up to 12.
+   - Meals & Chef: Private chef can be arranged (₹2,500/day for cooking, groceries extra).
+   - Pets: Pet-friendly (₹1,000 cleaning fee per stay).
 2. **Villa Sol (Candolim, Goa)**
    - Location: Candolim, North Goa (5 mins drive to beach).
    - Type: 3 BHK Portuguese-style luxury villa.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps up to 8.`;
+   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps up to 8.
+   - Amenities: Private swimming pool, high-speed Wi-Fi, fully equipped kitchen.
+   - Meals & Chef: Chef service on request (₹2,500/day).
+   - Pets: Pet-friendly (₹1,000 cleaning fee).`;
   } else if (companyId === '23') {
     prompt = `You are the autonomous AI Booking Assistant for The Rentalgram, offering premium curated family villas.
 === PROPERTY KNOWLEDGE BASE ===
@@ -514,11 +526,16 @@ function getCompanyKnowledge(companyId) {
    - Location: Mandwa Road, Alibaug (10 mins from jetty).
    - Type: Ultra-luxury 5 BHK Villa.
    - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend).
-   - Features: Large private pool, landscaped gardens, private bar, AC, caretaker on-site. Sleeps 15.
+   - Amenities: Large private swimming pool, landscaped gardens, private bar, AC, caretaker on-site. Sleeps 15.
+   - Meals & Chef: In-villa kitchen with private chef on request (₹3,000/day).
+   - Pets: Pet-friendly (no extra charge).
 2. **Bonheur Villa (Lonavala)**
    - Location: Khandala, Lonavala.
    - Type: 4 BHK Premium Family Villa with pool, kids play area, indoor games.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.`;
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
+   - Amenities: Swimming pool, play area, indoor games.
+   - Meals & Chef: Private chef can be hired (₹3,000/day).
+   - Pets: Pet-friendly (no extra charge).`;
   } else if (companyId === '24') {
     prompt = `You are the autonomous AI Booking Assistant for Melhor Stays, managing high-end private villas in Goa.
 === PROPERTY KNOWLEDGE BASE ===
@@ -526,11 +543,16 @@ function getCompanyKnowledge(companyId) {
    - Location: Anjuna, Goa (close to Purple Martini).
    - Type: Luxury beachfront 4 BHK villa with beach access.
    - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 10.
-   - Features: Private plunge pool, chef on call, security, high-speed Wi-Fi, fully serviced.
+   - Amenities: Private plunge pool, high-speed Wi-Fi, beach access.
+   - Meals & Chef: Chef on call available (₹3,500/day, specializes in Goan seafood).
+   - Pets: Pet-friendly (₹1,500 one-time fee).
 2. **Villa Bela Vista (Calangute, Goa)**
    - Location: Calangute, Goa.
    - Type: 3 BHK Luxury Villa with private garden, housekeeping, fully equipped kitchen.
-   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 8.`;
+   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 8.
+   - Amenities: Private swimming pool, garden, caretakers.
+   - Meals & Chef: Chef on request (₹3,500/day).
+   - Pets: Pet-friendly (₹1,500 fee).`;
   } else if (companyId === '25') {
     prompt = `You are the autonomous AI Booking Assistant for StayVista, India's largest luxury villa network.
 === PROPERTY KNOWLEDGE BASE ===
@@ -538,11 +560,16 @@ function getCompanyKnowledge(companyId) {
    - Location: Lovedale, Ooty.
    - Type: 5 BHK Heritage Colonial Bungalow set in a tea estate.
    - Rates: ₹45,000/night (weekday) / ₹55,000/night (weekend). Sleeps 15.
-   - Features: Tea garden view, fireplace, private lawn, pool table, chef service, premium linen.
+   - Amenities: Fireplace, private lawn, pool table, premium linen, Wi-Fi. (Note: No swimming pool due to cold weather).
+   - Meals & Chef: In-villa cook serves premium home-cooked meals (₹1,800/adult/day for all meals).
+   - Pets: Pet-friendly (must notify in advance, ₹1,000/day).
 2. **Vista Cliffhanger (Kasauli)**
    - Location: Kasauli, Himachal.
    - Type: 4 BHK luxury villa with mountain views.
-   - Rates: ₹35,000/night (weekday) / ₹42,000/night (weekend). Jacuzzi, BBQ, bonfire area. Sleeps 10.`;
+   - Rates: ₹35,000/night (weekday) / ₹42,000/night (weekend). Sleeps 10.
+   - Amenities: Private outdoor jacuzzi, BBQ, bonfire area.
+   - Meals & Chef: In-house cook prepares all meals (₹1,800/adult/day).
+   - Pets: Pet-friendly (₹1,000/day).`;
   } else if (companyId === '26') {
     prompt = `You are the autonomous AI Booking Assistant for SaffronStays, a network of premium private villas in India.
 === PROPERTY KNOWLEDGE BASE ===
@@ -550,11 +577,16 @@ function getCompanyKnowledge(companyId) {
    - Location: Khardi, Maharashtra (Lake Vaitarna waterfront).
    - Type: 3 BHK eco-friendly lakefront villa with organic dining.
    - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 10.
-   - Features: Lake views, pet-friendly, farm-to-table food, board games, quiet location.
+   - Amenities: Lake views, board games, quiet location, private lawn. (Note: No swimming pool, waterfront access).
+   - Meals & Chef: Home-cooked organic meals prepared by in-villa cook (all meals package: ₹1,500/person/day).
+   - Pets: Pet-friendly (free of charge).
 2. **SaffronStays Salt Rim (Alibaug)**
    - Location: Korlai, Alibaug (beachfront).
    - Type: 2 BHK vintage villa overlooking the sea.
-   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Beach access, Konkani chef. Sleeps 6.`;
+   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Sleeps 6.
+   - Amenities: Direct beach access, sea views, lawn.
+   - Meals & Chef: In-villa cook specializes in Konkani seafood (all meals package: ₹1,500/person/day).
+   - Pets: Pet-friendly (free of charge).`;
   } else {
     // ScienceThoughts AI Agency default
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
@@ -586,7 +618,7 @@ function simulateOfflineResponse(companyId, history) {
   const lower = lastText.toLowerCase();
 
   const companyName = companiesMap[companyId] || "Brigade Group";
-  const isHospitality = ["9", "18", "19", "20", "21", "22", "23", "24", "25", "26"].includes(companyId);
+  const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26"].includes(companyId);
 
   // Retrieve current lead state from history
   let extractedName = null;
@@ -658,7 +690,7 @@ function simulateOfflineResponse(companyId, history) {
       } else if (companyId === '19') {
         reply = `Villa Azure in Goa is ₹35,000/night (weekdays) and ₹45,000/night (weekends) for the entire 4 BHK villa. Shall I check booking availability for you?`;
       } else if (companyId === '20') {
-        reply = `Arco Iris Heritage Rooms start at ₹7,500/room/night on weekdays and ₹9,500/room/night on weekends, including breakfast. Do you want to block a room?`;
+        reply = `Our customized Employee Welcome Kits start at ₹800/kit, and Festive Gifting Hampers start at ₹1,200/hamper. The exact price depends on customization and order volume (MOQ is 50 kits). Would you like to check our design catalog?`;
       } else if (companyId === '21') {
         reply = `Destiny Farmstay room rates are ₹8,500/night (weekdays) and ₹11,500/night (weekends) with lake & farm views. Shall I check dates for you?`;
       } else if (companyId === '22') {
@@ -680,13 +712,15 @@ function simulateOfflineResponse(companyId, history) {
   }
   // Rule C: Amenities / Features
   else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food") || lower.includes("spa")) {
-    if (isHospitality) {
+    if (companyId === '20') {
+      reply = `We are a corporate gifting and branded merchandise agency in Mumbai. We customize premium hampers and welcome kits (MOQ 50), but we do not offer travel services, chefs, or pools. Would you like to request a catalog?`;
+    } else if (isHospitality) {
       if (companyId === '9' || companyId === '19' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
         reply = `We feature a private swimming pool, Wi-Fi, 100% generator backup, caretakers, and a private chef on call to prepare local fresh delicacies. Selected properties are also pet-friendly. What dates are you planning?`;
       } else if (companyId === '18') {
         reply = `The treehouse features private decks, open-air bathtubs, forest views, and runs on solar power. To protect local wildlife, pets are not allowed. Shall we block dates?`;
       } else if (companyId === '21' || companyId === '25') {
-        reply = `We feature horse riding, lake views, dairy farm visits, adventure ziplining, and organic local meals. Pet hosting can be arranged on request. What dates do you have in mind?`;
+        reply = `We feature stables, farm tours, fireplace, and private lawns. Our in-house chefs serve premium farm-to-table meals, and we are pet-friendly. (Note: No swimming pool available). What dates do you have in mind?`;
       } else {
         reply = `We offer private pools, high-speed Wi-Fi, fully equipped kitchens, games, and chef services. What dates would you like to request?`;
       }

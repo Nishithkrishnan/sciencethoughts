@@ -32,7 +32,7 @@ export default function InteractiveWebDemo() {
     "9": "Mango Alibaug Villas (Alibaug Stay)",
     "18": "The Machan (Lonavala Resort)",
     "19": "Lost Traveller (Goa Villas)",
-    "20": "Arco Iris Homestay (Goa Heritage)",
+    "20": "Arcoiris Gifting (Corporate Gifting)",
     "21": "Destiny Farmstay (Ooty Resort)",
     "22": "Eko Stay (Lonavala/Goa Villas)",
     "23": "The Rentalgram (Family Villas)",
@@ -51,11 +51,16 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "20", "21", "22", "23", "24", "25", "26"].includes(newId);
+    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26"].includes(newId);
     
-    const welcomeMsg = isHospitality
-      ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`
-      : `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+    let welcomeMsg = "";
+    if (isHospitality) {
+      welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
+    } else if (newId === "20") {
+      welcomeMsg = `Welcome to ${companyName}! How can I help you with custom employee kits, premium hampers, or corporate gifting requirements today?`;
+    } else {
+      welcomeMsg = `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+    }
 
     setMessages([
       { role: "assistant", content: welcomeMsg }

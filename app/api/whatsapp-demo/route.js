@@ -588,24 +588,51 @@ function simulateOfflineResponse(companyId, history) {
   const companyName = companiesMap[companyId] || "Brigade Group";
   const isHospitality = ["9", "18", "19", "20", "21", "22", "23", "24", "25", "26"].includes(companyId);
 
-  // 1. Retrieve current lead state from history
+  // Retrieve current lead state from history
   let extractedName = null;
   let extractedEmail = null;
+  let extractedCheckInDate = null;
+  let extractedCheckOutDate = null;
+  let extractedCheckInTime = null;
+  let extractedCheckOutTime = null;
+  let extractedCallbackTime = null;
+  let requirements = [];
 
   for (let i = history.length - 1; i >= 0; i--) {
     const msg = history[i];
     if (msg.role === 'user') {
-      const parts = msg.content.split(' ');
-      if (parts.length <= 4 && !msg.content.includes('/') && !msg.content.includes('@')) {
-        extractedName = msg.content.trim();
+      const txt = msg.content;
+      const l = txt.toLowerCase();
+      
+      // Extract name
+      const parts = txt.split(' ');
+      if (parts.length <= 4 && !txt.includes('/') && !txt.includes('@') && !l.includes('book') && !l.includes('stay') && !l.includes('chef') && !l.includes('yes') && !l.includes('hi')) {
+        extractedName = txt.trim();
       }
-      if (msg.content.includes('@') && msg.content.includes('.')) {
-        extractedEmail = msg.content.trim();
+      // Extract email
+      if (txt.includes('@') && txt.includes('.')) {
+        extractedEmail = txt.trim();
+      }
+      // Extract requirements
+      if (l.includes('chef') || l.includes('cook')) requirements.push("requires chef");
+      if (l.includes('pet') || l.includes('dog') || l.includes('cat')) requirements.push("needs pet toys/facilities");
+      if (l.includes('spa') || l.includes('massage')) requirements.push("spa service booking needed");
+      if (l.includes('jacuzzi') || l.includes('pool')) requirements.push("pool access request");
+
+      // Extract timings
+      if (l.includes('early check') || l.includes('early checkin') || l.includes('early check-in')) {
+        extractedCheckInTime = "early check-in requested";
+      }
+      if (l.includes('late check') || l.includes('late checkout') || l.includes('late check-out')) {
+        extractedCheckOutTime = "late check-out requested";
+      }
+      if (l.includes('call back') || l.includes('call me') || l.includes('callback')) {
+        extractedCallbackTime = "callback requested";
       }
     }
   }
 
-  // 2. State-Based Heuristics
+  // State-Based Heuristics
   let reply = "";
   let lead_extracted = null;
 
@@ -640,12 +667,11 @@ function simulateOfflineResponse(companyId, history) {
         reply = `Rates range from ₹15,000 to ₹35,000 per night depending on the property selected. Shall we check your preferred dates?`;
       }
     } else {
-      // Real Estate Price
       reply = `Prices range from ₹75 Lakhs to ₹3.5 Crores depending on the configuration (2, 3, or 4 BHK). Would you like me to share the exact pricing brochure or schedule a site visit?`;
     }
   }
   // Rule C: Amenities / Features
-  else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food")) {
+  else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food") || lower.includes("spa")) {
     if (isHospitality) {
       if (companyId === '9' || companyId === '19' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
         reply = `We feature a private swimming pool, Wi-Fi, 100% generator backup, caretakers, and a private chef on call to prepare local fresh delicacies. Selected properties are also pet-friendly. What dates are you planning?`;
@@ -672,12 +698,10 @@ function simulateOfflineResponse(companyId, history) {
   }
   // Rule E: Name or Email Shared (Capture leads)
   else {
-    // If they typed an email
     if (lower.includes('@') && lower.includes('.')) {
       extractedEmail = lastText.trim();
       reply = `Thank you! I have updated your email to: ${extractedEmail}. Our manager will call you shortly to confirm dates and booking details.`;
     } 
-    // If it's a short text (likely a name)
     else if (lastText.split(' ').length <= 3) {
       extractedName = lastText.trim();
       if (isHospitality) {
@@ -686,7 +710,6 @@ function simulateOfflineResponse(companyId, history) {
         reply = `Nice to meet you, ${extractedName}! What is your preferred date and time for a site visit or phone call?`;
       }
     } 
-    // General response
     else {
       reply = `I've noted that! Would you like me to check active booking availability, block your dates, or have a sales representative call you back?`;
     }
@@ -698,8 +721,13 @@ function simulateOfflineResponse(companyId, history) {
       name: extractedName,
       phone: null,
       email: extractedEmail || null,
-      budget: isHospitality ? "25000" : "12500000",
-      preferred_time: "Offline Demo Fallback"
+      callback_time: extractedCallbackTime || null,
+      check_in_date: extractedCheckInDate || "Next Weekend",
+      check_out_date: extractedCheckOutDate || "Next Weekend",
+      check_in_time: extractedCheckInTime || null,
+      check_out_time: extractedCheckOutTime || null,
+      additional_requirements: requirements.length > 0 ? requirements.join(', ') : "Direct Booking Requested",
+      budget: isHospitality ? "25000" : "12500000"
     };
   }
 
@@ -709,7 +737,7 @@ function simulateOfflineResponse(companyId, history) {
   };
 }
 
-// Google Gemini API integration
+// Google Gemini API integration (Gemini 2.0 Flash)
 async function getGeminiResponse(history, systemInstruction) {
   if (!GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not set.");
@@ -748,7 +776,7 @@ async function getGeminiResponse(history, systemInstruction) {
   return JSON.parse(cleanContent);
 }
 
-// Top-level LLM request orchestrator with fallbacks
+// Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId) {
   let builderPrompt = getCompanyKnowledge(companyId);
 
@@ -762,18 +790,27 @@ async function getOpenAIStructuredResponse(history, companyId) {
   1. Do NOT ask them for their phone number (the system already has it!).
   2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
   3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
-  4. Map these details to the JSON: name, email, budget, and preferred_time.
 - **HOW TO HANDLE BOOKINGS/RESERVATIONS:** If the guest wants to book or check availability for the villas/resorts:
   1. Ask for their check-in and checkout dates, and the number of guests.
   2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
   3. Once they provide the dates, name, and email, confirm warmly that their pending booking request has been logged and our manager will contact them to confirm.
-  4. Map these details to the JSON: name, email, budget (set to the estimated total booking cost, e.g. nights * rate), and preferred_time (format as: "Dates: [check-in to check-out], Guests: [count]").
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.
-- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. Keys: "name", "phone", "email", "budget", "preferred_time". If a key is not found or has not been shared yet, set its value to null.`;
+- "lead_extracted": An object containing the extracted details from the conversation history if they are mentioned. Only populate these if you are confident they have been provided. 
+  Keys: 
+  - "name": "string or null"
+  - "phone": "string or null"
+  - "email": "string or null"
+  - "callback_time": "string or null (e.g. 'Tomorrow at 4 PM' if user requested call at specific time)"
+  - "check_in_date": "string or null (e.g. 'Oct 12th')"
+  - "check_out_date": "string or null (e.g. 'Oct 15th')"
+  - "check_in_time": "string or null (e.g. 'early check-in at 10 AM')"
+  - "check_out_time": "string or null (e.g. 'late check-out at 2 PM')"
+  - "additional_requirements": "string summarizing dynamic requests (e.g., 'requires chef', 'spa service booking', 'needs pet toys') or null"
+  - "budget": "string or null"`;
 
   // LEVEL 1: Primary Try (OpenAI)
   if (OPENAI_API_KEY) {
@@ -875,8 +912,13 @@ async function pushLeadToMake(leadData) {
         name: leadData.name,
         phone: leadData.phone,
         email: leadData.email,
+        callback_time: leadData.callback_time || null,
+        check_in_date: leadData.check_in_date || null,
+        check_out_date: leadData.check_out_date || null,
+        check_in_time: leadData.check_in_time || null,
+        check_out_time: leadData.check_out_time || null,
+        additional_requirements: leadData.additional_requirements || null,
         budget: leadData.budget,
-        preferred_time: leadData.preferred_time || null,
         builder: leadData.target_builder || "Brigade Group",
         timestamp: new Date().toISOString()
       })

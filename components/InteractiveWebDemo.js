@@ -42,7 +42,7 @@ export default function InteractiveWebDemo() {
     "27": "Lohono Stays (Premium Villas)",
     "28": "amã Stays & Trails (Taj Group)",
     "29": "ELIVAAS (Luxury Homestays)",
-    "30": "Hireavilla (Goa/Alibaug Stays)",
+    "30": "Barefoot at Havelock (Andaman Resort)",
     "31": "Roamhome (Holiday Homes)",
     "32": "Elite Havens (Ultra-Luxury)",
     "33": "Tripvillas (Beachfront Stays)",

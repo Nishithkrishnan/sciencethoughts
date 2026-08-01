@@ -99,7 +99,7 @@ const companiesMap = {
   '27': 'Lohono Stays',
   '28': 'amã Stays & Trails',
   '29': 'ELIVAAS',
-  '30': 'Hireavilla',
+  '30': 'Barefoot at Havelock',
   '31': 'Roamhome',
   '32': 'Elite Havens India',
   '33': 'Tripvillas',
@@ -195,7 +195,7 @@ export async function POST(req) {
               `27. *Lohono Stays* (Premium Luxury Villas)\n` +
               `28. *amã Stays & Trails* (Taj Group Homestays)\n` +
               `29. *ELIVAAS* (Luxury Villa Rentals)\n` +
-              `30. *Hireavilla* (Goa/Alibaug Villas)\n` +
+              `30. *Barefoot at Havelock* (Andaman Resort)\n` +
               `31. *Roamhome* (Curated Holiday Homes)\n` +
               `32. *Elite Havens India* (Ultra-Luxury Retreats)\n` +
               `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
@@ -659,22 +659,22 @@ function getCompanyKnowledge(companyId) {
    - Meals & Chef: In-house cook prepares all meals (₹1,500/adult/day).
    - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).`;
   } else if (companyId === '30') {
-    prompt = `You are the autonomous AI Booking Assistant for Hireavilla.
+    prompt = `You are the autonomous AI Booking Assistant for Barefoot at Havelock, Swaraj Dweep (Andamans).
 === PROPERTY KNOWLEDGE BASE ===
-1. **Villa Sage (Alibaug)**
-   - Location: Mandwa Road, Alibaug.
-   - Type: 4 BHK Luxury Pool Villa.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
-   - Amenities: Large private pool, lounge deck, high-speed Wi-Fi.
-   - Meals & Chef: In-villa cook on request (₹2,500/day, groceries extra).
-   - Pets: Pet-friendly (no extra charge).
-2. **Villa Amber (Goa)**
-   - Location: Candolim, North Goa.
-   - Type: 3 BHK Pool Villa.
-   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 9.
-   - Amenities: Swimming pool, beach proximity (5 mins walk), caretakers.
-   - Meals & Chef: In-villa cook available (₹2,500/day).
-   - Pets: Pet-friendly (no extra charge).`;
+1. **Tented Cottage**
+   - Location: Havelock Island (Swaraj Dweep), Andaman Islands.
+   - Type: Premium air-conditioned tented cottages surrounded by rainforest near Beach No. 7 (Radhanagar Beach).
+   - Rates: ₹14,500/night (weekday) / ₹17,500/night (weekend). Sleeps 3.
+   - Amenities: Private beachfront access, room service, ceiling fan, writing desk, safety locker.
+   - Meals & Chef: Buffet breakfast included; buffet lunch/dinner available at the in-house beach restaurant (meal packages: ₹1,800/adult/day).
+   - Pets: Pets are not allowed due to local wildlife and environmental regulations.
+2. **Nicobari Cottage**
+   - Location: Havelock Island (Swaraj Dweep), Andaman Islands.
+   - Type: Luxury thatched-roof cottages built using local materials.
+   - Rates: ₹18,000/night (weekday) / ₹22,000/night (weekend). Sleeps 3.
+   - Amenities: En-suite bathroom, luxury bedding, private sit-out deck, direct rainforest path access.
+   - Meals & Chef: Gourmet dining at our restaurant.
+   - Pets: Pets are not allowed.`;
   } else if (companyId === '31') {
     prompt = `You are the autonomous AI Booking Assistant for Roamhome holiday homes.
 === PROPERTY KNOWLEDGE BASE ===

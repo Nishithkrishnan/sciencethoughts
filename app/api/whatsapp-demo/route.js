@@ -96,6 +96,16 @@ const companiesMap = {
   '24': 'Melhor Stays',
   '25': 'StayVista',
   '26': 'SaffronStays',
+  '27': 'Lohono Stays',
+  '28': 'amã Stays & Trails',
+  '29': 'ELIVAAS',
+  '30': 'Hireavilla',
+  '31': 'Roamhome',
+  '32': 'Elite Havens India',
+  '33': 'Tripvillas',
+  '34': 'Sol de Goa',
+  '35': 'LuxUnlock',
+  '36': 'Abode Bombay',
   'agency': 'ScienceThoughts AI Agency'
 };
 
@@ -181,8 +191,18 @@ export async function POST(req) {
               `23. *The Rentalgram* (Family Villas)\n` +
               `24. *Melhor Stays* (Goa Beach Villas)\n` +
               `25. *StayVista* (Premium Villa Chain)\n` +
-              `26. *SaffronStays* (Premium Villa Network)\n\n` +
-              `Reply with a number (*1-26*) to start the simulation!`;
+              `26. *SaffronStays* (Premium Villa Network)\n` +
+              `27. *Lohono Stays* (Premium Luxury Villas)\n` +
+              `28. *amã Stays & Trails* (Taj Group Homestays)\n` +
+              `29. *ELIVAAS* (Luxury Villa Rentals)\n` +
+              `30. *Hireavilla* (Goa/Alibaug Villas)\n` +
+              `31. *Roamhome* (Curated Holiday Homes)\n` +
+              `32. *Elite Havens India* (Ultra-Luxury Retreats)\n` +
+              `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
+              `34. *Sol de Goa* (Nerul Boutique Stay)\n` +
+              `35. *LuxUnlock* (Restored Heritage Villas)\n` +
+              `36. *Abode Bombay* (Colaba Boutique Hotel)\n\n` +
+              `Reply with a number (*1-36*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
@@ -190,7 +210,7 @@ export async function POST(req) {
           // Handle selection mode
           if (session.companyId === null) {
             const num = parseInt(trimmedText);
-            if (!isNaN(num) && num >= 1 && num <= 26) {
+            if (!isNaN(num) && num >= 1 && num <= 36) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
@@ -587,6 +607,176 @@ function getCompanyKnowledge(companyId) {
    - Amenities: Direct beach access, sea views, lawn.
    - Meals & Chef: In-villa cook specializes in Konkani seafood (all meals package: ₹1,500/person/day).
    - Pets: Pet-friendly (free of charge).`;
+  } else if (companyId === '27') {
+    prompt = `You are the autonomous AI Booking Assistant for Lohono Stays, offering premium luxury villa rentals.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Verde (Goa)**
+   - Location: North Goa (Assagao).
+   - Type: 4 BHK Luxury Private Pool Villa.
+   - Rates: ₹45,000/night (weekday) / ₹55,000/night (weekend). Sleeps 12.
+   - Amenities: Private pool, lounge deck, high-speed Wi-Fi, housekeeping.
+   - Meals & Chef: Private chef on request (₹3,500/day, groceries extra).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Mansion House (Alibaug)**
+   - Location: Mandwa, Alibaug.
+   - Type: 6 BHK Ultra-Luxury Estate.
+   - Rates: ₹70,000/night (weekday) / ₹85,000/night (weekend). Sleeps 18.
+   - Amenities: Large pool, bar lounge, massive gardens.
+   - Meals & Chef: Gourmet chef service included (groceries charged at cost).
+   - Pets: Pet-friendly (one-time ₹2,000 cleaning fee).`;
+  } else if (companyId === '28') {
+    prompt = `You are the autonomous AI Booking Assistant for amã Stays & Trails by Taj (IHCL).
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Cardamom Hills Bungalow (Munnar)**
+   - Location: Munnar, Kerala.
+   - Type: 3 BHK Heritage Tea Plantation Bungalow.
+   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 8.
+   - Amenities: Plantation walks, mountain views, fireplace.
+   - Meals & Chef: Authentic local meals by in-villa cook (all meals package: ₹1,500/adult/day, breakfast included).
+   - Pets: Pet-friendly (free of charge, wide lawns).
+2. **Beach House (Varkala)**
+   - Location: Varkala, Kerala.
+   - Type: 4 BHK Seaside Villa with beach access.
+   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend). Sleeps 10.
+   - Amenities: Sea-facing deck, direct beach access.
+   - Meals & Chef: Fresh seafood meals by in-villa cook (all meals package: ₹1,800/adult/day).
+   - Pets: Pet-friendly (free of charge).`;
+  } else if (companyId === '29') {
+    prompt = `You are the autonomous AI Booking Assistant for ELIVAAS luxury holiday villas.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Amara (Goa)**
+   - Location: Assagao, North Goa.
+   - Type: 4 BHK Luxury Private Pool Villa.
+   - Rates: ₹32,000/night (weekday) / ₹40,000/night (weekend). Sleeps 12.
+   - Amenities: Private swimming pool, concierge desk, high-speed Wi-Fi.
+   - Meals & Chef: Dedicated cook service included (groceries charged at cost).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Pine Crest (Kasauli)**
+   - Location: Kasauli, Himachal.
+   - Type: 3 BHK Mountain Chalet.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 8.
+   - Amenities: Private outdoor jacuzzi, bonfire pit, BBQ deck.
+   - Meals & Chef: In-house cook prepares all meals (₹1,500/adult/day).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).`;
+  } else if (companyId === '30') {
+    prompt = `You are the autonomous AI Booking Assistant for Hireavilla.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Sage (Alibaug)**
+   - Location: Mandwa Road, Alibaug.
+   - Type: 4 BHK Luxury Pool Villa.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
+   - Amenities: Large private pool, lounge deck, high-speed Wi-Fi.
+   - Meals & Chef: In-villa cook on request (₹2,500/day, groceries extra).
+   - Pets: Pet-friendly (no extra charge).
+2. **Villa Amber (Goa)**
+   - Location: Candolim, North Goa.
+   - Type: 3 BHK Pool Villa.
+   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 9.
+   - Amenities: Swimming pool, beach proximity (5 mins walk), caretakers.
+   - Meals & Chef: In-villa cook available (₹2,500/day).
+   - Pets: Pet-friendly (no extra charge).`;
+  } else if (companyId === '31') {
+    prompt = `You are the autonomous AI Booking Assistant for Roamhome holiday homes.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **The Glasshouse (Kasauli)**
+   - Location: Kasauli, Himachal.
+   - Type: 3 BHK Modern Glass Villa with mountain views.
+   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 8.
+   - Amenities: Fireplace, BBQ deck, panoramic mountain views.
+   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,200/adult/day).
+   - Pets: Pet-friendly (free of charge).
+2. **River Retreat (Manali)**
+   - Location: Manali, Himachal.
+   - Type: 4 BHK Riverside Cabin.
+   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 10.
+   - Amenities: Riverside deck, private garden, bonfire area.
+   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,200/adult/day).
+   - Pets: Pet-friendly (free of charge).`;
+  } else if (companyId === '32') {
+    prompt = `You are the autonomous AI Booking Assistant for Elite Havens India, offering ultra-luxury villa retreats.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Villa Lonavala (Lonavala)**
+   - Location: Khandala, Lonavala.
+   - Type: 5 BHK Ultra-Luxury Villa.
+   - Rates: ₹60,000/night (weekday) / ₹75,000/night (weekend). Sleeps 15.
+   - Amenities: Private swimming pool, home theater, fully staffed.
+   - Meals & Chef: Gourmet chef included (groceries charged at cost).
+   - Pets: Pet-friendly (must notify in advance, ₹1,500 cleaning fee).
+2. **Villa Candolim (Goa)**
+   - Location: Candolim beachfront, Goa.
+   - Type: 4 BHK Beachfront Luxury Villa.
+   - Rates: ₹50,000/night (weekday) / ₹65,000/night (weekend). Sleeps 12.
+   - Amenities: Beach access, private pool, estate manager.
+   - Meals & Chef: Dedicated private chef included (groceries charged at cost).
+   - Pets: Pet-friendly (must notify in advance, ₹1,500 cleaning fee).`;
+  } else if (companyId === '33') {
+    prompt = `You are the autonomous AI Booking Assistant for Tripvillas vacation homes.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Sunset Beach Villa (Goa)**
+   - Location: Candolim, Goa.
+   - Type: 3 BHK Beachfront Villa.
+   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Sleeps 9.
+   - Amenities: Swimming pool, direct beachfront, high-speed Wi-Fi.
+   - Meals & Chef: Caretaker cooks breakfast (included); chef can be hired for other meals (₹2,500/day).
+   - Pets: Pet-friendly (one-time ₹1,000 fee).
+2. **Valley View Chalet (Mahabaleshwar)**
+   - Location: Mahabaleshwar, Maharashtra.
+   - Type: 4 BHK Luxury Valley-facing Retreat.
+   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 12.
+   - Amenities: Private pool, gardens, caretaker.
+   - Meals & Chef: Cook service available on request (₹2,500/day).
+   - Pets: Pet-friendly (one-time ₹1,000 fee).`;
+  } else if (companyId === '34') {
+    prompt = `You are the autonomous AI Booking Assistant for Sol de Goa, Nerul.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Sol de Goa Boutique Hotel**
+   - Location: Nerul, North Goa (overlooking the river).
+   - Type: Luxury Boutique River-facing Hotel.
+   - Rates: ₹8,000/room/night (weekday) / ₹11,000/room/night (weekend). Sleeps 2 per room.
+   - Amenities: Two swimming pools, Sol Bar & Bistro, live music nights, spa.
+   - Meals & Chef: In-house award-winning restaurant. Breakfast included, all-day dining available.
+   - Pets: Pets are not allowed (hotel policy, guide dogs permitted).
+2. **The Suite (Sol de Goa)**
+   - Location: Nerul, Goa.
+   - Type: 1 BHK Luxury Suite with private riverfront balcony.
+   - Rates: ₹15,000/night (weekday) / ₹20,000/night (weekend). Sleeps 3.
+   - Amenities: Private balcony, deep soaking tub, access to premium lounge.
+   - Meals & Chef: In-suite dining menu available.
+   - Pets: Pets are not allowed.`;
+  } else if (companyId === '35') {
+    prompt = `You are the autonomous AI Booking Assistant for LuxUnlock, offering restored heritage vacation stays.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Casa de Goa (Goa)**
+   - Location: North Goa (restored Portuguese quarters).
+   - Type: Restored 4 BHK Portuguese Heritage Villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
+   - Amenities: Restored vintage pool, housekeeper, high-speed Wi-Fi.
+   - Meals & Chef: Traditional Goan meals prepared by private cook (meal packages: ₹1,500/adult/day).
+   - Pets: Pet-friendly (free of charge).
+2. **Planter's Bungalow (Ooty)**
+   - Location: Lovedale, Ooty.
+   - Type: 3 BHK Colonial Tea Estate Bungalow.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 8.
+   - Amenities: Fireplace, colonial interiors, tea estate tours.
+   - Meals & Chef: Home-cooked meals prepared by estate cook (all meals package: ₹1,500/adult/day).
+   - Pets: Pet-friendly (free of charge).`;
+  } else if (companyId === '36') {
+    prompt = `You are the autonomous AI Booking Assistant for Abode Bombay, Colaba.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Vintage Room**
+   - Location: Colaba, Mumbai (near Gateway of India).
+   - Type: Premium Boutique Hotel Room.
+   - Rates: ₹9,000/room/night (weekday) / ₹12,000/room/night (weekend). Sleeps 2.
+   - Amenities: High ceilings, reclaimed teak wood furniture, vintage decor, spa.
+   - Meals & Chef: Organic cafe on-site (breakfast included, cafe menu items charged extra).
+   - Pets: Pets are not allowed.
+2. **Luxury Room**
+   - Location: Colaba, Mumbai.
+   - Type: Spacious Suite.
+   - Rates: ₹14,000/room/night (weekday) / ₹18,000/room/night (weekend). Sleeps 3.
+   - Amenities: Roll-top freestanding bath, writing desk, premium bedding.
+   - Meals & Chef: Cafe orders served in-room.
+   - Pets: Pets are not allowed.`;
   } else {
     // ScienceThoughts AI Agency default
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
@@ -618,7 +808,7 @@ function simulateOfflineResponse(companyId, history) {
   const lower = lastText.toLowerCase();
 
   const companyName = companiesMap[companyId] || "Brigade Group";
-  const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26"].includes(companyId);
+  const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(companyId);
 
   // Retrieve current lead state from history
   let extractedName = null;

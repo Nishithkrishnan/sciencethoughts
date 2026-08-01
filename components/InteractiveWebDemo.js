@@ -38,7 +38,17 @@ export default function InteractiveWebDemo() {
     "23": "The Rentalgram (Family Villas)",
     "24": "Melhor Stays (Goa Beach Villas)",
     "25": "StayVista (Premium Villa Chain)",
-    "26": "SaffronStays (Premium Villa Network)"
+    "26": "SaffronStays (Premium Villa Network)",
+    "27": "Lohono Stays (Premium Villas)",
+    "28": "amã Stays & Trails (Taj Group)",
+    "29": "ELIVAAS (Luxury Homestays)",
+    "30": "Hireavilla (Goa/Alibaug Stays)",
+    "31": "Roamhome (Holiday Homes)",
+    "32": "Elite Havens (Ultra-Luxury)",
+    "33": "Tripvillas (Beachfront Stays)",
+    "34": "Sol de Goa (Boutique Stay)",
+    "35": "LuxUnlock (Heritage Villas)",
+    "36": "Abode Bombay (Boutique Hotel)"
   };
 
   useEffect(() => {
@@ -51,7 +61,7 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26"].includes(newId);
+    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(newId);
     
     let welcomeMsg = "";
     if (isHospitality) {
@@ -105,7 +115,7 @@ export default function InteractiveWebDemo() {
 
   const handleReset = () => {
     const companyName = companies[companyId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "20", "21"].includes(companyId);
+    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(companyId);
     
     const welcomeMsg = isHospitality
       ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`

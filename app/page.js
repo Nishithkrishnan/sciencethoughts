@@ -183,14 +183,37 @@ export default async function Home() {
 
       {/* 2.5 Case Studies & Benchmarks */}
       <section id="case-studies-cta" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
-        <div className="container" style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>See Real Impact</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "700px", margin: "0 auto 30px auto" }}>
-            Explore our architectural benchmarks and case studies showcasing how zero-hallucination RAG engines eliminate lead leakage for enterprise developers like Brigade Group and ASBL.
-          </p>
-          <a href="/case-studies" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-            View Case Studies <ArrowRight size={18} />
-          </a>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>ScienceThoughts (ST) Core Engine Benchmarks</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "800px", margin: "0 auto" }}>
+              Our proprietary ST Core Engine runs a semantic validation layer sitting between client interfaces and LLMs, guaranteeing high reliability and data privacy.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "25px", marginBottom: "50px" }}>
+            <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
+              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-teal)", marginBottom: "10px" }}>98.6%</div>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Grounding Accuracy</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Zero-hallucination guardrails evaluated via the RAGAS framework, containing answers to verified source data.</p>
+            </div>
+            <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
+              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-green)", marginBottom: "10px" }}>1.42s</div>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Average Latency</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Fast-routing Next.js edge functions matching human reading and responding expectations.</p>
+            </div>
+            <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
+              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-violet)", marginBottom: "10px" }}>99.9%</div>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Failover SLA</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Triple-Fallback routing (OpenAI ➔ Gemini ➔ Offline rules) prevents conversational server outages.</p>
+            </div>
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <a href="/case-studies" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
+              Explore Case Studies & Code Audits <ArrowRight size={18} />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -203,46 +226,46 @@ export default async function Home() {
                 <Briefcase size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Automation Services</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Stop buying generic software. Commission a custom autonomous system.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Flexible Retainer Plans</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Scale your customer acquisition and operations with our SLA-managed recurring services.</p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px", alignItems: "stretch" }}>
             {/* Service 1 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>The Lead Qualifier</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹75,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>once</span></p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>A 24/7 WhatsApp AI agent that engages Facebook leads instantly, qualifies their budget, and routes them to your sales team.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Starter Plan</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹14,500 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Best for single-property stays or boutique setups needing intelligent automated guest interactions on WhatsApp.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Instant 24/7 Response</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Knowledge-Restricted Vault</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Logs data to Google Sheets</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> ST Core Engine Middleware</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 FAQ & Policy Guard</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Basic CRM / Google Sheets logs</li>
               </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Book Audit</a>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
 
             {/* Service 2 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Customer Support Bot</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹50,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>once</span></p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Automate your most common customer inquiries on your website or WhatsApp to free up your human support staff.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Growth Plan</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹29,500 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month + usage</span></p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Designed for growing networks, multi-property vacation portfolios, and active real estate pipelines requiring transaction management.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Trained on your FAQs</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-language support</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Seamless Human Handoff</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Stateless Date & Booking State Tracking</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Property Route Mapping</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Full Zoho / HubSpot CRM Sync</li>
               </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Book Audit</a>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
 
             {/* Service 3 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Bespoke Architecture</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Need a multi-agent system, an internal data analysis tool, or a complex API integration? Let's scope it out.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Enterprise / Bespoke</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom SLA</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Custom RAG datasets, dedicated vector instances, custom telephony voice callers, and fully SLA-backed support contracts.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom Tech Stack</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Internal Tooling</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> End-to-end deployment</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom Model Orchestrations</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> AI Voice Agent integrations</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Dedicated Vector Database hosting</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto", background: "var(--bg-card)", border: "1px solid var(--border-color)" }}>Request Quote</a>
             </div>

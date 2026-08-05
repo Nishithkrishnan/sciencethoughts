@@ -1012,26 +1012,18 @@ async function getGeminiResponse(history, systemInstruction) {
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
   let builderPrompt = getCompanyKnowledge(companyId);
 
-  let webChatRule = "";
-  if (isWebChat) {
-    webChatRule = `
-- **WEB CHAT EXCEPTION:** You are currently running in a Web Chat browser widget on the homepage. The visitor is completely anonymous. You do NOT have their phone number or contact info. If they request a callback, booking, or reservation, you MUST explicitly ask them for their **Name** and **Phone Number** (or Email) so a representative can reach out. Do NOT say 'we have your current number' or 'contact you on your current number' because you do not have it.`;
-  }
-
   const systemInstruction = `${builderPrompt}
-${webChatRule}
 
 === UNIVERSAL RULES & BEHAVIOR ===
 - Be polite, professional, and helpful. 
 - **FIRST MESSAGE GREETING:** If the user sends a simple greeting (like "Hi", "Hello", "Hey") for the very first message in the history, ALWAYS reply with: "Welcome to [Company Name]! How can I assist you today?" (Make sure to replace [Company Name] with the actual company you represent).
 - ALWAYS answer the user's questions first using the knowledge base.
 - **HOW TO HANDLE CALLBACKS/CALLS:** If the user asks for a call, callback, or asks for someone to call them:
-  1. Do NOT ask them for their phone number (the system already has it!).
-  2. Ask for their **Name** and their **Preferred Time** for the call. For example: "I would be happy to arrange that! Could I get your name and your preferred time for the call?"
-  3. Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time.
+  1. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Preferred Time** for the call. You MUST explicitly ask for their phone number because they are on an anonymous website chat and we do not have it." : "Do NOT ask them for their phone number (the system already has it!). Ask for their **Name** and their **Preferred Time** for the call."}
+  2. ${isWebChat ? "Once they provide their name, phone number, and preferred time, confirm warmly that a representative will call them at that phone number." : "Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time."}
 - **HOW TO HANDLE BOOKINGS/RESERVATIONS:** If the guest wants to book or check availability for the villas/resorts:
   1. **WHICH PROPERTY:** If the brand manages *multiple* properties/villas (check the knowledge base for this brand), you MUST ask them to confirm **which specific villa or property** they want to book (e.g. for Lohono Stays: Villa Verde or Mansion House) along with their check-in/checkout dates and number of guests.
-  2. Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!).
+  2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** so you can log the booking. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide the villa name, dates, name, and email, confirm warmly that their pending booking request for that specific villa has been logged and our manager will contact them to confirm.
 - **NO 'NOT MENTIONED' RESPONSES:** If a guest asks about an amenity (like spa, gym, Wi-Fi, child policies, early check-in/out) that is not detailed in the property knowledge base, do NOT say 'currently it's not mentioned' or 'not in my files'. Instead, state politely whether that amenity is available. If not mentioned: assume high-speed Wi-Fi is complimentary, secure parking is available, and for spa services: we can arrange an in-villa massage therapist on-call with 24h advance notice, but there is no dedicated spa facility.
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.

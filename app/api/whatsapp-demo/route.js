@@ -1029,6 +1029,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
+- **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.

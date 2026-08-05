@@ -118,7 +118,7 @@ export async function POST(req) {
     if (body.webChatMode) {
       const { text, companyId = "15", history = [] } = body;
       const formattedHistory = history.length > 0 ? history : [{ role: "user", content: text }];
-      const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId);
+      const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);
       
       // If lead extracted, attempt to push to CRM
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
@@ -1009,10 +1009,17 @@ async function getGeminiResponse(history, systemInstruction) {
 }
 
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
-async function getOpenAIStructuredResponse(history, companyId) {
+async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
   let builderPrompt = getCompanyKnowledge(companyId);
 
+  let webChatRule = "";
+  if (isWebChat) {
+    webChatRule = `
+- **WEB CHAT EXCEPTION:** You are currently running in a Web Chat browser widget on the homepage. The visitor is completely anonymous. You do NOT have their phone number or contact info. If they request a callback, booking, or reservation, you MUST explicitly ask them for their **Name** and **Phone Number** (or Email) so a representative can reach out. Do NOT say 'we have your current number' or 'contact you on your current number' because you do not have it.`;
+  }
+
   const systemInstruction = `${builderPrompt}
+${webChatRule}
 
 === UNIVERSAL RULES & BEHAVIOR ===
 - Be polite, professional, and helpful. 

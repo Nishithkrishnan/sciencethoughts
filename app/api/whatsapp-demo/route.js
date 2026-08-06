@@ -207,18 +207,43 @@ export async function POST(req) {
             return new NextResponse('OK', { status: 200 });
           }
 
-            // UNCONDITIONAL DIRECT NUMBER ROUTING:
-            // If the user texts a number 1-36, immediately switch their company profile and reset history, even if session exists!
-            const num = parseInt(trimmedText);
-            if (!isNaN(num) && num >= 1 && num <= 36 && !isPermanentNumber) {
-              session.companyId = trimmedText;
+            // UNCONDITIONAL DIRECT ROUTING:
+            // Route by number (1-36) or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
+            let matchedId = null;
+            if (!isPermanentNumber) {
+              const num = parseInt(trimmedText);
+              if (!isNaN(num) && num >= 1 && num <= 36) {
+                matchedId = trimmedText;
+              } else {
+                const lowerText = trimmedText.toLowerCase();
+                for (const [id, name] of Object.entries(companiesMap)) {
+                  // Normalize terms to match core tokens (e.g., "Lohono Stays" -> "lohono")
+                  const cleanName = name.toLowerCase()
+                    .replace(/stays/g, "")
+                    .replace(/&/g, "")
+                    .replace(/trails/g, "")
+                    .replace(/at/g, "")
+                    .replace(/havelock/g, "")
+                    .replace(/india/g, "")
+                    .trim();
+                  
+                  if (cleanName.length > 3 && lowerText.includes(cleanName)) {
+                    matchedId = id;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (matchedId) {
+              session.companyId = matchedId;
               session.history = [];
               await saveSession(from, session);
               
-              const isStays = num >= 18; // Options 18-36 are boutique stay/villa concierges
+              const isStays = parseInt(matchedId) >= 18;
               const welcome = isStays 
-                ? `Welcome to *${companiesMap[trimmedText]}*! How can I assist you with your luxury stay bookings, villa availability, or amenities today?`
-                : `Welcome to *${companiesMap[trimmedText]}*! How can I assist you with our residential projects, site visits, or unit pricing today?`;
+                ? `Welcome to *${companiesMap[matchedId]}*! How can I assist you with your luxury stay bookings, villa availability, or amenities today?`
+                : `Welcome to *${companiesMap[matchedId]}*! How can I assist you with our residential projects, site visits, or unit pricing today?`;
 
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });

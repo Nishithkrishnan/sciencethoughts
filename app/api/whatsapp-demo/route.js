@@ -207,23 +207,25 @@ export async function POST(req) {
             return new NextResponse('OK', { status: 200 });
           }
 
-          // Handle selection mode
-          if (session.companyId === null) {
+            // UNCONDITIONAL DIRECT NUMBER ROUTING:
+            // If the user texts a number 1-36, immediately switch their company profile and reset history, even if session exists!
             const num = parseInt(trimmedText);
-            if (!isNaN(num) && num >= 1 && num <= 36) {
+            if (!isNaN(num) && num >= 1 && num <= 36 && !isPermanentNumber) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
               const welcome = `Starting simulation for *${companiesMap[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our properties, prices, locations, or availability. Send */reset* at any time to choose a different business!`;
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });
-            } else {
+            }
+
+            // Default fallback if no company selected yet
+            if (session.companyId === null) {
               // Default to Brigade Group (Option 15) for actual prospects who text 'Hi'
               session.companyId = '15';
               session.history = [];
               await saveSession(from, session);
             }
-          }
 
           // 2. Append user message to history
           session.history.push({ role: 'user', content: text });

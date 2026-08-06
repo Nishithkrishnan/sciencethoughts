@@ -214,7 +214,12 @@ export async function POST(req) {
               session.companyId = trimmedText;
               session.history = [];
               await saveSession(from, session);
-              const welcome = `Starting simulation for *${companiesMap[trimmedText]}* AI Assistant! 🚀\n\nAsk me anything about our properties, prices, locations, or availability. Send */reset* at any time to choose a different business!`;
+              
+              const isStays = num >= 18; // Options 18-36 are boutique stay/villa concierges
+              const welcome = isStays 
+                ? `Welcome to *${companiesMap[trimmedText]}*! How can I assist you with your luxury stay bookings, villa availability, or amenities today?`
+                : `Welcome to *${companiesMap[trimmedText]}*! How can I assist you with our residential projects, site visits, or unit pricing today?`;
+
               await sendWhatsAppMessage(phone_number_id, from, welcome);
               return new NextResponse('OK', { status: 200 });
             }

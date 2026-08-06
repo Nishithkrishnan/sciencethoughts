@@ -57,6 +57,31 @@ export default function InteractiveWebDemo() {
     }
   }, [messages, loading]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlCompanyId = params.get("c") || params.get("companyId");
+      if (urlCompanyId && companies[urlCompanyId]) {
+        setCompanyId(urlCompanyId);
+        const companyName = companies[urlCompanyId].split(" (")[0];
+        const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(urlCompanyId);
+        
+        let welcomeMsg = "";
+        if (isHospitality) {
+          welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
+        } else if (urlCompanyId === "20") {
+          welcomeMsg = `Welcome to ${companyName}! How can I help you with custom employee kits, premium hampers, or corporate gifting requirements today?`;
+        } else {
+          welcomeMsg = `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+        }
+
+        setMessages([
+          { role: "assistant", content: welcomeMsg }
+        ]);
+      }
+    }
+  }, []);
+
   const handleCompanyChange = (e) => {
     const newId = e.target.value;
     setCompanyId(newId);

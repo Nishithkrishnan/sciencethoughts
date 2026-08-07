@@ -48,7 +48,17 @@ export default function InteractiveWebDemo() {
     "33": "Tripvillas (Beachfront Stays)",
     "34": "Sol de Goa (Boutique Stay)",
     "35": "LuxUnlock (Heritage Villas)",
-    "36": "Abode Bombay (Boutique Hotel)"
+    "36": "Abode Bombay (Boutique Hotel)",
+    "37": "The Postcard Hotel (Boutique Resorts)",
+    "38": "Seclude Hotels (Experiential Rentals)",
+    "39": "Coco Shambhala (Goa Villas)",
+    "40": "Rivermist Resorts (Forest Resort)",
+    "41": "Ebony Stays (Private Villas)",
+    "42": "29Bungalow (Infinity Villas)",
+    "43": "Villa Rentals Goa (Pool Stays)",
+    "44": "Greek Villa Lonavala (Themed Villas)",
+    "45": "Villa 24 Alibaug (Private Bungalows)",
+    "46": "Stay Willas (Lonavala Villas)"
   };
 
   useEffect(() => {
@@ -64,7 +74,7 @@ export default function InteractiveWebDemo() {
       if (urlCompanyId && companies[urlCompanyId]) {
         setCompanyId(urlCompanyId);
         const companyName = companies[urlCompanyId].split(" (")[0];
-        const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(urlCompanyId);
+        const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"].includes(urlCompanyId);
         
         let welcomeMsg = "";
         if (isHospitality) {
@@ -86,7 +96,7 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(newId);
+    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"].includes(newId);
     
     let welcomeMsg = "";
     if (isHospitality) {

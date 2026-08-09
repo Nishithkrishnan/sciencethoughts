@@ -114,7 +114,7 @@ const companiesMap = {
   '42': '29Bungalow',
   '43': 'Villa Rentals Goa',
   '44': 'Araiya Hotels',
-  '45': 'Villa 24 Alibaug',
+  '45': 'The Goa Villas',
   '46': 'Stay Willas',
   'agency': 'ScienceThoughts AI Agency'
 };
@@ -220,7 +220,7 @@ export async function POST(req) {
               `42. *29Bungalow* (Infinity Pool Villas)\n` +
               `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
               `44. *Araiya Hotels* (Boutique Resort Group)\n` +
-              `45. *Villa 24 Alibaug* (Private Pool Bungalows)\n` +
+              `45. *The Goa Villas* (Luxury Villa Collection)\n` +
               `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
               `Reply with a number (*1-46*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
@@ -951,20 +951,19 @@ function getCompanyKnowledge(companyId) {
    - Rates: ₹16,000/room/night. Sleeps 2.
    - Amenities: Infinity pool overlooking the forest, spa, yoga deck.`;
   } else if (companyId === '45') {
-    prompt = `You are the autonomous AI Booking Assistant for Villa 24 Alibaug.
+    prompt = `You are the autonomous AI Booking Assistant for The Goa Villas, a curated portfolio of luxury private pool villas in Goa.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Villa 24 (Akshi Beach)**
-   - Location: Akshi, Alibaug (5 mins walk from beach).
-   - Type: 3 BHK Premium Private Pool Bungalow.
-   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 10.
-   - Amenities: Private pool, furnished lawn, indoor games, generator backup.
-   - Meals & Chef: Local home-cooked meals by in-house cook (all meals package: ₹1,200/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
-2. **Beachfront Cottage**
-   - Location: Akshi, Alibaug.
-   - Type: 2 BHK Beachside Cottage.
-   - Rates: ₹12,000/night (weekday) / ₹16,000/night (weekend). Sleeps 6.
-   - Amenities: Garden patio, sea breeze balcony.`;
+1. **Villa Simplex (Baga)**
+   - Location: Baga beachfront, Goa.
+   - Type: Luxury 4-BHK private pool villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
+   - Amenities: Private pool, direct beach path access, lounge terrace, AC, Wi-Fi.
+   - Meals & Chef: Gourmet chef included (groceries charged at cost).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Villa Duplex (Candolim)**
+   - Location: Candolim, Goa.
+   - Type: 5-BHK luxury pool estate.
+   - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 15.`;
   } else if (companyId === '46') {
     prompt = `You are the autonomous AI Booking Assistant for Stay Willas vacation rentals.
 === PROPERTY KNOWLEDGE BASE ===

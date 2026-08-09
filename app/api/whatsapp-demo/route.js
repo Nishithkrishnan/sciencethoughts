@@ -113,7 +113,7 @@ const companiesMap = {
   '41': 'Ebony Stays',
   '42': '29Bungalow',
   '43': 'Villa Rentals Goa',
-  '44': 'Greek Villa Lonavala',
+  '44': 'Araiya Hotels',
   '45': 'Villa 24 Alibaug',
   '46': 'Stay Willas',
   'agency': 'ScienceThoughts AI Agency'
@@ -219,7 +219,7 @@ export async function POST(req) {
               `41. *Ebony Stays* (Private Pool Villas)\n` +
               `42. *29Bungalow* (Infinity Pool Villas)\n` +
               `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
-              `44. *Greek Villa Lonavala* (Themed Pool Villas)\n` +
+              `44. *Araiya Hotels* (Boutique Resort Group)\n` +
               `45. *Villa 24 Alibaug* (Private Pool Bungalows)\n` +
               `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
               `Reply with a number (*1-46*) to start the simulation!`;
@@ -936,20 +936,20 @@ function getCompanyKnowledge(companyId) {
    - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 9.
    - Amenities: Private pool, overlooking the creek.`;
   } else if (companyId === '44') {
-    prompt = `You are the autonomous AI Booking Assistant for Greek Villa Lonavala.
+    prompt = `You are the autonomous AI Booking Assistant for Araiya Hotels, a luxury boutique hotel and resort brand.
 === PROPERTY KNOWLEDGE BASE ===
-1. **The Greek Villa**
-   - Location: Lonavala, Maharashtra (Greek-themed design).
-   - Type: 4 BHK Luxury Greek Theme Private Pool Villa.
-   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend). Sleeps 12.
-   - Amenities: Themed pool, whitewashed stone structure, rooftop lounge, home theater.
-   - Meals & Chef: In-villa cook prepares meals (all-meals package: ₹1,500/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
-2. **Santorini Chalet**
-   - Location: Khandala, Lonavala.
-   - Type: 3 BHK Greek Style Villa.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 9.
-   - Amenities: Indoor splash pool, blue-and-white theme layout.`;
+1. **Araiya Palampur (Himachal)**
+   - Location: Palampur, Himachal Pradesh (Kangra Valley).
+   - Type: Luxury Boutique Resort rooms & suites.
+   - Rates: ₹12,000/room/night. Sleeps 2.
+   - Amenities: Spa, fitness center, mountain view deck, bar & restaurant.
+   - Meals & Chef: All-day dining at the in-house restaurant (breakfast included).
+   - Pets: Pets are not allowed.
+2. **Araiya Athirappilly (Kerala)**
+   - Location: Athirappilly, Kerala (near waterfalls).
+   - Type: Luxury jungle-themed suites.
+   - Rates: ₹16,000/room/night. Sleeps 2.
+   - Amenities: Infinity pool overlooking the forest, spa, yoga deck.`;
   } else if (companyId === '45') {
     prompt = `You are the autonomous AI Booking Assistant for Villa 24 Alibaug.
 === PROPERTY KNOWLEDGE BASE ===

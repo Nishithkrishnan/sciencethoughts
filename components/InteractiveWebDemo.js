@@ -56,7 +56,7 @@ export default function InteractiveWebDemo() {
     "41": "Ebony Stays (Private Villas)",
     "42": "29Bungalow (Infinity Villas)",
     "43": "Villa Rentals Goa (Pool Stays)",
-    "44": "Greek Villa Lonavala (Themed Villas)",
+    "44": "Araiya Hotels (Boutique Hotels)",
     "45": "Villa 24 Alibaug (Private Bungalows)",
     "46": "Stay Willas (Lonavala Villas)"
   };

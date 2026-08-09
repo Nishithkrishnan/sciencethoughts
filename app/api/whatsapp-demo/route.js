@@ -211,33 +211,42 @@ export async function POST(req) {
               `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
               `34. *Sol de Goa* (Nerul Boutique Stay)\n` +
               `35. *LuxUnlock* (Restored Heritage Villas)\n` +
-              `36. *Abode Bombay* (Colaba Boutique Hotel)\n\n` +
-              `Reply with a number (*1-36*) to start the simulation!`;
+              `36. *Abode Bombay* (Colaba Boutique Hotel)\n` +
+              `37. *The Postcard Hotel* (Boutique Resorts)\n` +
+              `38. *Seclude Hotels* (Experiential Stays)\n` +
+              `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
+              `40. *Rivermist Resorts* (Forest Resort)\n` +
+              `41. *Ebony Stays* (Private Pool Villas)\n` +
+              `42. *29Bungalow* (Infinity Pool Villas)\n` +
+              `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
+              `44. *Greek Villa Lonavala* (Themed Pool Villas)\n` +
+              `45. *Villa 24 Alibaug* (Private Pool Bungalows)\n` +
+              `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
+              `Reply with a number (*1-46*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
           }
 
             // UNCONDITIONAL DIRECT ROUTING:
-            // Route by number (1-36) or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
+            // Route by number (1-46) or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
             let matchedId = null;
             if (!isPermanentNumber) {
               const num = parseInt(trimmedText);
-              if (!isNaN(num) && num >= 1 && num <= 36) {
+              if (!isNaN(num) && num >= 1 && num <= 46) {
                 matchedId = trimmedText;
               } else {
                 const lowerText = trimmedText.toLowerCase();
+                const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
                 for (const [id, name] of Object.entries(companiesMap)) {
-                  // Normalize terms to match core tokens (e.g., "Lohono Stays" -> "lohono")
                   const cleanName = name.toLowerCase()
-                    .replace(/stays/g, "")
                     .replace(/&/g, "")
-                    .replace(/trails/g, "")
                     .replace(/at/g, "")
-                    .replace(/havelock/g, "")
-                    .replace(/india/g, "")
                     .trim();
                   
-                  if (cleanName.length > 3 && lowerText.includes(cleanName)) {
+                  const cleanWords = cleanName.split(' ').filter(w => w.length > 2 && !stopWords.includes(w));
+                  const matchesKeyword = cleanWords.some(word => lowerText.includes(word));
+                  
+                  if (matchesKeyword || lowerText.includes(cleanName)) {
                     matchedId = id;
                     break;
                   }

@@ -52,7 +52,7 @@ export default function InteractiveWebDemo() {
     "37": "The Postcard Hotel (Boutique Resorts)",
     "38": "Seclude Hotels (Experiential Rentals)",
     "39": "Coco Shambhala (Goa Villas)",
-    "40": "Rivermist Resorts (Forest Resort)",
+    "40": "Royal Garden Villas (Pool Villas)",
     "41": "Ebony Stays (Private Villas)",
     "42": "29Bungalow (Infinity Villas)",
     "43": "Villa Rentals Goa (Pool Stays)",

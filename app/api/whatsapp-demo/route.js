@@ -109,7 +109,7 @@ const companiesMap = {
   '37': 'The Postcard Hotel',
   '38': 'Seclude Hotels',
   '39': 'Coco Shambhala',
-  '40': 'Rivermist Resorts',
+  '40': 'Royal Garden Villas',
   '41': 'Ebony Stays',
   '42': '29Bungalow',
   '43': 'Villa Rentals Goa',
@@ -215,7 +215,7 @@ export async function POST(req) {
               `37. *The Postcard Hotel* (Boutique Resorts)\n` +
               `38. *Seclude Hotels* (Experiential Stays)\n` +
               `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
-              `40. *Rivermist Resorts* (Forest Resort)\n` +
+              `40. *Royal Garden Villas* (Lonavala Pool Villas)\n` +
               `41. *Ebony Stays* (Private Pool Villas)\n` +
               `42. *29Bungalow* (Infinity Pool Villas)\n` +
               `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
@@ -876,20 +876,20 @@ function getCompanyKnowledge(companyId) {
    - Rates: ₹70,000/night (weekday) / ₹80,000/night (weekend). Sleeps 4.
    - Amenities: Private pool, lounge pavilion.`;
   } else if (companyId === '40') {
-    prompt = `You are the autonomous AI Booking Assistant for Rivermist Resorts, Chikmagalur.
+    prompt = `You are the autonomous AI Booking Assistant for Royal Garden Villas, offering luxury pool villas in Lonavala.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Luxury Woodhouse**
-   - Location: Chikmagalur forest, Karnataka.
-   - Type: Luxury wooden cabins overlooking the hills.
-   - Rates: ₹12,000/night (weekday) / ₹15,000/night (weekend). Sleeps 2.
-   - Amenities: Balcony, coffee plantation tour, campfire area, Wi-Fi.
-   - Meals & Chef: In-house buffet dining included (breakfast, lunch, dinner).
-   - Pets: Pets are not allowed.
-2. **Hillview Suite**
-   - Location: Chikmagalur, Karnataka.
-   - Type: Premium spacious suites with valley views.
-   - Rates: ₹10,000/night (weekday) / ₹13,000/night (weekend). Sleeps 3.
-   - Amenities: Mountain views, private balcony, access to wellness club.`;
+1. **Royal Garden 4BHK Villa**
+   - Location: Lonavala, Maharashtra (near city center).
+   - Type: Luxury 4-BHK private pool villa with garden.
+   - Rates: ₹20,000/night (weekday) / ₹28,000/night (weekend). Sleeps 12.
+   - Amenities: Private swimming pool, kids splash pool, pool table, AC, generator backup, lawn, Wi-Fi.
+   - Meals & Chef: Cook service available on-request (meals package: ₹1,500/adult/day for all meals).
+   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
+2. **Royal Garden 6BHK Villa**
+   - Location: Lonavala, Maharashtra.
+   - Type: Spacious 6-BHK luxury pool villa.
+   - Rates: ₹30,000/night (weekday) / ₹42,000/night (weekend). Sleeps 18.
+   - Amenities: Private pool, rooftop lounge deck, indoor games room.`;
   } else if (companyId === '41') {
     prompt = `You are the autonomous AI Booking Assistant for Ebony Stays, luxury pool villas.
 === PROPERTY KNOWLEDGE BASE ===

@@ -52,13 +52,13 @@ export default function InteractiveWebDemo() {
     "37": "The Postcard Hotel (Boutique Resorts)",
     "38": "Seclude Hotels (Experiential Rentals)",
     "39": "Coco Shambhala (Goa Villas)",
-    "40": "Royal Garden Villas (Pool Villas)",
-    "41": "Ebony Stays (Private Villas)",
-    "42": "29Bungalow (Infinity Villas)",
-    "43": "Villa Rentals Goa (Pool Stays)",
+    "40": "The Khyber Resort (Gulmarg Luxury Resort)",
+    "41": "Glenburn Tea Estate (Boutique Heritage Stay)",
+    "42": "Neemrana Hotels (Heritage Palace Hotels)",
+    "43": "CGH Earth Resorts (Eco-Luxury Resorts)",
     "44": "Araiya Hotels (Boutique Hotels)",
-    "45": "The Goa Villas (Luxury Villa Collection)",
-    "46": "Stay Willas (Lonavala Villas)"
+    "45": "Rhythm Resorts (Premium Suite Resorts)",
+    "46": "Svatma Tanjore (Luxury Heritage Stay)"
   };
 
   useEffect(() => {

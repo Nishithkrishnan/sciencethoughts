@@ -109,13 +109,13 @@ const companiesMap = {
   '37': 'The Postcard Hotel',
   '38': 'Seclude Hotels',
   '39': 'Coco Shambhala',
-  '40': 'The Khyber Resort',
-  '41': 'Glenburn Tea Estate',
-  '42': 'Neemrana Hotels',
-  '43': 'CGH Earth Resorts',
+  '40': 'Royal Garden Villas',
+  '41': 'Ebony Stays',
+  '42': '29Bungalow',
+  '43': 'Villa Rentals Goa',
   '44': 'Araiya Hotels',
-  '45': 'Rhythm Resorts',
-  '46': 'Svatma Tanjore',
+  '45': 'The Goa Villas',
+  '46': 'Stay Willas',
   'agency': 'ScienceThoughts AI Agency'
 };
 
@@ -215,13 +215,13 @@ export async function POST(req) {
               `37. *The Postcard Hotel* (Boutique Resorts)\n` +
               `38. *Seclude Hotels* (Experiential Stays)\n` +
               `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
-              `40. *The Khyber Resort* (Gulmarg Luxury Resort)\n` +
-              `41. *Glenburn Tea Estate* (Boutique Heritage Stay)\n` +
-              `42. *Neemrana Hotels* (Heritage Palace Hotels)\n` +
-              `43. *CGH Earth Resorts* (Eco-Luxury Resorts)\n` +
+              `40. *Royal Garden Villas* (Lonavala Pool Villas)\n` +
+              `41. *Ebony Stays* (Private Pool Villas)\n` +
+              `42. *29Bungalow* (Infinity Pool Villas)\n` +
+              `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
               `44. *Araiya Hotels* (Boutique Resort Group)\n` +
-              `45. *Rhythm Resorts* (Premium Suite Resorts)\n` +
-              `46. *Svatma Tanjore* (Luxury Heritage Stay)\n\n` +
+              `45. *The Goa Villas* (Luxury Villa Collection)\n` +
+              `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
               `Reply with a number (*1-46*) to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting);
             return new NextResponse('OK', { status: 200 });
@@ -876,64 +876,65 @@ function getCompanyKnowledge(companyId) {
    - Rates: ₹70,000/night (weekday) / ₹80,000/night (weekend). Sleeps 4.
    - Amenities: Private pool, lounge pavilion.`;
   } else if (companyId === '40') {
-    prompt = `You are the autonomous AI Booking Assistant for The Khyber Himalayan Resort & Spa in Gulmarg, Kashmir.
+    prompt = `You are the autonomous AI Booking Assistant for Royal Garden Villas, offering luxury pool villas in Lonavala.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Premier Room**
-   - Location: Gulmarg, Kashmir (overlooking pine forests).
-   - Type: Luxury Mountain Room.
-   - Rates: ₹28,000/room/night. Sleeps 2.
-   - Amenities: Khyber Spa (by L'Occitane), heated indoor swimming pool, gym, central heating, mountain views.
-   - Meals & Chef: Breakfast included; multi-cuisine dining at Cloves restaurant.
-   - Pets: Pets are not allowed.
-2. **Luxury Suite**
-   - Location: Gulmarg, Kashmir.
-   - Type: Spacious Presidential Suite.
-   - Amenities: Private living room, forest view balcony, jacuzzi access.`;
+1. **Royal Garden 4BHK Villa**
+   - Location: Lonavala, Maharashtra (near city center).
+   - Type: Luxury 4-BHK private pool villa with garden.
+   - Rates: ₹20,000/night (weekday) / ₹28,000/night (weekend). Sleeps 12.
+   - Amenities: Private swimming pool, kids splash pool, pool table, AC, generator backup, lawn, Wi-Fi.
+   - Meals & Chef: Cook service available on-request (meals package: ₹1,500/adult/day for all meals).
+   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
+2. **Royal Garden 6BHK Villa**
+   - Location: Lonavala, Maharashtra.
+   - Type: Spacious 6-BHK luxury pool villa.
+   - Rates: ₹30,000/night (weekday) / ₹42,000/night (weekend). Sleeps 18.
+   - Amenities: Private pool, rooftop lounge deck, indoor games room.`;
   } else if (companyId === '41') {
-    prompt = `You are the autonomous AI Booking Assistant for Glenburn Tea Estate, Darjeeling.
+    prompt = `You are the autonomous AI Booking Assistant for Ebony Stays, luxury pool villas.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Glenburn Suite**
-   - Location: Darjeeling, West Bengal (nestled in a active tea plantation).
-   - Type: Luxury colonial-style suite.
-   - Rates: ₹38,000/suite/night. Sleeps 2.
-   - Amenities: Guided tea factory tours, hiking trails, veranda with mountain views.
-   - Meals & Chef: All meals, beverages, and laundry included (gourmet chef on-site).
-   - Pets: Pets are not allowed.
-2. **Kanchenjunga Suite**
-   - Location: Darjeeling, West Bengal.
-   - Type: Premium suite overlooking the Kanchenjunga range.
-   - Rates: ₹48,000/suite/night. Sleeps 2.
-   - Amenities: Fireplace, private garden access, snow-peak views.`;
+1. **Ebony Vista (Goa)**
+   - Location: Vagator beachfront, Goa.
+   - Type: 4 BHK Luxury Private Pool Villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
+   - Amenities: Infinity pool, direct beach access, rooftop lounge.
+   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,500/adult/day).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Ebony Oasis (Alibaug)**
+   - Location: Kihim, Alibaug.
+   - Type: 3 BHK Modern Pool Villa.
+   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend). Sleeps 9.
+   - Amenities: Private pool, large lawn, generator backup.`;
   } else if (companyId === '42') {
-    prompt = `You are the autonomous AI Booking Assistant for Neemrana Hotels, heritage palaces and resorts.
+    prompt = `You are the autonomous AI Booking Assistant for 29Bungalow vacation properties.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Neemrana Fort-Palace**
-   - Location: Delhi-Jaipur Highway, Alwar, Rajasthan.
-   - Type: Luxury Heritage Room.
-   - Rates: ₹12,000/room/night. Sleeps 2.
-   - Amenities: Hanging gardens, two swimming pools, ayurvedic spa, zip-lining.
-   - Meals & Chef: Buffet breakfast included; traditional Rajasthani and French dining.
-   - Pets: Pets are not allowed.
-2. **Hill Fort Kesroli**
-   - Location: Alwar, Rajasthan (heritage fort overlooking mustard fields).
-   - Type: Fort Suite.
-   - Rates: ₹8,000/room/night. Sleeps 2.
-   - Amenities: Outdoor swimming pool, spa, village walks.`;
+1. **Villa Oasis (Lonavala)**
+   - Location: Khandala, Lonavala.
+   - Type: 4 BHK Premium Private Pool Villa.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
+   - Amenities: Swimming pool, karaoke system, private lawn, games area.
+   - Meals & Chef: Caretaker cooks breakfast (included); meals package available for lunch/dinner (₹1,500/adult/day).
+   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
+2. **Villa Riviera (Goa)**
+   - Location: Candolim, Goa.
+   - Type: 3 BHK Luxury Pool Villa.
+   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 9.
+   - Amenities: Swimming pool, high-speed Wi-Fi, housekeeping.`;
   } else if (companyId === '43') {
-    prompt = `You are the autonomous AI Booking Assistant for CGH Earth Resorts, celebrating nature and heritage.
+    prompt = `You are the autonomous AI Booking Assistant for Villa Rentals Goa.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Coconut Lagoon (Kumarakom)**
-   - Location: Kumarakom, Kerala Backwaters.
-   - Type: Heritage Bungalow (accessible only by boat).
-   - Rates: ₹22,000/bungalow/night. Sleeps 2.
-   - Amenities: Private pool villas available, Ayurvedic spa, sunset cruise, butterfly garden.
-   - Meals & Chef: Authentic Kuttanad buffet breakfast included; local chef seafood dining.
-   - Pets: Pets are not allowed.
-2. **Spice Village (Thekkady)**
-   - Location: Thekkady, Kerala (near Periyar Tiger Reserve).
-   - Type: Spice Garden Cottage.
-   - Rates: ₹18,000/cottage/night. Sleeps 2.
-   - Amenities: Swimming pool, spice plantation tours, cooking demonstrations.`;
+1. **Sunset Villa (Candolim)**
+   - Location: Candolim, Goa.
+   - Type: 4 BHK Luxury Private Pool Villa near beach.
+   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 12.
+   - Amenities: Private pool, beachfront lounge deck, generator backup.
+   - Meals & Chef: Caretaker cooks breakfast; private chef can be hired (₹3,000/day).
+   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
+2. **Creek Villa (Baga)**
+   - Location: Baga, Goa.
+   - Type: 3 BHK Luxury Pool Villa.
+   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 9.
+   - Amenities: Private pool, overlooking the creek.`;
   } else if (companyId === '44') {
     prompt = `You are the autonomous AI Booking Assistant for Araiya Hotels, a luxury boutique hotel and resort brand.
 === PROPERTY KNOWLEDGE BASE ===
@@ -950,35 +951,34 @@ function getCompanyKnowledge(companyId) {
    - Rates: ₹16,000/room/night. Sleeps 2.
    - Amenities: Infinity pool overlooking the forest, spa, yoga deck.`;
   } else if (companyId === '45') {
-    prompt = `You are the autonomous AI Booking Assistant for Rhythm Resorts & Hospitality, a premium suite resort brand.
+    prompt = `You are the autonomous AI Booking Assistant for The Goa Villas, a curated portfolio of luxury private pool villas in Goa.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Banyan Suite**
-   - Location: Lonavala, Maharashtra.
-   - Type: Luxury pool-access suite.
-   - Rates: ₹14,000/night. Sleeps 2.
-   - Amenities: Swimming pool, spa, multi-cuisine restaurant, kids play area, indoor activities.
-   - Meals & Chef: Breakfast included; hot buffet options at Treehouse restaurant.
-   - Pets: Pets are not allowed.
-2. **Cypress Suite**
-   - Location: Lonavala, Maharashtra.
-   - Type: Deluxe duplex suite.
-   - Rates: ₹18,000/night. Sleeps 4.
-   - Amenities: Private balcony, separate living area, bathtub.`;
+1. **Villa Simplex (Baga)**
+   - Location: Baga beachfront, Goa.
+   - Type: Luxury 4-BHK private pool villa.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
+   - Amenities: Private pool, direct beach path access, lounge terrace, AC, Wi-Fi.
+   - Meals & Chef: Gourmet chef included (groceries charged at cost).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Villa Duplex (Candolim)**
+   - Location: Candolim, Goa.
+   - Type: 5-BHK luxury pool estate.
+   - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 15.`;
   } else if (companyId === '46') {
-    prompt = `You are the autonomous AI Booking Assistant for Svatma Tanjore, a premium luxury heritage hotel.
+    prompt = `You are the autonomous AI Booking Assistant for Stay Willas vacation rentals.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Heritage Room**
-   - Location: Tanjore (Thanjavur), Tamil Nadu.
-   - Type: Restored traditional luxury heritage room.
-   - Rates: ₹16,000/room/night. Sleeps 2.
-   - Amenities: Arogyam Spa, swimming pool, classical music/dance pavilion, bronze-sculpting demonstrations.
-   - Meals & Chef: Traditional vegetarian fine dining at Aaharam restaurant.
-   - Pets: Pets are not allowed.
-2. **Svatma Suite**
-   - Location: Tanjore, Tamil Nadu.
-   - Type: Luxury suite with private terrace.
-   - Rates: ₹22,000/suite/night. Sleeps 2.
-   - Amenities: Large private terrace, traditional swing, copper bathtub.`;
+1. **Willas Khandala (Khandala)**
+   - Location: Khandala, Lonavala.
+   - Type: 5 BHK Premium Private Pool Estate.
+   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 15.
+   - Amenities: Private swimming pool, gazebo, indoor games room, kids splash area.
+   - Meals & Chef: Dedicated cook prepares Konkani and North Indian meals (all meals package: ₹1,500/adult/day).
+   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
+2. **Willas Karjat (Karjat)**
+   - Location: Karjat, Maharashtra.
+   - Type: 4 BHK Farm-style Pool Villa.
+   - Rates: ₹28,000/night (weekday) / ₹36,000/night (weekend). Sleeps 12.
+   - Amenities: Farm views, large private pool, bonfire pit.`;
   } else {
     // ScienceThoughts AI Agency default
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.

@@ -48,7 +48,6 @@ export default function RootLayout({ children }) {
               <a href="/" className="nav-link">Home</a>
               <a href="/lab" className="nav-link">The Lab</a>
               <a href="/case-studies" className="nav-link">Case Studies</a>
-              <a href="/#blog" className="nav-link">Think Tank</a>
               <a href="/#contact" className="nav-btn">Work With Me</a>
             </nav>
           </div>
@@ -76,7 +75,6 @@ export default function RootLayout({ children }) {
                   <li><a href="/" className="footer-link">Home</a></li>
                   <li><a href="/lab" className="footer-link">The Lab (AI Agents)</a></li>
                   <li><a href="/case-studies" className="footer-link">Case Studies & Benchmarks</a></li>
-                  <li><a href="/#blog" className="footer-link">Think Tank (Blog)</a></li>
                 </ul>
               </div>
               <div>

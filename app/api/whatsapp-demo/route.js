@@ -161,12 +161,66 @@ export async function POST(req) {
           const session = await getSession(from);
           const trimmedText = text.trim();
           
-          // Route permanent number ID to ScienceThoughts AI agency assistant
+          // Route permanent number ID to ScienceThoughts AI agency assistant or dynamic sandbox
           const PERMANENT_PHONE_NUMBER_ID = (process.env.PERMANENT_PHONE_NUMBER_ID || "").trim();
           const isPermanentNumber = PERMANENT_PHONE_NUMBER_ID && (phone_number_id === PERMANENT_PHONE_NUMBER_ID);
 
+          const lowerText = trimmedText.toLowerCase();
+
           if (isPermanentNumber) {
-            session.companyId = 'agency';
+            // Check for join code to launch a specific trial sandbox
+            if (lowerText.startsWith("join ") || lowerText.startsWith("connect ")) {
+              const query = trimmedText.slice(5).trim();
+              const num = parseInt(query);
+              let matchedId = null;
+
+              if (!isNaN(num) && num >= 1 && num <= 46) {
+                matchedId = String(num);
+              } else {
+                const searchLower = query.toLowerCase();
+                const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
+                for (const [id, name] of Object.entries(companiesMap)) {
+                  const cleanName = name.toLowerCase()
+                    .replace(/&/g, "")
+                    .replace(/at/g, "")
+                    .trim();
+                  
+                  const cleanWords = cleanName.split(' ').filter(w => w.length > 2 && !stopWords.includes(w));
+                  const matchesKeyword = cleanWords.some(word => searchLower.includes(word));
+                  
+                  if (matchesKeyword || searchLower.includes(cleanName)) {
+                    matchedId = id;
+                    break;
+                  }
+                }
+              }
+
+              if (matchedId) {
+                session.companyId = matchedId;
+                session.history = [];
+                await saveSession(from, session);
+                
+                const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[matchedId]}*.\n\n` +
+                  `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
+                await sendWhatsAppMessage(phone_number_id, from, welcome);
+                return new NextResponse('OK', { status: 200 });
+              } else {
+                await sendWhatsAppMessage(phone_number_id, from, `Could not find a sandbox matching "${query}". Reply with "join [1-46]" or "join [business name]" to test.`);
+                return new NextResponse('OK', { status: 200 });
+              }
+            } else if (lowerText === 'exit' || lowerText === '/exit') {
+              session.companyId = 'agency';
+              session.history = [];
+              await saveSession(from, session);
+              await sendWhatsAppMessage(phone_number_id, from, `Sandbox deactivated. ↩️ You are back in the ScienceThoughts Agency assistant. Type *join [number/name]* to test a specific client bot.`);
+              return new NextResponse('OK', { status: 200 });
+            }
+
+            // Ensure session has a valid default if it was null
+            if (!session.companyId) {
+              session.companyId = 'agency';
+              await saveSession(from, session);
+            }
           }
 
           // Handle reset command (disabled for the permanent number)
@@ -992,8 +1046,8 @@ function getCompanyKnowledge(companyId) {
    - Fluently bilingual in English, Hindi, Hinglish, Tamil, and Kannada.
    - Automatic CRM Webhook triggers.
 3. **Pilot Offer & Pricing:**
-   - Custom 14-day Staging Sandbox pilot for free.
-   - Standard pricing: Setup starts at ₹75,000 / $1,000 (one-time) + monthly maintenance retainer.
+    - Custom 7-day Staging Sandbox pilot for free.
+    - Standard pricing: Setup is ₹25,000 (one-time) and ₹10,000/month as a hosting and maintenance retainer. If they want CRM integration, it is an additional ₹10,000 one-time (total ₹35,000 setup).
 4. **Booking:**
    - Book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
 === CONVERSION GOAL ===

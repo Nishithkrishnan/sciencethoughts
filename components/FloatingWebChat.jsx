@@ -127,18 +127,41 @@ export default function FloatingWebChat() {
                 </span>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#a0a0b0",
-                cursor: "pointer",
-                padding: "4px",
-              }}
-            >
-              <X size={18} />
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <a
+                href="https://wa.me/918015424935?text=Hi_ScienceThoughts"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Continue on WhatsApp"
+                style={{
+                  color: "#25D366",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "opacity 0.2s",
+                }}
+                onMouseOver={(e) => e.currentTarget.style.opacity = "0.8"}
+                onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.76.459 3.473 1.332 4.988L2 22l5.137-1.347c1.47.8 3.11 1.222 4.782 1.225h.003c5.505 0 9.987-4.482 9.987-9.99A9.923 9.923 0 0012.012 2zm-.006 18.286c-1.493 0-2.955-.401-4.227-1.16l-.303-.18-3.14.823.837-3.06-.197-.313a8.243 8.243 0 01-1.264-4.397c0-4.557 3.71-8.267 8.267-8.267 2.207 0 4.283.86 5.845 2.423a8.212 8.212 0 012.417 5.852c-.004 4.56-3.714 8.28-8.268 8.28zm4.54-6.192c-.248-.124-1.472-.727-1.7-.81-.228-.083-.393-.124-.559.124-.165.248-.642.81-.787.977-.145.165-.29.186-.538.062a6.857 6.857 0 01-2.004-1.235c-.78-.696-1.307-1.556-1.46-1.817-.153-.26-.016-.402.108-.525.112-.11.248-.29.372-.435.124-.145.165-.248.248-.414.083-.166.042-.31-.02-.435-.063-.124-.56-1.347-.767-1.848-.202-.484-.405-.418-.559-.426-.145-.008-.31-.008-.476-.008-.166 0-.435.062-.662.31-.228.249-.87.85-8.7 2.075 0 1.222.89 2.406 1.014 2.572.124.166 1.752 2.677 4.246 3.753.593.256 1.056.41 1.417.525.595.19 1.137.163 1.565.1.477-.072 1.472-.601 1.679-1.182.207-.58.207-1.077.145-1.181-.062-.104-.228-.166-.476-.29z"/>
+                </svg>
+              </a>
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#a0a0b0",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Messages Area */}

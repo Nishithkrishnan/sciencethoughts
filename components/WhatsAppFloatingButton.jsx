@@ -42,7 +42,7 @@ export default function WhatsAppFloatingButton() {
 
       {/* Button */}
       <a
-        href="https://wa.me/919952047109"
+        href="https://wa.me/918015424935?text=Hi_ScienceThoughts"
         target="_blank"
         rel="noopener noreferrer"
         onMouseEnter={() => setHovered(true)}

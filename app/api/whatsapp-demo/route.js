@@ -127,7 +127,7 @@ export async function POST(req) {
     // Handle Direct Web Chat Requests from sciencethoughts.com website widget
     if (body.webChatMode) {
       const { text, companyId = "agency", history = [] } = body;
-      const formattedHistory = history.length > 0 ? history : [{ role: "user", content: text }];
+      const formattedHistory = [...history, { role: "user", content: text }];
       const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);
       
       // If lead extracted, attempt to push to CRM
@@ -1286,6 +1286,8 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 - **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
+- **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., "I can only assist you with inquiries regarding Royal Garden Villas").
+
 
 You must respond in JSON format with the following keys:
 - "reply": The natural language reply to the user.

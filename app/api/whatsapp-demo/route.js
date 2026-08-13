@@ -126,7 +126,7 @@ export async function POST(req) {
 
     // Handle Direct Web Chat Requests from sciencethoughts.com website widget
     if (body.webChatMode) {
-      const { text, companyId = "15", history = [] } = body;
+      const { text, companyId = "agency", history = [] } = body;
       const formattedHistory = history.length > 0 ? history : [{ role: "user", content: text }];
       const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);
       
@@ -324,8 +324,8 @@ export async function POST(req) {
 
             // Default fallback if no company selected yet
             if (session.companyId === null) {
-              // Default to Brigade Group (Option 15) for actual prospects who text 'Hi'
-              session.companyId = '15';
+              // Default to ScienceThoughts AI Agency (agency) for actual prospects who text 'Hi'
+              session.companyId = 'agency';
               session.history = [];
               await saveSession(from, session);
             }

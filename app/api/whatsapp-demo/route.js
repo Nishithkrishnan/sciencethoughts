@@ -1304,6 +1304,8 @@ You must respond in JSON format with the following keys:
   - "additional_requirements": "string summarizing dynamic requests (e.g., 'requires chef', 'spa service booking', 'needs pet toys') or null"
   - "budget": "string or null"`;
 
+  let payload = null;
+
   // LEVEL 1: Primary Try (OpenAI)
   if (OPENAI_API_KEY) {
     try {
@@ -1329,8 +1331,7 @@ You must respond in JSON format with the following keys:
       if (!data.error) {
         const rawContent = data.choices[0].message.content.trim();
         const cleanContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
-        const parsedContent = JSON.parse(cleanContent);
-        return parsedContent;
+        payload = JSON.parse(cleanContent);
       } else {
         console.error("[DEMO ROUTE] OpenAI API error response:", data.error.message);
       }
@@ -1340,19 +1341,27 @@ You must respond in JSON format with the following keys:
   }
 
   // LEVEL 2: Secondary Try (Google Gemini Failover)
-  if (GEMINI_API_KEY) {
+  if (!payload && GEMINI_API_KEY) {
     try {
       console.log("[DEMO ROUTE] Triggering Google Gemini fallback...");
-      const geminiPayload = await getGeminiResponse(history, systemInstruction);
-      return geminiPayload;
+      payload = await getGeminiResponse(history, systemInstruction);
     } catch (geminiError) {
       console.error("[DEMO ROUTE] Gemini fallback failed:", geminiError.message);
     }
   }
 
   // LEVEL 3: Emergency Offline Fallback
-  console.log("[DEMO ROUTE] Triggering local simulation fallback...");
-  return simulateOfflineResponse(companyId, history);
+  if (!payload) {
+    console.log("[DEMO ROUTE] Triggering local simulation fallback...");
+    payload = simulateOfflineResponse(companyId, history);
+  }
+
+  // Format safeguard: remove forbidden markdown double asterisks
+  if (payload && payload.reply) {
+    payload.reply = payload.reply.replace(/\*\*/g, "");
+  }
+
+  return payload;
 }
 
 async function sendWhatsAppMessage(phone_number_id, to, messageText) {

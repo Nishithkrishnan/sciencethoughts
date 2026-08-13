@@ -2,7 +2,6 @@ import pytest
 from asserts.hard_asserts import HardAsserter
 from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric
 from deepeval.test_case import LLMTestCase
-from deepeval import assert_test
 
 RAG_CONTEXT_MAP = {
     "9": [
@@ -24,6 +23,12 @@ RAG_CONTEXT_MAP = {
     ]
 }
 
+def get_rag_context(company_id: str) -> list:
+    """Dynamically retrieves RAG context from map or defaults to avoid crashes."""
+    if company_id in RAG_CONTEXT_MAP:
+        return RAG_CONTEXT_MAP[company_id]
+    return [f"Knowledge Base details for Tenant ID: {company_id}."]
+
 class TestWhatsAppAgent:
 
     def test_agent_response(self, test_case, agent_client):
@@ -32,7 +37,10 @@ class TestWhatsAppAgent:
         user_turns = test_case["user_turns"]
         expected_tenant = test_case["expected_tenant"]
         forbidden_tenants = test_case.get("forbidden_tenants", [])
-        max_latency = test_case.get("max_latency_ms", 2800)
+        
+        # Environment-aware Latency SLA Target: 2.8s locally, 5.5s on production Vercel CDN
+        is_local = "localhost" in agent_client.base_url
+        max_latency = 2800 if is_local else 5500
 
         # ---- 1. Multi-turn conversation simulation ----
         session_id = f"test_{test_id}"
@@ -40,31 +48,22 @@ class TestWhatsAppAgent:
         all_conversation = []
 
         for turn_idx, user_msg in enumerate(user_turns):
-            # Extract history of previous turns
             history = [m for m in all_conversation]
-            
             result = agent_client.send_message(
                 company_id=company_id,
                 message=user_msg,
                 session_id=session_id,
                 history=history
             )
-            
-            # Store turns
             all_conversation.append({"role": "user", "content": user_msg})
             all_conversation.append({"role": "assistant", "content": result["reply"]})
             final_reply = result["reply"]
 
-            # ---- 2. Hard assertions per turn ----
-            # Enforce latency checks only on local builds to prevent production CDN/network roundtrip noise
-            is_production = "localhost" not in agent_client.base_url
-            if not is_production:
-                pass  # Skip latency assert in production mode
-            elif turn_idx > 0 or len(user_turns) == 1:
-                HardAsserter.assert_latency(result, max_latency)
-                
+            # ---- 2. Hard assertions per turn (Enforced everywhere) ----
+            HardAsserter.assert_latency(result, max_latency)
             HardAsserter.assert_char_limit(result)
             HardAsserter.assert_markdown_compliance(result)
+            HardAsserter.assert_interactive_payload(result)
             if forbidden_tenants:
                 HardAsserter.assert_no_tenant_bleed(result, forbidden_tenants)
 
@@ -75,7 +74,7 @@ class TestWhatsAppAgent:
         assert len(missing_slots) == 0, f"Missing required slots: {missing_slots}"
 
         # ---- 4. DeepEval Semantic Evaluation ----
-        retrieval_context = RAG_CONTEXT_MAP.get(company_id, ["ScienceThoughts AI bot context."])
+        retrieval_context = get_rag_context(company_id)
         last_user_msg = user_turns[-1] if user_turns else ""
 
         test_case_deepeval = LLMTestCase(
@@ -85,25 +84,17 @@ class TestWhatsAppAgent:
             expected_output=f"Should be grounded on {expected_tenant} details."
         )
 
-        metrics = []
+        # Strictly assert zero-hallucinations (Faithfulness threshold = 0.99)
+        faithfulness_metric = FaithfulnessMetric(threshold=0.99)
+        faithfulness_metric.measure(test_case_deepeval)
+        assert faithfulness_metric.score >= 0.99, f"Faithfulness check failed: {faithfulness_metric.score}"
         
-        # Faithfulness
-        faithfulness_metric = FaithfulnessMetric(threshold=0.7)
-        metrics.append(faithfulness_metric)
-        
-        # Relevancy (only run if flag is enabled)
+        # Conditionally measure Relevancy (Relevancy threshold = 0.85)
         run_relevancy = test_case.get("run_relevancy", True)
         if run_relevancy:
-            relevancy_metric = AnswerRelevancyMetric(threshold=0.6)
-            metrics.append(relevancy_metric)
-
-        # Execute DeepEval Assertions
-        faithfulness_metric.measure(test_case_deepeval)
-        assert faithfulness_metric.score >= 0.7, f"Faithfulness check failed: {faithfulness_metric.score}"
-        
-        if run_relevancy:
+            relevancy_metric = AnswerRelevancyMetric(threshold=0.85)
             relevancy_metric.measure(test_case_deepeval)
-            assert relevancy_metric.score >= 0.6, f"Answer Relevancy check failed: {relevancy_metric.score}"
+            assert relevancy_metric.score >= 0.85, f"Answer Relevancy check failed: {relevancy_metric.score}"
 
         # ---- 5. Security Refusal Assertion ----
         if test_case.get("expects_refusal", False):
@@ -114,7 +105,7 @@ class TestWhatsAppAgent:
             assert any(phrase in final_reply.lower() for phrase in refusal_phrases), \
                 f"Security test expected a refusal but reply was: {final_reply}"
 
-        # ---- 6. Print scorecard for output verification ----
+        # ---- 6. Print scorecard ----
         print(f"\n[PASS] VERDICT: APPROVED")
         print(f"Scorecard:")
         print(f" - Latency SLA: PASS ({result['latency_ms']:.0f}ms)")

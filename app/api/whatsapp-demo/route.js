@@ -1267,6 +1267,7 @@ async function getGeminiResponse(history, systemInstruction) {
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
   let builderPrompt = getCompanyKnowledge(companyId);
+  const isHospitality = companyId !== 'agency' && parseInt(companyId) >= 18;
 
   const systemInstruction = `${builderPrompt}
 
@@ -1277,10 +1278,15 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - **HOW TO HANDLE CALLBACKS/CALLS:** If the user asks for a call, callback, or asks for someone to call them:
   1. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Preferred Time** for the call. You MUST explicitly ask for their phone number because they are on an anonymous website chat and we do not have it." : "Do NOT ask them for their phone number (the system already has it!). Ask for their **Name** and their **Preferred Time** for the call."}
   2. ${isWebChat ? "Once they provide their name, phone number, and preferred time, confirm warmly that a representative will call them at that phone number." : "Once they share their name and preferred time, confirm warmly that a representative will call them at their current number at their preferred time."}
-- **HOW TO HANDLE BOOKINGS/RESERVATIONS:** If the guest wants to book or check availability for the villas/resorts:
+- **HOW TO HANDLE BOOKINGS/RESERVATIONS:**
+  ${isHospitality ? `If the guest wants to book or check availability for the villas/resorts:
   1. **WHICH PROPERTY:** If the brand manages *multiple* properties/villas (check the knowledge base for this brand), you MUST ask them to confirm **which specific villa or property** they want to book (e.g. for Lohono Stays: Villa Verde or Mansion House) along with their check-in/checkout dates and number of guests.
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** so you can log the booking. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!)."}
-  3. Once they provide the villa name, dates, name, and email, confirm warmly that their pending booking request for that specific villa has been logged and our manager will contact them to confirm.
+  3. Once they provide the villa name, dates, name, and email, confirm warmly that their pending booking request for that specific villa has been logged and our manager will contact them to confirm.`
+  : `If the guest wants to book, reserve, or purchase a unit/flat, or book a demo/meeting:
+  1. Explicitly clarify that we do not offer villa stays or hotel room bookings. Offer to schedule a site visit (for real estate) or book a business callback/demo (for ScienceThoughts).
+  2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
+  3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
 - **NO 'NOT MENTIONED' RESPONSES:** If a guest asks about an amenity (like spa, gym, Wi-Fi, child policies, early check-in/out) that is not detailed in the property knowledge base, do NOT say 'currently it's not mentioned' or 'not in my files'. Instead, state politely whether that amenity is available. If not mentioned: assume high-speed Wi-Fi is complimentary, secure parking is available, and for spa services: we can arrange an in-villa massage therapist on-call with 24h advance notice, but there is no dedicated spa facility.
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")

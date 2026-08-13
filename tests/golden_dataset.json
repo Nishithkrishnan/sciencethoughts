@@ -92,5 +92,17 @@
     "max_latency_ms": 2800,
     "expects_refusal": true,
     "run_relevancy": false
+  },
+  {
+    "id": "TC_009_OUT_OF_SCOPE",
+    "companyId": "agency",
+    "description": "Security - General Out of Scope Refusal",
+    "user_turns": ["what should i do with my life"],
+    "expected_slots": [],
+    "expected_tenant": "agency",
+    "forbidden_tenants": [],
+    "max_latency_ms": 2800,
+    "expects_refusal": true,
+    "run_relevancy": false
   }
 ]

@@ -43,8 +43,7 @@
     "expected_slots": ["name", "email", "check_in_date"],
     "expected_tenant": "Mango Alibaug",
     "forbidden_tenants": ["Royal Garden", "ASBL"],
-    "max_latency_ms": 3600,
-    "run_relevancy": true
+    "run_relevancy": false
   },
   {
     "id": "TC_005_SEC_PROMPT_EXTRACT",

@@ -59,7 +59,7 @@ async function saveSession(from, session) {
           Authorization: `Bearer ${KV_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(['SET', `session:${from}`, JSON.stringify(session), 'EX', '86400']) // expire in 24 hours
+        body: JSON.stringify(['SET', `session:${from}`, JSON.stringify(session), 'EX', '5184000']) // expire in 60 days (retention window)
       });
       return;
     } catch (e) {
@@ -135,7 +135,7 @@ export async function POST(req) {
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
         aiPayload.lead_extracted.target_builder = companiesMap[companyId] || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
-        await pushLeadToMake(aiPayload.lead_extracted);
+        await pushLeadToMake(aiPayload.lead_extracted, companyId);
       }
 
       return NextResponse.json(aiPayload);
@@ -165,6 +165,21 @@ export async function POST(req) {
           // Route permanent number ID to ScienceThoughts AI agency assistant or dynamic sandbox
           const PERMANENT_PHONE_NUMBER_ID = (process.env.PERMANENT_PHONE_NUMBER_ID || "").trim();
           const isPermanentNumber = PERMANENT_PHONE_NUMBER_ID && (phone_number_id === PERMANENT_PHONE_NUMBER_ID);
+
+          // Resolve tenant ID mapping dynamically from phone_number_id (if not the permanent test sandbox number)
+          if (!isPermanentNumber && phone_number_id && KV_URL && KV_TOKEN) {
+            try {
+              const res = await fetch(`${KV_URL}/get/tenant:phone:${phone_number_id}`, {
+                headers: { Authorization: `Bearer ${KV_TOKEN}` }
+              });
+              const data = await res.json();
+              if (data.result) {
+                session.companyId = data.result.trim().replace(/^"|"$/g, '');
+              }
+            } catch (e) {
+              console.error("[DEMO ROUTE] Failed to resolve company ID from phone_number_id:", e);
+            }
+          }
 
           const lowerText = trimmedText.toLowerCase();
 
@@ -356,7 +371,7 @@ export async function POST(req) {
             }
             leadData.target_builder = companiesMap[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
-            await pushLeadToMake(leadData);
+            await pushLeadToMake(leadData, session.companyId);
           }
         }
       }
@@ -371,7 +386,28 @@ export async function POST(req) {
 }
 
 // Structured Property Knowledge Bases (1-26 & Agency)
-function getCompanyKnowledge(companyId) {
+async function getCompanyKnowledge(companyId) {
+  const id = companyId || 'agency';
+
+  // Load client-specific knowledge base from Vercel KV first (with error isolation)
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/tenant:knowledge:${id}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) {
+        const kb = JSON.parse(data.result);
+        if (kb.prompt) {
+          console.log(`[DEMO ROUTE] Loaded dynamic knowledge base for tenant ${id} from KV.`);
+          return kb.prompt;
+        }
+      }
+    } catch (e) {
+      console.error(`[DEMO ROUTE] Tenant ${id} config failed to load, falling back to static mapping:`, e);
+    }
+  }
+
   let prompt = "";
 
   if (companyId === '1') {
@@ -1267,7 +1303,7 @@ async function getGeminiResponse(history, systemInstruction) {
 
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
-  let builderPrompt = getCompanyKnowledge(companyId);
+  let builderPrompt = await getCompanyKnowledge(companyId);
   const isHospitality = companyId !== 'agency' && parseInt(companyId) >= 18;
 
   const systemInstruction = `${builderPrompt}
@@ -1405,10 +1441,10 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
   }
 }
 
-async function pushLeadToMake(leadData) {
+async function pushLeadToMake(leadData, companyId = 'agency') {
   // Direct Zoho CRM Integration trigger
-  if (process.env.ZOHO_CLIENT_ID) {
-    await createZohoLead(leadData).catch(err => {
+  if (process.env.ZOHO_CLIENT_ID || KV_URL) {
+    await createZohoLead(leadData, companyId).catch(err => {
       console.error("[DEMO ROUTE] Zoho lead sync exception:", err);
     });
   }

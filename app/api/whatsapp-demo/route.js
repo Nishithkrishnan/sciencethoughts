@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createZohoLead } from '../../../lib/zoho';
+import { decrypt } from '../../../lib/crypto';
 
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -218,17 +219,17 @@ export async function POST(req) {
                 
                 const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[matchedId]}*.\n\n` +
                   `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
-                await sendWhatsAppMessage(phone_number_id, from, welcome);
+                await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
                 return new NextResponse('OK', { status: 200 });
               } else {
-                await sendWhatsAppMessage(phone_number_id, from, `Could not find a sandbox matching "${query}". Reply with "join [1-46]" or "join [business name]" to test.`);
+                await sendWhatsAppMessage(phone_number_id, from, `Could not find a sandbox matching "${query}". Reply with "join [1-46]" or "join [business name]" to test.`, session.companyId);
                 return new NextResponse('OK', { status: 200 });
               }
             } else if (lowerText === 'exit' || lowerText === '/exit') {
               session.companyId = 'agency';
               session.history = [];
               await saveSession(from, session);
-              await sendWhatsAppMessage(phone_number_id, from, `Sandbox deactivated. ↩️ You are back in the ScienceThoughts Agency assistant. Type *join [number/name]* to test a specific client bot.`);
+              await sendWhatsAppMessage(phone_number_id, from, `Sandbox deactivated. ↩️ You are back in the ScienceThoughts Agency assistant. Type *join [number/name]* to test a specific client bot.`, session.companyId);
               return new NextResponse('OK', { status: 200 });
             }
 
@@ -293,7 +294,7 @@ export async function POST(req) {
               `45. *The Goa Villas* (Luxury Villa Collection)\n` +
               `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
               `Reply with a number (*1-46*) to start the simulation!`;
-            await sendWhatsAppMessage(phone_number_id, from, greeting);
+            await sendWhatsAppMessage(phone_number_id, from, greeting, session.companyId);
             return new NextResponse('OK', { status: 200 });
           }
 
@@ -334,7 +335,7 @@ export async function POST(req) {
                 ? `Welcome to *${companiesMap[matchedId]}*! How can I assist you with your luxury stay bookings, villa availability, or amenities today?`
                 : `Welcome to *${companiesMap[matchedId]}*! How can I assist you with our residential projects, site visits, or unit pricing today?`;
 
-              await sendWhatsAppMessage(phone_number_id, from, welcome);
+              await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
               return new NextResponse('OK', { status: 200 });
             }
 
@@ -362,7 +363,7 @@ export async function POST(req) {
           await saveSession(from, session);
 
           // 4. Send the AI response back to the user via WhatsApp
-          await sendWhatsAppMessage(phone_number_id, from, aiResponseText);
+          await sendWhatsAppMessage(phone_number_id, from, aiResponseText, session.companyId);
 
           // 5. If lead is qualified (Name found), push to Make CRM Webhook
           if (leadData && leadData.name) {
@@ -1409,9 +1410,32 @@ You must respond in JSON format with the following keys:
   return payload;
 }
 
-async function sendWhatsAppMessage(phone_number_id, to, messageText) {
-  if (!WHATSAPP_ACCESS_TOKEN) {
-    console.warn("WHATSAPP_ACCESS_TOKEN is not set. Cannot send outbound message.");
+async function getWhatsAppToken(companyId) {
+  const id = companyId || 'agency';
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/tenant:whatsapp:${id}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) {
+        const wa = JSON.parse(data.result);
+        const token = decrypt(wa.waba_token);
+        if (token) {
+          return token;
+        }
+      }
+    } catch (e) {
+      console.error(`[DEMO ROUTE] Failed to load WhatsApp token for tenant ${id}:`, e);
+    }
+  }
+  return WHATSAPP_ACCESS_TOKEN;
+}
+
+async function sendWhatsAppMessage(phone_number_id, to, messageText, companyId = 'agency') {
+  const token = await getWhatsAppToken(companyId);
+  if (!token) {
+    console.warn(`[DEMO ROUTE] WhatsApp access token is not set for tenant ${companyId}. Cannot send message.`);
     return;
   }
 
@@ -1419,7 +1443,7 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
     const response = await fetch(`https://graph.facebook.com/v19.0/${phone_number_id}/messages`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -1434,7 +1458,7 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
     if (result.error) {
       console.error("[DEMO ROUTE] Meta API Error:", result.error);
     } else {
-      console.log(`[DEMO ROUTE] Successfully replied to ${to}`);
+      console.log(`[DEMO ROUTE] Successfully replied to ${to} under tenant ${companyId}`);
     }
   } catch (error) {
     console.error("[DEMO ROUTE] Failed to send WhatsApp message:", error);

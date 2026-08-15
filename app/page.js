@@ -8,22 +8,22 @@ export default async function Home() {
   const agents = [
     {
       id: "email-agent",
-      name: "Email Filtering Agent",
-      desc: "An enterprise-grade autonomous workflow intercepting emails, performing real-time zero-shot priority & sentiment classification via LLMs, logging metadata to Google Sheets, and applying context-aware tags.",
+      name: "Automated Lead Processing",
+      desc: "An enterprise-grade workflow intercepting incoming booking inquiries, performing real-time zero-shot priority & sentiment classification, logging metadata to your PMS, and triggering custom notifications.",
       icon: <Mail size={24} />,
       color: "var(--accent-green)",
-      badge: "Make.com + OpenAI",
-      stack: ["Make.com", "OpenAI GPT-4o", "Google Sheets", "Gmail API"],
+      badge: "HubSpot & Zoho Native",
+      stack: ["LeadSquared API", "Zoho CRM", "Google Sheets", "Email Parsing"],
       borderColor: "rgba(57, 255, 20, 0.2)"
     },
     {
       id: "real-estate-agent",
-      name: "Real Estate QA Agent",
-      desc: "An autonomous Python engine using LangChain to audit marketing copy. Analyzes subjectivity, tone, and conversion mechanics against enterprise real estate data.",
+      name: "Direct Booking Concierge",
+      desc: "A custom 24/7 conversational assistant built to quote weekend tariffs, clarify property policies, verify real-time calendar availability, and register bookings directly in your PMS.",
       icon: <HomeIcon size={24} />,
       color: "var(--accent-teal)",
-      badge: "Python + LangChain",
-      stack: ["Next.js", "FastAPI", "Python", "LangChain Core"],
+      badge: "SiteMinder & Staah Ready",
+      stack: ["Next.js Edge", "Upstash Redis", "OpenAI GPT-4o", "iCal Feeds"],
       borderColor: "rgba(0, 242, 255, 0.2)"
     }
   ];
@@ -37,20 +37,20 @@ export default async function Home() {
           
           <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-color)", padding: "8px 18px", borderRadius: "30px", marginBottom: "25px", animation: "slideUp 0.6s ease-out" }}>
             <Activity size={14} className="animate-pulse-glow" style={{ color: "var(--accent-teal)" }} />
-            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", letterSpacing: "0.05em" }}>PORTFOLIO & COGNITIVE LOGS</span>
+            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", letterSpacing: "0.05em" }}>ENTERPRISE AI CONCIERGE PLATFORM</span>
           </div>
 
           <h1 style={{ fontSize: "4.2rem", fontWeight: "900", fontFamily: "var(--font-display)", letterSpacing: "-0.03em", lineHeight: "1.1", marginBottom: "25px", animation: "slideUp 0.8s ease-out" }}>
-            Architecting the <span className="gradient-text">Intelligence</span> of Tomorrow
+            The 24/7 AI Concierge for <span className="gradient-text">Luxury Hospitality</span>
           </h1>
 
           <p style={{ fontSize: "1.3rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400", animation: "slideUp 1s ease-out" }}>
-            A hybrid space where science meets AI. I build autonomous agents that bridge the gap between human thought and machine execution.
+            Convert late-night inquiries into confirmed reservations. Our brand-safe AI agents engage guests instantly on WhatsApp and sync booking details directly to your CRM or Property Management System.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "20px", alignItems: "center", flexWrap: "wrap", animation: "slideUp 1.2s ease-out" }}>
-            <a href="/lab" className="nav-btn" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-              Explore the Lab <ArrowRight size={18} />
+            <a href="/case-studies" className="nav-btn" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
+              Explore Case Studies <ArrowRight size={18} />
             </a>
             <SearchInput />
           </div>
@@ -64,13 +64,13 @@ export default async function Home() {
       {/* 1.5 Powered By Strip (Social Proof) */}
       <section style={{ padding: "40px 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container">
-          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Powered By Enterprise Infrastructure</p>
+          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Secured & Integrated With Your Systems</p>
           <div style={{ display: "flex", justifyContent: "center", gap: "50px", flexWrap: "wrap", opacity: 0.35 }}>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>OpenAI</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Meta API</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>LangChain</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Vercel</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>FastAPI</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Zoho CRM</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>HubSpot</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>LeadSquared</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>SiteMinder</span>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Cloudbeds</span>
           </div>
         </div>
       </section>
@@ -85,8 +85,8 @@ export default async function Home() {
                 <Cpu size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>The Experimental Lab</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Interactive AI workflows designed for complex cognitive tasks.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Pre-Built Industry Adapters</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Fully configured guest concierges ready to link with your property operations.</p>
           </div>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "30px", flexWrap: "wrap" }}>
@@ -121,8 +121,8 @@ export default async function Home() {
                   ))}
                 </div>
 
-                <a href={`/lab`} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px", fontSize: "0.95rem", fontWeight: "600", color: "#fff", transition: "var(--transition-fast)" }} className="launch-link">
-                  Launch Agent <ArrowRight size={14} style={{ transition: "transform 0.2s" }} />
+                <a href={`/case-studies`} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px", fontSize: "0.95rem", fontWeight: "600", color: "#fff", transition: "var(--transition-fast)" }} className="launch-link">
+                  View Demo Hub <ArrowRight size={14} style={{ transition: "transform 0.2s" }} />
                 </a>
               </div>
             ))}
@@ -152,21 +152,21 @@ export default async function Home() {
       <section id="case-studies-cta" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>ScienceThoughts (ST) Core Engine Benchmarks</h2>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Enterprise Security & Reliability Benchmarks</h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "800px", margin: "0 auto" }}>
-              Our proprietary ST Core Engine runs a semantic validation layer sitting between client interfaces and LLMs, guaranteeing high reliability and data privacy.
+              Our proprietary integration middleware runs a semantic validation layer sitting between client interfaces and LLMs, guaranteeing high reliability and data privacy.
             </p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "25px", marginBottom: "50px" }}>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-teal)", marginBottom: "10px" }}>98.6%</div>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Grounding Accuracy</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Zero-hallucination guardrails evaluated via the RAGAS framework, containing answers to verified source data.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Brand-Safe Responses</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Zero-hallucination guardrails evaluated via strict metrics, containing answers to verified source data.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-green)", marginBottom: "10px" }}>1.42s</div>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Average Latency</h4>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Instant Guest Engagement</h4>
               <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Fast-routing Next.js edge functions matching human reading and responding expectations.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
@@ -178,7 +178,7 @@ export default async function Home() {
 
           <div style={{ textAlign: "center" }}>
             <a href="/case-studies" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-              Explore Case Studies & Code Audits <ArrowRight size={18} />
+              Explore Case Studies & Demos <ArrowRight size={18} />
             </a>
           </div>
         </div>
@@ -193,33 +193,35 @@ export default async function Home() {
                 <Briefcase size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Flexible Retainer Plans</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Scale your customer acquisition and operations with our SLA-managed recurring services.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Bespoke Implementation Plans</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Scale your direct booking conversions with our SLA-managed integrations.</p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px", alignItems: "stretch" }}>
             {/* Service 1 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Starter Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹14,500 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Best for single-property stays or boutique setups needing intelligent automated guest interactions on WhatsApp.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Boutique Plan</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹29,500 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹50,000 Custom Setup Fee</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Best for single-property luxury stays or boutique setups needing intelligent automated guest interactions on WhatsApp.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> ST Core Engine Middleware</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 FAQ & Policy Guard</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Basic CRM / Google Sheets logs</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Brand-Safe FAQ & Booking Guard</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 Automated Availability Sync</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Google Sheets & Slack Lead Logs</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
 
             {/* Service 2 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Growth Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹29,500 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month + usage</span></p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Designed for growing networks, multi-property vacation portfolios, and active real estate pipelines requiring transaction management.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Portfolio Plan</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹45,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹100,000 Custom Setup Fee</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Designed for growing networks, multi-property vacation portfolios, and active hospitality groups requiring CRM pipelines.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Stateless Date & Booking State Tracking</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Property Route Mapping</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Full Zoho / HubSpot CRM Sync</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Villa Calendar Routing (iCal)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Full CRM Integration (Zoho / HubSpot)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Custom Field Attribute Extraction</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
@@ -228,10 +230,11 @@ export default async function Home() {
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", display: "flex", flexDirection: "column", height: "100%" }}>
               <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Enterprise / Bespoke</h3>
               <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom SLA</p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>Bespoke Architecture Pricing</p>
               <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Custom RAG datasets, dedicated vector instances, custom telephony voice callers, and fully SLA-backed support contracts.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom Model Orchestrations</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> AI Voice Agent integrations</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Direct PMS Integrations (SiteMinder / Staah)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> SOC 2 / GDPR Compliant Data Siloing</li>
                 <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Dedicated Vector Database hosting</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto", background: "var(--bg-card)", border: "1px solid var(--border-color)" }}>Request Quote</a>
@@ -239,8 +242,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-
 
       {/* 5. Contact / Work With Me Section */}
       <section id="contact" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
@@ -252,8 +253,8 @@ export default async function Home() {
                 <Calendar size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Book an AI Audit</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Pick a time on my calendar below, or send a direct message.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Schedule a 15-Min Consultation</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Discuss integrating the AI Concierge with your current booking engine and CRM.</p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "40px", alignItems: "start" }}>
@@ -273,7 +274,7 @@ export default async function Home() {
             <div className="glass-panel" style={{ padding: "40px", background: "rgba(15, 15, 20, 0.6)" }}>
               <h3 style={{ marginBottom: "20px", fontSize: "1.4rem", fontWeight: "700", fontFamily: "var(--font-display)" }}>Send an Inquiry</h3>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: "30px", lineHeight: "1.6" }}>
-                Not ready for a call? Send me a direct message regarding your technical requirements or automation needs.
+                Send a direct message regarding your specific property PMS/CRM integrations, custom policies, or setup timelines.
               </p>
               <ContactForm />
             </div>

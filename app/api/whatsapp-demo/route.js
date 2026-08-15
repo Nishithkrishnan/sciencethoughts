@@ -1408,7 +1408,7 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
 async function pushLeadToMake(leadData) {
   // Direct Zoho CRM Integration trigger
   if (process.env.ZOHO_CLIENT_ID) {
-    createZohoLead(leadData).catch(err => {
+    await createZohoLead(leadData).catch(err => {
       console.error("[DEMO ROUTE] Zoho lead sync exception:", err);
     });
   }

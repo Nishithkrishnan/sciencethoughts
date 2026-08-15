@@ -5,34 +5,17 @@ import { MessageSquare, Send, Bot, User, RefreshCw, CheckCircle2, Sparkles } fro
 
 export default function InteractiveWebDemo() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Welcome to Brigade Group! How can I assist you with Brigade Cornerstone Utopia or Brigade El Dorado today?" }
+    { role: "assistant", content: "Welcome to The Machan! How can I assist you with checking cabin availability, rates, or forest treehouse amenities today?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [companyId, setCompanyId] = useState("15"); // Default to Brigade Group (15)
+  const [companyId, setCompanyId] = useState("18"); // Default to The Machan (18)
   const chatEndRef = useRef(null);
 
   const companies = {
-    "15": "Brigade Group (Bangalore)",
-    "1": "Giridhari Constructions (Hyd)",
-    "2": "DAC Developers (Chennai)",
-    "3": "ASBL Builders (Hyderabad)",
-    "4": "Saritha Developers (Bangalore)",
-    "5": "Anvita Group (Bangalore)",
-    "6": "Radiance Realty (Chennai)",
-    "7": "GP Homes (Chennai)",
-    "8": "Navin Housing (Chennai)",
-    "10": "Century Real Estate (Bangalore)",
-    "11": "Adarsh Developers (Bangalore)",
-    "12": "Aparna Constructions (Hyderabad)",
-    "13": "Sumadhura Group (Bangalore/Hyd)",
-    "14": "My Home Constructions (Hyd)",
-    "16": "BBG India (South Plot Layouts)",
-    "17": "Arvind SmartSpaces (Golf Villas)",
-    "9": "Mango Alibaug Villas (Alibaug Stay)",
     "18": "The Machan (Lonavala Resort)",
+    "9": "Mango Alibaug Villas (Alibaug Stay)",
     "19": "Lost Traveller (Goa Villas)",
-    "20": "Arcoiris Gifting (Corporate Gifting)",
     "21": "Destiny Farmstay (Ooty Resort)",
     "22": "Eko Stay (Lonavala/Goa Villas)",
     "23": "The Rentalgram (Family Villas)",
@@ -74,16 +57,9 @@ export default function InteractiveWebDemo() {
       if (urlCompanyId && companies[urlCompanyId]) {
         setCompanyId(urlCompanyId);
         const companyName = companies[urlCompanyId].split(" (")[0];
-        const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"].includes(urlCompanyId);
+        const isHospitality = true; // All curated selections are hospitality
         
-        let welcomeMsg = "";
-        if (isHospitality) {
-          welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
-        } else if (urlCompanyId === "20") {
-          welcomeMsg = `Welcome to ${companyName}! How can I help you with custom employee kits, premium hampers, or corporate gifting requirements today?`;
-        } else {
-          welcomeMsg = `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
-        }
+        let welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
 
         setMessages([
           { role: "assistant", content: welcomeMsg }
@@ -96,16 +72,7 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"].includes(newId);
-    
-    let welcomeMsg = "";
-    if (isHospitality) {
-      welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
-    } else if (newId === "20") {
-      welcomeMsg = `Welcome to ${companyName}! How can I help you with custom employee kits, premium hampers, or corporate gifting requirements today?`;
-    } else {
-      welcomeMsg = `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
-    }
+    const welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
 
     setMessages([
       { role: "assistant", content: welcomeMsg }
@@ -150,11 +117,7 @@ export default function InteractiveWebDemo() {
 
   const handleReset = () => {
     const companyName = companies[companyId].split(" (")[0];
-    const isHospitality = ["9", "18", "19", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"].includes(companyId);
-    
-    const welcomeMsg = isHospitality
-      ? `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`
-      : `Welcome to ${companyName}! How can I assist you with our active residential projects today?`;
+    const welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
 
     setMessages([
       { role: "assistant", content: welcomeMsg }
@@ -174,7 +137,7 @@ export default function InteractiveWebDemo() {
               Live AI Concierge Interactive Demo
               <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>LIVE RAG</span>
             </h3>
-            <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Select a brand to test real-time inventory query & CRM capture</p>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Select a resort or villa brand to test availability queries</p>
           </div>
         </div>
 
@@ -248,7 +211,7 @@ export default function InteractiveWebDemo() {
       <form onSubmit={handleSend} style={{ padding: "15px 20px", borderTop: "1px solid var(--border-color)", background: "rgba(10, 12, 18, 0.9)", display: "flex", gap: "12px" }}>
         <input 
           type="text" 
-          placeholder="Ask about 2/3 BHK pricing, amenities, location, or request a callback..." 
+          placeholder="Ask about treehouse availability, weekday rates, wildlife policies, or request a booking..." 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           style={{ flexGrow: 1, background: "#060810", color: "#fff", border: "1px solid var(--border-color)", padding: "12px 18px", borderRadius: "12px", fontSize: "0.92rem", outline: "none" }}

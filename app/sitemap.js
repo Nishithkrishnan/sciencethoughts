@@ -9,10 +9,10 @@ export default function sitemap() {
       priority: 1,
     },
     {
-      url: `${baseUrl}/lab`,
+      url: `${baseUrl}/case-studies`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
   ];
 }

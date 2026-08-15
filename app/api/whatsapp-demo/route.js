@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createZohoLead } from '../../../lib/zoho';
 
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -1405,6 +1406,13 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText) {
 }
 
 async function pushLeadToMake(leadData) {
+  // Direct Zoho CRM Integration trigger
+  if (process.env.ZOHO_CLIENT_ID) {
+    createZohoLead(leadData).catch(err => {
+      console.error("[DEMO ROUTE] Zoho lead sync exception:", err);
+    });
+  }
+
   const url = MAKE_WEBHOOK_URL;
   if (!url) {
     console.warn("MAKE_WEBHOOK_URL environment variable is not set. Skipping CRM push.");
@@ -1428,7 +1436,7 @@ async function pushLeadToMake(leadData) {
         check_out_time: leadData.check_out_time || null,
         additional_requirements: leadData.additional_requirements || null,
         budget: leadData.budget,
-        builder: leadData.target_builder || "Brigade Group",
+        builder: leadData.target_builder || "The Machan",
         timestamp: new Date().toISOString()
       })
     });

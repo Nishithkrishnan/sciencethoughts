@@ -53,7 +53,7 @@ export default function InteractiveWebDemo() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const urlCompanyId = params.get("c") || params.get("companyId");
+      const urlCompanyId = params.get("c") || params.get("companyId") || params.get("tenant");
       if (urlCompanyId && companies[urlCompanyId]) {
         setCompanyId(urlCompanyId);
         const companyName = companies[urlCompanyId].split(" (")[0];

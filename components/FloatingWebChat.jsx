@@ -5,6 +5,7 @@ import { MessageSquare, Send, X, Bot, User } from "lucide-react";
 
 export default function FloatingWebChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const [companyId, setCompanyId] = useState("agency");
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -14,6 +15,28 @@ export default function FloatingWebChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlCompanyId = params.get("tenant") || params.get("companyId") || params.get("c");
+      if (urlCompanyId && urlCompanyId !== "agency") {
+        setCompanyId(urlCompanyId);
+        
+        const names = {
+          "9": "Mango Alibaug Villas",
+          "18": "The Machan Lonavala"
+        };
+        const companyName = names[urlCompanyId] || `Property ${urlCompanyId}`;
+        setMessages([
+          {
+            role: "assistant",
+            content: `Welcome to ${companyName}! How can I assist you with checking villa availability, rates, or booking inquiries today?`
+          }
+        ]);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,8 +61,8 @@ export default function FloatingWebChat() {
         body: JSON.stringify({
           webChatMode: true,
           text: userMsg,
-          companyId: "agency", // Locked to ScienceThoughts AI Agency
-          history: newHistory.slice(-6) // Capped at last 3 turns
+          companyId: companyId, // Dynamically set to the active tenant ID
+          history: newHistory.slice(-6)
         })
       });
 
@@ -120,10 +143,10 @@ export default function FloatingWebChat() {
               />
               <div>
                 <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: "700", color: "#ffffff", letterSpacing: "0.02em" }}>
-                  ScienceThoughts AI
+                  {companyId === "agency" ? "ScienceThoughts AI" : companyId === "9" ? "Mango Alibaug AI" : `Property ${companyId} AI`}
                 </h4>
                 <span style={{ fontSize: "0.75rem", color: "#707080" }}>
-                  Online Concierge
+                  {companyId === "agency" ? "Online Concierge" : "Guest Concierge"}
                 </span>
               </div>
             </div>

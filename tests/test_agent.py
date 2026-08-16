@@ -123,10 +123,11 @@ class TestWhatsAppAgent:
         # Conditionally measure Relevancy (Relevancy threshold = 0.85)
         run_relevancy = test_case.get("run_relevancy", True)
         if run_relevancy:
-            relevancy_metric = AnswerRelevancyMetric(threshold=0.85)
+            relevancy_threshold = test_case.get("relevancy_threshold", 0.85)
+            relevancy_metric = AnswerRelevancyMetric(threshold=relevancy_threshold)
             relevancy_metric.measure(test_case_deepeval)
-            assert relevancy_metric.score >= 0.85, (
-                f"Answer Relevancy check failed: {relevancy_metric.score}\n"
+            assert relevancy_metric.score >= relevancy_threshold, (
+                f"Answer Relevancy check failed: {relevancy_metric.score} (threshold {relevancy_threshold})\n"
                 f"  Question asked: {last_user_msg!r}\n"
                 f"  Actual reply: {final_reply!r}\n"
                 f"  DeepEval reason: {getattr(relevancy_metric, 'reason', 'n/a')}"

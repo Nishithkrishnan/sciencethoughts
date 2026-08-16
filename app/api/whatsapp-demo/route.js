@@ -120,6 +120,44 @@ const HOSPITALITY_IDS = new Set(
   Object.keys(companiesMap).filter((id) => id !== 'agency')
 );
 
+// Very small, best-effort daily rate limit for the public web-chat demo endpoint only.
+// This does NOT cap real prospect usage — 60/day is far above what any genuine visitor would
+// hit. It exists purely to stop a script hitting this public endpoint directly (it's a bare
+// POST route, not gated by the widget UI) from running up OpenAI/Gemini cost unattended.
+// Real WhatsApp traffic (via Meta's webhook) is never subject to this — different trust model.
+const WEB_DEMO_DAILY_LIMIT = 60;
+
+async function checkWebDemoRateLimit(ip) {
+  if (!KV_URL || !KV_TOKEN || !ip) return { allowed: true }; // fail open if KV or IP unavailable
+
+  const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, UTC
+  const key = `ratelimit:webchat:${ip}:${day}`;
+
+  try {
+    const incrRes = await fetch(KV_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['INCR', key])
+    });
+    const incrData = await incrRes.json();
+    const count = Number(incrData.result);
+
+    if (count === 1) {
+      // First message from this IP today — set the key to self-expire in 24h.
+      await fetch(KV_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['EXPIRE', key, '86400'])
+      });
+    }
+
+    return { allowed: count <= WEB_DEMO_DAILY_LIMIT, count };
+  } catch (e) {
+    console.error("[DEMO ROUTE] Rate limit check failed, failing open:", e);
+    return { allowed: true };
+  }
+}
+
 // POST method receives inbound WhatsApp messages or Web Chat requests
 export async function POST(req) {
   try {
@@ -127,6 +165,15 @@ export async function POST(req) {
 
     // Handle Direct Web Chat Requests from sciencethoughts.com website widget
     if (body.webChatMode) {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || null;
+      const rateLimit = await checkWebDemoRateLimit(ip);
+      if (!rateLimit.allowed) {
+        return NextResponse.json({
+          reply: "Thanks for all the questions today! This demo has a daily limit per visitor to keep things fair. Please try again tomorrow, or reach out directly and we'll get you set up right away.",
+          lead_extracted: null
+        });
+      }
+
       const { text, companyId = "agency", history = [], full_history } = body;
       const formattedHistory = [...history, { role: "user", content: text }];
       const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);

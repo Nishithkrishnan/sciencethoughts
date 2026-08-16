@@ -87,8 +87,8 @@ payload = {
     "model": "gpt-4o-mini",
     "response_format": { "type": "json_object" },
     "messages": [
-        { "role": "system", content: system_instruction },
-        { "role": "user", content: user_prompt }
+        { "role": "system", "content": system_instruction },
+        { "role": "user", "content": user_prompt }
     ],
     "max_tokens": 1500,
     "temperature": 0.2

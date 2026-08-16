@@ -246,27 +246,10 @@ export async function POST(req) {
             session.history = [];
             await saveSession(from, session);
             
-            const greeting = `Demo Hub Reset! 🔄 Please select which AI Assistant you would like to test:\n\n` +
-              `1. *Giridhari Constructions* (Hyderabad)\n` +
-              `2. *DAC Developers* (Chennai)\n` +
-              `3. *ASBL Builders* (Hyderabad)\n` +
-              `4. *Saritha Developers* (Bangalore)\n` +
-              `5. *Anvita Group* (Bangalore)\n` +
-              `6. *Radiance Realty* (Chennai)\n` +
-              `7. *GP Homes* (Chennai)\n` +
-              `8. *Navin Housing* (Chennai)\n` +
+            const greeting = `Demo Hub Reset! 🔄 Please select which AI Concierge you would like to test:\n\n` +
               `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
-              `10. *Century Real Estate* (Bangalore)\n` +
-              `11. *Adarsh Developers* (Bangalore)\n` +
-              `12. *Aparna Constructions* (Hyderabad)\n` +
-              `13. *Sumadhura Group* (Bangalore/Hyd)\n` +
-              `14. *My Home Constructions* (Hyderabad)\n` +
-              `15. *Brigade Group* (Bangalore)\n` +
-              `16. *BBG India* (South India Plots)\n` +
-              `17. *Arvind SmartSpaces* (Golf Villas)\n` +
               `18. *The Machan* (Lonavala Treehouses)\n` +
               `19. *Lost Traveller* (Goa Villas)\n` +
-              `20. *Arcoiris Gifting* (Corporate Gifting Mumbai)\n` +
               `21. *Destiny Farmstay* (Ooty Resort)\n` +
               `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
               `23. *The Rentalgram* (Family Villas)\n` +
@@ -293,7 +276,7 @@ export async function POST(req) {
               `44. *Araiya Hotels* (Boutique Resort Group)\n` +
               `45. *The Goa Villas* (Luxury Villa Collection)\n` +
               `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
-              `Reply with a number (*1-46*) to start the simulation!`;
+              `Reply with a number from the list above, or type the property name, to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting, session.companyId);
             return new NextResponse('OK', { status: 200 });
           }
@@ -1325,7 +1308,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   1. Explicitly clarify that we do not offer villa stays or hotel room bookings. Offer to schedule a site visit (for real estate) or book a business callback/demo (for ScienceThoughts).
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
-- **NO 'NOT MENTIONED' RESPONSES:** If a guest asks about an amenity (like spa, gym, Wi-Fi, child policies, early check-in/out) that is not detailed in the property knowledge base, do NOT say 'currently it's not mentioned' or 'not in my files'. Instead, state politely whether that amenity is available. If not mentioned: assume high-speed Wi-Fi is complimentary, secure parking is available, and for spa services: we can arrange an in-villa massage therapist on-call with 24h advance notice, but there is no dedicated spa facility.
+- **UNLISTED AMENITIES/POLICIES:** If a guest asks about something not detailed in the property knowledge base (e.g. spa, gym, child policies, early check-in/out), do NOT say 'currently it's not mentioned' or 'not in my files' — that sounds robotic. Instead, say warmly that you'll confirm the exact details with the property team and get back to them shortly. NEVER state a specific policy, price, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer.
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share the brochure or schedule a site visit to the property?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).

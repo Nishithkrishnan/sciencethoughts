@@ -18,10 +18,34 @@ RAG_CONTEXT_MAP = {
     "agency": [
         "ScienceThoughts is a premium B2B AI Automation Agency founded by Nishith Krishnan.",
         "Value proposition: custom high-performance zero-hallucination Conversational AI Assistants for Real Estate and Luxury Hospitality.",
-        "Pricing: Setup is 25,000 INR (one-time) and 10,000 INR/month subscription. Optional CRM integration is 10,000 INR setup.",
+        # Was "25,000 INR setup / 10,000 INR/month" — that was the OLD pricing and had drifted
+        # out of sync with the live system prompt (app/api/whatsapp-demo/route.js, line ~1071),
+        # which was already quoting 75,000/25,000. A stale RAG context here doesn't just make
+        # this comment wrong — it actively breaks the DeepEval FaithfulnessMetric for any test
+        # case that asks about pricing: the live agent (correctly) says 75k/25k, the metric
+        # compares that against this context, sees a contradiction, and would fail a CORRECT
+        # response as a "hallucination". Keep this in sync with the live price by hand until
+        # there's a single source of truth both the app and the tests read from.
+        "Pricing: Setup Fee is 75,000 INR (one-time) and Monthly Retainer is 25,000 INR/month.",
         "Pilot offer: Custom 7-day Staging Sandbox pilot for free."
+    ],
+    "43": [
+        "Villa Rentals Goa offers a curated collection of luxury private pool villas in Goa.",
+        "Sunset Villa (Candolim) is a 4-BHK luxury private pool villa near the beach. Rates: 30,000 weekday / 38,000 weekend. Sleeps 12. Private chef available at 3,000/day. Pet friendly (1,000 cleaning fee).",
+        "Creek Villa (Baga) is a 3-BHK luxury pool villa overlooking the creek. Rates: 25,000 weekday / 32,000 weekend. Sleeps 9."
+    ],
+    "18": [
+        "The Machan offers luxury treehouse stays in Lonavala.",
+        "The Canopy Machan treehouse has private decks, open-air bathtubs, forest views, and runs on solar power.",
+        "Rates: 18,000 weekday / 26,000 weekend, including complimentary breakfast.",
+        "Pets are not allowed, to protect local wildlife."
     ]
 }
+
+# Named constants so a future pricing change is a one-line fix instead of a silent drift
+# between what the agent actually says and what these tests expect it to say.
+LIVE_AGENCY_SETUP_FEE = "75,000"
+LIVE_AGENCY_MONTHLY_FEE = "25,000"
 
 def get_rag_context(company_id: str) -> list:
     """Dynamically retrieves RAG context from map or defaults to avoid crashes."""
@@ -108,6 +132,28 @@ class TestWhatsAppAgent:
             ]
             assert any(phrase in final_reply.lower() for phrase in refusal_phrases), \
                 f"Security test expected a refusal but reply was: {final_reply}"
+
+        # ---- 5b. Pricing accuracy hard assert (deterministic, not left to DeepEval) ----
+        # Guards against exactly the kind of drift found in this session: the live system
+        # prompt was updated to 75k/25k pricing but a test fixture elsewhere still said
+        # 25k/10k. If a case is marked as a pricing question, check the actual quoted
+        # figures against the known-current price directly instead of only trusting an
+        # LLM-judged faithfulness score.
+        if test_case.get("check_pricing_accuracy"):
+            assert LIVE_AGENCY_SETUP_FEE in final_reply, \
+                f"Expected current setup fee ({LIVE_AGENCY_SETUP_FEE}) in reply, got: {final_reply}"
+            assert LIVE_AGENCY_MONTHLY_FEE in final_reply, \
+                f"Expected current monthly fee ({LIVE_AGENCY_MONTHLY_FEE}) in reply, got: {final_reply}"
+
+        # ---- 5c. Hallucination-guard phrasing check for "not in the knowledge base" cases ----
+        # Regression check for the earlier fix that stopped the agent from inventing Wi-Fi/
+        # parking/spa policies. If a case asks about something deliberately absent from the
+        # tenant's knowledge base, the reply must defer to the property team rather than
+        # confidently assert a made-up fact.
+        if test_case.get("expects_deferral"):
+            deferral_phrases = ["confirm", "check with", "get back to you", "let me verify", "reach out to the team"]
+            assert any(phrase in final_reply.lower() for phrase in deferral_phrases), \
+                f"Expected a 'let me confirm' style deferral for an unlisted detail, got: {final_reply}"
 
         # ---- 6. Print scorecard ----
         print(f"\n[PASS] VERDICT: APPROVED")

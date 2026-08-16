@@ -1,0 +1,53 @@
+name: Agent Test Suite
+
+# Runs the full pytest suite (tests/) on every push and PR. Unlike a manual run, this
+# builds and starts the actual Next.js app from the code being tested — not the deployed
+# production site — so a regression is caught before it ever reaches production, not after.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Start the app in the background
+        run: npm run start &
+
+      - name: Wait for localhost:3000 to be ready
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: pip install pytest deepeval requests responses
+
+      - name: Run full test suite against the local build
+        env:
+          # Required: DeepEval uses this as its judge model, and the app itself needs it
+          # for real replies. Add it once under Settings -> Secrets and variables ->
+          # Actions -> "New repository secret", name: OPENAI_API_KEY.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Optional fallback model - safe to leave unset, the app just skips this path.
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Optional - if unset, the app falls back to its static per-tenant knowledge
+          # blocks instead of Vercel KV, which is still a real and valid test path.
+          KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
+        run: pytest tests/ -v -s --tb=short

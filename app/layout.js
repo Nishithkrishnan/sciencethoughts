@@ -4,19 +4,19 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
-  title: "Science Thoughts - AI Agents & Human Insights",
-  description: "A hybrid showcase where science meets AI. Explore autonomous agents, dynamic interfaces, and cutting-edge cognitive articles.",
+  title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
+  description: "AI-powered WhatsApp concierge for luxury villas, resorts, and boutique hotels. Instant guest replies, accurate rates from your own knowledge base, and qualified booking leads — 24/7, zero missed inquiries.",
   openGraph: {
-    title: "Science Thoughts - AI Agent Laboratory",
-    description: "Explore my interactive portfolio of autonomous AI agents. Test out the Email Auto-Responder and the Real Estate Lead Auditor live.",
+    title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
+    description: "See how an AI concierge answers guest questions, quotes rates, and captures booking leads on WhatsApp. Try the live demo for a luxury villa or resort.",
     url: "https://sciencethoughts.com",
-    siteName: "Science Thoughts",
+    siteName: "Sciencethoughts",
     images: [
       {
         url: "https://sciencethoughts.com/og-image.jpg", // Add an og-image.jpg to your public folder later
         width: 1200,
         height: 630,
-        alt: "Science Thoughts AI Lab",
+        alt: "Sciencethoughts AI WhatsApp Concierge",
       },
     ],
     locale: "en_US",
@@ -24,8 +24,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Science Thoughts - AI Agents",
-    description: "Explore my interactive portfolio of autonomous AI agents.",
+    title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
+    description: "AI-powered WhatsApp concierge for luxury villas, resorts, and boutique hotels.",
   },
   icons: {
     icon: "/favicon.ico",

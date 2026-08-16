@@ -94,13 +94,25 @@ class CRMAdapter:
             
         return len(successful)
 
-    def push_to_zoho(self, lead_data, attempt=0):
-        """Push lead to Zoho CRM with retry backoff"""
+    def push_to_zoho(self, lead_data, attempt=0, access_token=None):
+        """Push lead to Zoho CRM with retry backoff.
+
+        NOTE: this CRMAdapter class is a test-only fixture and is NOT the code path that
+        actually runs in production — lib/zoho.js is. Until this bug was found, this
+        function built a request that would have failed against the real Zoho API on
+        every attempt (401, since Zoho requires an OAuth Bearer token on every call and
+        none was ever attached), which meant every "test" of this path was really just
+        testing the local retry/backoff/queue logic, never the real HTTP contract. Fixed
+        the immediate bug below; the bigger fix is exercising lib/zoho.js's actual
+        request-building logic directly instead of maintaining a second, parallel
+        implementation here that can silently drift out of sync with it.
+        """
         url = f"{self.zoho_domain}/crm/v2/Leads"
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": f"Zoho-oauthtoken {access_token or self.zoho_refresh_token or ''}"
         }
-        
+
         # Construct summary description
         desc = f"Direct Booking: {lead_data.get('check_in_date')} to {lead_data.get('check_out_date')} for {lead_data.get('additional_requirements', 'None')}"
         payload = {
@@ -118,8 +130,6 @@ class CRMAdapter:
 
         try:
             # We mock the actual HTTP call in unit tests, or run it live if credentials exist
-            # Note: Zoho expects Authorization header
-            # For OAuth, we'd fetch an access token first, which is mock-tested.
             res = requests.post(url, json=payload, headers=headers, timeout=5)
             if res.status_code == 201:
                 return True

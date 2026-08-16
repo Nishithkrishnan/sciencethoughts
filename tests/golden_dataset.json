@@ -105,5 +105,107 @@
     "max_latency_ms": 2800,
     "expects_refusal": true,
     "run_relevancy": false
+  },
+  {
+    "id": "TC_010_MANGO_HOSPITALITY_FLOW_REGRESSION",
+    "companyId": "9",
+    "description": "Regression - Mango Alibaug (id 9) must use the villa booking flow, not the real-estate flow. This tenant was being misclassified as real estate in production before this session's fix (isHospitality incorrectly required id >= 18).",
+    "user_turns": ["I want to book a stay, what do you need from me?"],
+    "expected_slots": [],
+    "expected_tenant": "Mango Alibaug",
+    "forbidden_tenants": ["Royal Garden", "ASBL", "site visit", "unit", "flat", "residential project"],
+    "max_latency_ms": 2800,
+    "run_relevancy": true
+  },
+  {
+    "id": "TC_011_VILLA_RENTALS_GOA_HAPPY",
+    "companyId": "43",
+    "description": "Happy Path - Villa Rentals Goa (previously zero test coverage; also the live Villa Rentals Goa / Nikhil Mirkar sales conversation)",
+    "user_turns": ["What villas do you have available and what are the rates?"],
+    "expected_slots": [],
+    "expected_tenant": "Villa Rentals Goa",
+    "forbidden_tenants": ["The Goa Villas", "Ebony Stays", "Mango Alibaug"],
+    "max_latency_ms": 2800,
+    "run_relevancy": true
+  },
+  {
+    "id": "TC_012_MACHAN_NEGATIVE_FACT_PET_POLICY",
+    "companyId": "18",
+    "description": "Negative-fact grounding - The Machan's knowledge base explicitly states pets are NOT allowed (wildlife protection). Confirms the agent states a negative fact correctly instead of defaulting to a generic pet-friendly answer copied from other villa tenants.",
+    "user_turns": ["Can I bring my dog?"],
+    "expected_slots": [],
+    "expected_tenant": "The Machan",
+    "forbidden_tenants": ["pet-friendly", "pets are welcome", "pets allowed"],
+    "max_latency_ms": 2800,
+    "run_relevancy": true
+  },
+  {
+    "id": "TC_013_ROYAL_GARDEN_UNLISTED_AMENITY_DEFERRAL",
+    "companyId": "40",
+    "description": "Hallucination-guard regression - Royal Garden's knowledge base has no spa or gym listed. Confirms the agent defers to the property team instead of inventing an answer (the exact bug fixed earlier this session in the system prompt).",
+    "user_turns": ["Do you have a spa and a gym on site?"],
+    "expected_slots": [],
+    "expected_tenant": "Royal Garden",
+    "forbidden_tenants": [],
+    "max_latency_ms": 2800,
+    "expects_deferral": true,
+    "run_relevancy": false
+  },
+  {
+    "id": "TC_014_AGENCY_PRICING_ACCURACY",
+    "companyId": "agency",
+    "description": "Pricing drift guard - Deterministically checks the quoted setup/monthly fee against the known-current price (75k/25k), independent of DeepEval's judgment call.",
+    "user_turns": ["What's your pricing for the AI concierge?"],
+    "expected_slots": [],
+    "expected_tenant": "agency",
+    "forbidden_tenants": [],
+    "max_latency_ms": 2800,
+    "check_pricing_accuracy": true,
+    "run_relevancy": true
+  },
+  {
+    "id": "TC_015_HINGLISH_BILINGUAL",
+    "companyId": "9",
+    "description": "Edge case - Hinglish input. The agency's own knowledge base claims fluency in English, Hindi, Hinglish, Tamil, and Kannada; this checks that claim against a real Hinglish message rather than assuming it.",
+    "user_turns": ["Mango Alibaug ka weekend rate kya hai 4 logo ke liye?"],
+    "expected_slots": [],
+    "expected_tenant": "Mango Alibaug",
+    "forbidden_tenants": ["Royal Garden"],
+    "max_latency_ms": 2800,
+    "run_relevancy": true
+  },
+  {
+    "id": "TC_016_CRASH_GUARD_MINIMAL_INPUT",
+    "companyId": "agency",
+    "description": "Robustness - A near-empty, low-signal message ('?') must not crash the pipeline (agent_client raises on non-2xx, which fails this test if the API 500s) and must still respect the hard WhatsApp-format constraints.",
+    "user_turns": ["?"],
+    "expected_slots": [],
+    "expected_tenant": "agency",
+    "forbidden_tenants": [],
+    "max_latency_ms": 2800,
+    "run_relevancy": false,
+    "run_faithfulness": false
+  },
+  {
+    "id": "TC_017_CRASH_GUARD_LONG_INPUT",
+    "companyId": "40",
+    "description": "Robustness - An unusually long guest message must not crash the pipeline or blow past the WhatsApp 1024-char reply limit.",
+    "user_turns": ["Hi, we are a group of 12 people coming from three different families for a milestone 60th birthday celebration and we have a lot of specific requirements including dietary restrictions for 3 vegetarians and 2 vegans and 1 gluten-free guest, we also need to know about parking for 4 cars, whether there is a generator backup in case of power cuts since one of our elderly guests uses a CPAP machine at night, what the exact check-in and check-out times are since our flight lands at 6am, whether the caretaker can arrange a birthday cake and decorations in advance, and whether the property allows outside catering or only the in-house chef, and also please let us know the full weekday and weekend rates for both villas you manage so we can compare and decide which one fits our group size and budget best."],
+    "expected_slots": [],
+    "expected_tenant": "Royal Garden",
+    "forbidden_tenants": ["Mango Alibaug"],
+    "max_latency_ms": 5500,
+    "run_relevancy": false
+  },
+  {
+    "id": "TC_018_ADJACENT_ID_BLEED_PROBE",
+    "companyId": "41",
+    "description": "Cross-tenant RAG isolation - Numerically adjacent tenants (41 Ebony Stays vs 43 Villa Rentals Goa) are the easiest pair to accidentally cross-contaminate if a prompt template or KV key is off by one.",
+    "user_turns": ["Is this the same as Villa Rentals Goa? What are their rates compared to yours?"],
+    "expected_slots": [],
+    "expected_tenant": "Ebony Stays",
+    "forbidden_tenants": ["Villa Rentals Goa", "Sunset Villa", "Creek Villa"],
+    "max_latency_ms": 2800,
+    "run_relevancy": false
   }
 ]

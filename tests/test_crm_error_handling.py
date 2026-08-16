@@ -91,6 +91,11 @@ def test_hubspot_token_refresh(adapter):
     assert adapter.hubspot_access_token == "new_refreshed_access_token"
 
 # Gap 4: Multi-tenant CRM Routing
+# CAUTION: this test is self-contained decoration, not a real integration check. `tenants`
+# and `route_lead` are defined right here in the test, not imported from any production
+# code — so this passes today even though the actual live product (lib/zoho.js) only
+# implements Zoho, not HubSpot or LeadSquared. It proves the routing IDEA works, not that
+# it's wired up. Don't read "6 passed" as "multi-CRM routing is live" — it isn't yet.
 def test_crm_tenant_routing():
     tenants = {
         "9": {"name": "Mango Alibaug", "crm": "zoho"},
@@ -129,3 +134,24 @@ def test_pms_webhook_signature_verification():
     
     # Verify spoofing prevention
     assert verify_pms_signature(payload, "fake_spoofed_signature", secret) is False
+
+# Regression test for a real bug found this session: push_to_zoho() built its Zoho API
+# request with no Authorization header at all, despite a comment saying "Zoho expects
+# Authorization header" right above the headers dict. Every real call would have failed
+# with 401 — the retry/backoff/queue logic was well tested, but the actual HTTP call it
+# was retrying was broken from the start.
+@responses.activate
+def test_push_to_zoho_sends_authorization_header(adapter):
+    responses.add(
+        responses.POST,
+        "https://www.zohoapis.in/crm/v2/Leads",
+        json={"data": [{"code": "SUCCESS"}]},
+        status=201,
+    )
+    lead = {"name": "Nishith Test Lead", "email": "test@example.com", "phone": "9999999999"}
+    result = adapter.push_to_zoho(lead, access_token="mock_zoho_access_token")
+
+    assert result is True
+    sent_headers = responses.calls[0].request.headers
+    assert "Authorization" in sent_headers, "push_to_zoho sent no Authorization header — every real call to Zoho would 401"
+    assert "mock_zoho_access_token" in sent_headers["Authorization"]

@@ -135,7 +135,8 @@ export async function POST(req) {
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
         aiPayload.lead_extracted.target_builder = companiesMap[companyId] || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
-        await pushLeadToMake(aiPayload.lead_extracted, companyId);
+        const fullConversation = [...formattedHistory, { role: 'assistant', content: aiPayload.reply || '' }];
+        await pushLeadToMake(aiPayload.lead_extracted, companyId, fullConversation);
       }
 
       return NextResponse.json(aiPayload);
@@ -361,7 +362,7 @@ export async function POST(req) {
             }
             leadData.target_builder = companiesMap[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
-            await pushLeadToMake(leadData, session.companyId);
+            await pushLeadToMake(leadData, session.companyId, session.history);
           }
         }
       }
@@ -1241,7 +1242,19 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText, companyId =
   }
 }
 
-async function pushLeadToMake(leadData, companyId = 'agency') {
+// Renders a conversation history array into a plain-text transcript for the lead sheet.
+// Kept simple on purpose — this is for a human (the property team) to skim, not to parse.
+function formatConversationTranscript(history = []) {
+  if (!Array.isArray(history) || history.length === 0) return '';
+  return history
+    .map((turn) => {
+      const speaker = turn.role === 'assistant' ? 'AI Concierge' : 'Guest';
+      return `${speaker}: ${turn.content}`;
+    })
+    .join('\n');
+}
+
+async function pushLeadToMake(leadData, companyId = 'agency', conversationHistory = []) {
   // Direct Zoho CRM Integration trigger
   if (process.env.ZOHO_CLIENT_ID || KV_URL) {
     await createZohoLead(leadData, companyId).catch(err => {
@@ -1273,6 +1286,7 @@ async function pushLeadToMake(leadData, companyId = 'agency') {
         additional_requirements: leadData.additional_requirements || null,
         budget: leadData.budget,
         builder: leadData.target_builder || "The Machan",
+        conversation_transcript: formatConversationTranscript(conversationHistory),
         timestamp: new Date().toISOString()
       })
     });

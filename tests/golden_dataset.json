@@ -30,7 +30,9 @@
     "expected_tenant": "Royal Garden",
     "forbidden_tenants": ["Mango Alibaug"],
     "max_latency_ms": 2800,
-    "run_relevancy": false
+    "run_relevancy": false,
+    "expects_refusal": true,
+    "refusal_note": "This is a cross-tenant refusal case, same category as TC_005-009, and was missing expects_refusal — which meant it ran FaithfulnessMetric against Royal Garden's own knowledge base. That's the wrong check here: the correct behavior is to refuse and redirect ('please reach out to that property directly'), which faithfulness incorrectly penalized as 'unnecessarily' not answering from Royal Garden's own pet policy, because the metric has no way to know 'that property' correctly refers to Mango Alibaug (the one actually asked about), not Royal Garden. Marking this as expects_refusal skips that inapplicable check and instead verifies the reply actually contains a refusal phrase, which it does."
   },
   {
     "id": "TC_004_MULTITURN_CONTEXT",

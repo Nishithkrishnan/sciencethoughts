@@ -1201,6 +1201,39 @@ You must respond in JSON format with the following keys:
     }
   }
 
+  // HARD SAFEGUARD: deterministic generic-filler-closer stripping. The system prompt's
+  // NO GENERIC FILLER CLOSERS rule asks the model to never end a reply with a vague,
+  // content-free line like "feel free to ask!" — but this kept slipping through across
+  // three separate live test rounds (TC_012, TC_015) even after the rule was added,
+  // each time tanking DeepEval's relevancy score on an otherwise fully correct answer.
+  // Prompt wording alone wasn't reliable enough, so this strips known filler *whole
+  // sentences* in code instead of hoping the model omits them. Deliberately matches
+  // against the isolated last sentence only (never a partial-string regex against the
+  // whole reply) so it can only ever delete a complete trailing sentence — an earlier
+  // version used a trailing-regex approach that partially matched mid-sentence and left
+  // a dangling, grammatically broken clause behind. A specific, substantive closer like
+  // "Would you like me to check availability?" or "If you'd like a smaller villa, let
+  // me know!" doesn't fully match these patterns and is left untouched.
+  if (payload && payload.reply) {
+    const FULL_SENTENCE_FILLER_PATTERNS = [
+      /^if you (have|need) any (other |further )?questions?( or need (any )?(further )?assistance)?,?\s*(feel free to ask|please ask|let me know|don't hesitate to (ask|reach out))!?\.?$/i,
+      /^let me know if you (need|have) anything else!?\.?$/i,
+      /^is there anything else i can (help|assist) (you )?with\??\.?$/i,
+      /^feel free to (ask|reach out)( if you have (any )?(other |further )?questions)?!?\.?$/i,
+      /^please (let me know|feel free to ask)( if you (need|have) (any )?(other |further )?questions)?!?\.?$/i,
+      /^don't hesitate to (ask|reach out)( if you have (any )?questions)?!?\.?$/i,
+    ];
+    const sentences = payload.reply.match(/[^.!?]*[.!?]+|[^.!?]+$/g);
+    if (sentences && sentences.length >= 2) {
+      const lastSentence = sentences[sentences.length - 1].trim();
+      const isFullFiller = FULL_SENTENCE_FILLER_PATTERNS.some((p) => p.test(lastSentence));
+      if (isFullFiller) {
+        console.log(`[DEMO ROUTE] Stripped generic filler closer from reply for tenant '${companyId}': "${lastSentence}"`);
+        payload.reply = sentences.slice(0, -1).join("").trim();
+      }
+    }
+  }
+
   return payload;
 }
 

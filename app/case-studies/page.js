@@ -50,51 +50,29 @@ export default function CaseStudies() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "40px" }}>
                   <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-color)", padding: "20px", borderRadius: "16px" }}>
-                    <div style={{ color: "var(--accent-teal)", fontSize: "2.5rem", fontWeight: "800", marginBottom: "5px" }}>1.8s</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Average Speed-to-Lead</div>
+                    <div style={{ color: "var(--accent-teal)", fontSize: "1.3rem", fontWeight: "800", marginBottom: "5px" }}>Real-Time</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Replies in the same WhatsApp conversation</div>
                   </div>
                   <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-color)", padding: "20px", borderRadius: "16px" }}>
-                    <div style={{ color: "var(--accent-violet)", fontSize: "2.5rem", fontWeight: "800", marginBottom: "5px" }}>100%</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Brand-Safe Fact Grounding</div>
+                    <div style={{ color: "var(--accent-violet)", fontSize: "1.3rem", fontWeight: "800", marginBottom: "5px" }}>Grounded</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Answers sourced from The Machan's own data</div>
                   </div>
                 </div>
 
                 <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "1rem" }}>
-                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Zero Hallucinations:</strong> Programmed with semantic guardrails to prevent outputting incorrect tariffs.</li>
-                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Instant CRM Sync:</strong> Pushes guest preferences and contacts directly to Zoho or HubSpot.</li>
+                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Grounded Tariff & Policy Answers:</strong> Instructed to defer to the property team rather than guess when information isn't in the verified knowledge base.</li>
+                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Zoho CRM Sync:</strong> Pushes captured guest and lead details directly to Zoho when connected.</li>
                   <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>WhatsApp Native:</strong> Communicates through the guest's preferred channel with zero app downloads required.</li>
                 </ul>
 
-                {/* Impact Comparison Matrix */}
-                <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>Before vs. After Impact Matrix</h3>
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem", textAlign: "left" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", color: "var(--text-muted)" }}>
-                        <th style={{ padding: "10px" }}>Metric</th>
-                        <th style={{ padding: "10px" }}>Traditional Form</th>
-                        <th style={{ padding: "10px", color: "var(--accent-teal)" }}>Concierge AI</th>
-                      </tr>
-                    </thead>
-                    <tbody style={{ color: "var(--text-secondary)" }}>
-                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                        <td style={{ padding: "10px", fontWeight: "600" }}>Response Latency</td>
-                        <td style={{ padding: "10px" }}>4.5 Hours</td>
-                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>1.8 Seconds</td>
-                      </tr>
-                      <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                        <td style={{ padding: "10px", fontWeight: "600" }}>Midnight Inbound Capture</td>
-                        <td style={{ padding: "10px" }}>12% (Form Fill)</td>
-                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>95% Conversation Rate</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: "10px", fontWeight: "600" }}>Direct Booking Share</td>
-                        <td style={{ padding: "10px" }}>Static</td>
-                        <td style={{ padding: "10px", color: "var(--accent-teal)", fontWeight: "700" }}>+15% Lift (Bypass OTA)</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                {/* Note: this is a proof-of-concept demo, not a completed client engagement with
+                    measured before/after results. A before/after comparison table with specific
+                    percentages was removed from here — those numbers were never actually measured
+                    against real guest traffic and shouldn't be presented as a case-study result. */}
+                <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>What This Demo Shows</h3>
+                <p style={{ color: "var(--text-secondary)", lineHeight: "1.6" }}>
+                  A guest can ask about amenities, pet policy, or rates at any hour and get an accurate, grounded answer immediately — instead of waiting until the property team is available the next morning. Try it yourself in the live demo.
+                </p>
               </div>
 
               {/* Right Column: Live Demo Component */}
@@ -124,10 +102,10 @@ export default function CaseStudies() {
               </div>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>ALIBAUG | LUXURY BEACH HOUSE</p>
               <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "25px" }}>
-                A custom AI host configured to quote weekend rates, calculate Konkani seafood meal packages, log pet access queries, and record guest numbers to sheets.
+                A custom AI host configured to quote weekend rates, calculate Konkani seafood meal packages, and answer pet-access questions from the property's own policies.
               </p>
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Outcome: 100% after-hours inquiry capture.</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Handles after-hours inquiries the property team would otherwise miss.</span>
               </div>
             </div>
 

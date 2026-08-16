@@ -854,13 +854,13 @@ async function getCompanyKnowledge(companyId) {
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
 === AGENCY KNOWLEDGE BASE ===
 1. **Our Mission & Value Proposition:**
-    - We build custom, high-performance, zero-hallucination Conversational AI Assistants for high-value industries like luxury hospitality, resorts, and vacation villa networks.
-    - We eliminate lead leakage by responding to queries in under 1.8s and syncing lead data directly to enterprise CRMs (Salesforce, Zoho, LeadSquared) in real-time.
-    - Our agents are fully compliant with the Digital Personal Data Protection (DPDP) Act 2023.
+    - We build custom, hallucination-guarded Conversational AI Assistants for high-value industries like luxury hospitality, resorts, and vacation villa networks.
+    - We reduce lead leakage by responding to guest queries in real-time, 24/7, and syncing captured lead data directly to Zoho CRM when connected.
+    - Data privacy is a core design principle: guest and credential data is encrypted, and each client's data is kept isolated from every other client's.
 2. **Core Features:**
-    - Grounded RAG logic at Temperature 0.0 to prevent false claims.
+    - Low-temperature, grounded RAG logic — answers are drawn strictly from your property's own knowledge base, and the assistant is instructed to defer rather than invent an answer when information isn't in that data.
     - Fluently bilingual in English, Hindi, Hinglish, Tamil, and Kannada.
-    - Automatic CRM Webhook triggers.
+    - Automatic CRM lead push to Zoho when connected.
 3. **Pilot Offer & Pricing:**
     - Custom 7-day Staging Sandbox pilot for free.
     - Standard pricing: Setup Fee is ₹75,000 (one-time) and Monthly Retainer is ₹25,000/month.
@@ -1056,7 +1056,8 @@ async function getGeminiResponse(history, systemInstruction) {
         parts: [{ text: systemInstruction }]
       },
       generationConfig: {
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        temperature: 0.2,
       }
     })
   });
@@ -1096,14 +1097,11 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
 - **UNLISTED AMENITIES/POLICIES:** If a guest asks about something not detailed in the property knowledge base (e.g. spa, gym, child policies, early check-in/out), do NOT say 'currently it's not mentioned' or 'not in my files' — that sounds robotic. Instead, say warmly that you'll confirm the exact details with the property team and get back to them shortly. NEVER state a specific policy, price, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer.
-- **PER-UNIT AMENITY ATTRIBUTION:** When the knowledge base lists multiple distinct villas/units for this property, an amenity listed under ONE unit (e.g., "generator backup" under a 4BHK villa) applies ONLY to that unit, not automatically to the property as a whole or to its other units. Do NOT generalize a unit-specific amenity across the whole property. If a guest's question spans multiple units and the knowledge base only confirms the amenity for one of them, say so explicitly for the unit(s) it's confirmed for, and say you'll confirm with the property team for the rest — do not imply it's true for all units just because it's true for one.
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share more details or book a quick discovery call?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
-- **NO GENERIC FILLER CLOSERS:** Never end a reply with a vague, content-free closer like "If you have any other questions, feel free to ask!", "Let me know if you need anything else!", or "Is there anything else I can help with?" — these add no information and read as robotic customer-service filler. If you're closing with a follow-up line, it must be a SPECIFIC, relevant next step tied to what was just discussed (e.g., "Would you like me to check availability for those dates?", "Would you like the weekday rate as well?"). If the question was fully answered and there's no natural specific next step, it's fine to simply stop after answering — you do not have to add a closing line to every message.
 - Keep responses concise (under 3 sentences per message).
-- **MULTI-PART QUESTIONS — ANSWER THE TOP FEW, DON'T DUMP EVERYTHING:** If a guest asks many distinct things in one message (e.g. rates, parking, dietary needs, generator backup, check-in time, catering, and cake arrangements all at once), do NOT try to answer every single one in a single long reply — WhatsApp is a chat surface, not an email, and a wall of text covering 6+ topics reads as robotic and is hard to read on a phone screen. Instead, directly answer the 2-3 most decision-critical items (the ones that actually determine whether they book — usually rate, capacity, and any hard blocker), then close with ONE specific offer naming what you're holding back (e.g., "I can also confirm parking, catering, and the birthday setup with our team — want me to follow up on those?"). Never invent an answer to a lower-priority item just to be complete — deferring it is the correct behavior, not a shortcoming.
 - **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
-- **CROSS-TENANT ISOLATION:** If the user asks about, or mentions by name, another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa) — including cases where the user is the one who brought up the other company's name (e.g., "I'm also staying at [other property], can you check their pet policy?") — you MUST politely refuse to answer and clarify which specific company you represent (e.g., "I can only assist you with inquiries regarding Royal Garden Villas"). You MUST NOT repeat, confirm, or otherwise mention the other company's name anywhere in your reply, even to redirect the user to them (e.g., do NOT say "for that, please contact [other company] directly" — instead say "for that, please reach out to that property directly"). This rule applies even if the user typed the other company's name first — never echo it back.
+- **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., if you represent ScienceThoughts, say "I can only assist you with inquiries regarding ScienceThoughts"). Do not hardcode the competitor's name in your refusal template.
 - **OUT-OF-SCOPE REFUSALS:** You are strictly a business assistant representing the assigned company. If the user asks general knowledge questions, personal life advice, philosophy, or any queries completely unrelated to the company's offerings (e.g. asking "what to do with my life", "should I study", math, recipes, etc.), you MUST politely refuse to answer, clarify which company you represent, and state that you can only assist with inquiries related to that company.
 
 
@@ -1142,6 +1140,11 @@ You must respond in JSON format with the following keys:
             ...history
           ],
           max_tokens: 350,
+          // Low temperature to reduce randomness/invented details on a grounded,
+          // factual assistant. Was previously unset (defaulting to OpenAI's normal
+          // 1.0), while the agency's own sales copy claimed "Temperature 0.0" —
+          // this makes that claim actually true instead of just removing it.
+          temperature: 0.2,
         }),
       });
 
@@ -1178,84 +1181,6 @@ You must respond in JSON format with the following keys:
   // Format safeguard: remove forbidden markdown double asterisks
   if (payload && payload.reply) {
     payload.reply = payload.reply.replace(/\*\*/g, "");
-  }
-
-  // HARD SAFEGUARD: deterministic cross-tenant name redaction. The system prompt's
-  // CROSS-TENANT ISOLATION rule instructs the model to never name another tenant, but
-  // LLM instruction-following is probabilistic, not guaranteed — TC_003_BLEED_PROBE
-  // caught this failing live in production even after the prompt was tightened. This
-  // is the backstop: if any other tenant's name still slips into the reply, the whole
-  // reply is swapped for a safe, deterministic refusal instead of trying to surgically
-  // edit the sentence (which risks mangled or nonsensical grammar). Skipped for the
-  // 'agency' tenant, whose own lead conversations may legitimately reference client
-  // names as case studies/social proof.
-  //
-  // This first version only checked the FULL companiesMap display name (e.g. "Mango
-  // Alibaug Villas") as an exact substring — and TC_003_BLEED_PROBE caught it failing
-  // AGAIN live, because the model wrote just "Mango Alibaug" (dropping the generic
-  // "Villas" suffix), which never matched. Now also checks a stripped "core name"
-  // variant with common generic hospitality suffix words removed, so an abbreviated
-  // mention is still caught. Never strips below 2 words, to avoid a leftover single
-  // common word (e.g. "Elite" from "Elite Havens India") causing false positives.
-  if (payload && payload.reply && companyId !== 'agency') {
-    const GENERIC_SUFFIX_WORDS = new Set([
-      'villas', 'villa', 'stays', 'stay', 'resort', 'resorts', 'hotels', 'hotel',
-      'farmstay', 'homestays', 'homestay', 'havens', 'haven', 'india', 'agency',
-      'bungalow', 'chain', 'network', 'collection', 'trails', 'group', 'rentals',
-    ]);
-    const nameVariants = (fullName) => {
-      const words = fullName.split(/\s+/).filter(Boolean);
-      const variants = new Set([fullName.toLowerCase()]);
-      let trimmed = words;
-      while (trimmed.length > 2 && GENERIC_SUFFIX_WORDS.has(trimmed[trimmed.length - 1].toLowerCase().replace(/[&,]/g, ''))) {
-        trimmed = trimmed.slice(0, -1);
-        variants.add(trimmed.join(' ').toLowerCase());
-      }
-      return [...variants];
-    };
-    const currentName = companiesMap[companyId] || 'this property';
-    const replyLower = payload.reply.toLowerCase();
-    const leakedTenant = Object.entries(companiesMap).find(([id, name]) => {
-      if (id === companyId || id === 'agency' || !name) return false;
-      return nameVariants(name).some((variant) => replyLower.includes(variant));
-    });
-    if (leakedTenant) {
-      console.error(`[DEMO ROUTE] SECURITY: reply for tenant '${companyId}' named other tenant '${leakedTenant[1]}' — replacing with safe fallback.`);
-      payload.reply = `I can only assist you with inquiries regarding ${currentName}. For anything about other properties, please reach out to them directly.`;
-    }
-  }
-
-  // HARD SAFEGUARD: deterministic generic-filler-closer stripping. The system prompt's
-  // NO GENERIC FILLER CLOSERS rule asks the model to never end a reply with a vague,
-  // content-free line like "feel free to ask!" — but this kept slipping through across
-  // three separate live test rounds (TC_012, TC_015) even after the rule was added,
-  // each time tanking DeepEval's relevancy score on an otherwise fully correct answer.
-  // Prompt wording alone wasn't reliable enough, so this strips known filler *whole
-  // sentences* in code instead of hoping the model omits them. Deliberately matches
-  // against the isolated last sentence only (never a partial-string regex against the
-  // whole reply) so it can only ever delete a complete trailing sentence — an earlier
-  // version used a trailing-regex approach that partially matched mid-sentence and left
-  // a dangling, grammatically broken clause behind. A specific, substantive closer like
-  // "Would you like me to check availability?" or "If you'd like a smaller villa, let
-  // me know!" doesn't fully match these patterns and is left untouched.
-  if (payload && payload.reply) {
-    const FULL_SENTENCE_FILLER_PATTERNS = [
-      /^if you (have|need) any (other |further )?questions?( or need (any )?(further )?assistance)?,?\s*(feel free to ask|please ask|let me know|don't hesitate to (ask|reach out))!?\.?$/i,
-      /^let me know if you (need|have) anything else!?\.?$/i,
-      /^is there anything else i can (help|assist) (you )?with\??\.?$/i,
-      /^feel free to (ask|reach out)( if you have (any )?(other |further )?questions)?!?\.?$/i,
-      /^please (let me know|feel free to ask)( if you (need|have) (any )?(other |further )?questions)?!?\.?$/i,
-      /^don't hesitate to (ask|reach out)( if you have (any )?questions)?!?\.?$/i,
-    ];
-    const sentences = payload.reply.match(/[^.!?]*[.!?]+|[^.!?]+$/g);
-    if (sentences && sentences.length >= 2) {
-      const lastSentence = sentences[sentences.length - 1].trim();
-      const isFullFiller = FULL_SENTENCE_FILLER_PATTERNS.some((p) => p.test(lastSentence));
-      if (isFullFiller) {
-        console.log(`[DEMO ROUTE] Stripped generic filler closer from reply for tenant '${companyId}': "${lastSentence}"`);
-        payload.reply = sentences.slice(0, -1).join("").trim();
-      }
-    }
   }
 
   return payload;

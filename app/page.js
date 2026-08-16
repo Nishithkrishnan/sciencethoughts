@@ -7,23 +7,23 @@ export default async function Home() {
 
   const agents = [
     {
-      id: "email-agent",
-      name: "Automated Lead Processing",
-      desc: "An enterprise-grade workflow intercepting incoming booking inquiries, performing real-time zero-shot priority & sentiment classification, logging metadata to your PMS, and triggering custom notifications.",
+      id: "concierge-agent",
+      name: "WhatsApp Guest Concierge",
+      desc: "A 24/7 conversational AI that answers guest questions from your property's own knowledge base, quotes accurate rates, and extracts structured lead details from the conversation automatically — name, dates, budget, and requirements.",
       icon: <Mail size={24} />,
       color: "var(--accent-green)",
-      badge: "HubSpot & Zoho Native",
-      stack: ["LeadSquared API", "Zoho CRM", "Google Sheets", "Email Parsing"],
+      badge: "Zoho CRM Native",
+      stack: ["WhatsApp Cloud API", "OpenAI GPT-4o", "Zoho CRM", "Structured Lead Extraction"],
       borderColor: "rgba(57, 255, 20, 0.2)"
     },
     {
-      id: "real-estate-agent",
+      id: "booking-agent",
       name: "Direct Booking Concierge",
-      desc: "A custom 24/7 conversational assistant built to quote weekend tariffs, clarify property policies, verify real-time calendar availability, and register bookings directly in your PMS.",
+      desc: "A custom 24/7 conversational assistant built to quote weekend tariffs, clarify property policies, and register bookings — grounded strictly in your property's verified knowledge base, and built to defer rather than guess.",
       icon: <HomeIcon size={24} />,
       color: "var(--accent-teal)",
-      badge: "SiteMinder & Staah Ready",
-      stack: ["Next.js Edge", "Upstash Redis", "OpenAI GPT-4o", "iCal Feeds"],
+      badge: "Multi-Tenant Architecture",
+      stack: ["Next.js Edge", "Vercel KV", "OpenAI GPT-4o", "Gemini Failover"],
       borderColor: "rgba(0, 242, 255, 0.2)"
     }
   ];
@@ -45,7 +45,7 @@ export default async function Home() {
           </h1>
 
           <p style={{ fontSize: "1.3rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400", animation: "slideUp 1s ease-out" }}>
-            Convert late-night inquiries into confirmed reservations. Our brand-safe AI agents engage guests instantly on WhatsApp and sync booking details directly to your CRM or Property Management System.
+            Convert late-night inquiries into confirmed reservations. Our AI agents engage guests instantly on WhatsApp, ground every answer in your property's own data, and sync captured lead details directly to your CRM.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "20px", alignItems: "center", flexWrap: "wrap", animation: "slideUp 1.2s ease-out" }}>
@@ -64,14 +64,12 @@ export default async function Home() {
       {/* 1.5 Powered By Strip (Social Proof) */}
       <section style={{ padding: "40px 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container">
-          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Secured & Integrated With Your Systems</p>
+          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Currently Integrated With</p>
           <div style={{ display: "flex", justifyContent: "center", gap: "50px", flexWrap: "wrap", opacity: 0.35 }}>
+            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>WhatsApp Business Platform</span>
             <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Zoho CRM</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>HubSpot</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>LeadSquared</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>SiteMinder</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Cloudbeds</span>
           </div>
+          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "16px" }}>Other CRMs and PMS platforms built to order for Portfolio and Enterprise plans.</p>
         </div>
       </section>
 
@@ -152,27 +150,24 @@ export default async function Home() {
       <section id="case-studies-cta" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Enterprise Security & Reliability Benchmarks</h2>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>How Reliability Is Built In</h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "800px", margin: "0 auto" }}>
-              Our proprietary integration middleware runs a semantic validation layer sitting between client interfaces and LLMs, guaranteeing high reliability and data privacy.
+              Every reply is grounded in your property's own data, and the system is designed to keep responding even when a provider goes down.
             </p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "25px", marginBottom: "50px" }}>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-teal)", marginBottom: "10px" }}>98.6%</div>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Brand-Safe Responses</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Zero-hallucination guardrails evaluated via strict metrics, containing answers to verified source data.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Grounded, Brand-Safe Responses</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Answers are drawn strictly from your property's own verified knowledge base — the assistant is instructed to defer to your team rather than guess when information isn't there.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-green)", marginBottom: "10px" }}>1.42s</div>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Instant Guest Engagement</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Fast-routing Next.js edge functions matching human reading and responding expectations.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Real-Time Guest Engagement</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Built on Next.js edge functions so guests get answers in the same conversation, not the next morning.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ fontSize: "3rem", fontWeight: "900", color: "var(--accent-violet)", marginBottom: "10px" }}>99.9%</div>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Failover SLA</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Triple-Fallback routing (OpenAI ➔ Gemini ➔ Offline rules) prevents conversational server outages.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Triple-Fallback Reliability</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>If OpenAI is unavailable, the system automatically fails over to Gemini, then to a rules-based offline responder — guests get a reply instead of a dead chat.</p>
             </div>
           </div>
 
@@ -206,8 +201,8 @@ export default async function Home() {
               <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Best for single-property luxury stays or boutique setups needing intelligent automated guest interactions on WhatsApp.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
                 <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Brand-Safe FAQ & Booking Guard</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 Automated Availability Sync</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Google Sheets & Slack Lead Logs</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 Guest Engagement on WhatsApp</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Structured Lead Capture (Name, Dates, Contact Info)</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
@@ -219,8 +214,8 @@ export default async function Home() {
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹100,000 Custom Setup Fee</p>
               <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Designed for growing networks, multi-property vacation portfolios, and active hospitality groups requiring CRM pipelines.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Villa Calendar Routing (iCal)</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Full CRM Integration (Zoho / HubSpot)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Property Knowledge Base Routing</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Zoho CRM Integration (other CRMs on request)</li>
                 <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Custom Field Attribute Extraction</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
@@ -233,9 +228,9 @@ export default async function Home() {
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>Bespoke Architecture Pricing</p>
               <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Custom RAG datasets, dedicated vector instances, custom telephony voice callers, and fully SLA-backed support contracts.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Direct PMS Integrations (SiteMinder / Staah)</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> SOC 2 / GDPR Compliant Data Siloing</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Dedicated Vector Database hosting</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom PMS & Booking Engine Integration (Built to Order)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Encrypted, Per-Tenant Data Isolation</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Dedicated Vector Database Hosting (on request)</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto", background: "var(--bg-card)", border: "1px solid var(--border-color)" }}>Request Quote</a>
             </div>

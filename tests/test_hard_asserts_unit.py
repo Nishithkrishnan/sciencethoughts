@@ -8,7 +8,7 @@ live OpenAI call to test something else entirely. These run in milliseconds, no 
 no API key, so they should run on every commit.
 """
 import pytest
-from tests.asserts.hard_asserts import HardAsserter
+from asserts.hard_asserts import HardAsserter
 
 
 def make_result(reply="Hello!", latency_ms=500, raw_response=None):

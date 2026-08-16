@@ -10,11 +10,23 @@ credentials get "encrypted" in a way that doesn't actually protect them).
 Requires: Node.js on PATH. No network, no OpenAI/Gemini key, no deployed site needed.
 """
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 CHECK_SCRIPT = Path(__file__).parent.parent / "lib" / "crypto_check.mjs"
+
+
+class NodeNotFound(Exception):
+    """Raised when no `node` executable is resolvable on PATH for this process.
+
+    Distinct from a real crypto-logic failure: this means the environment running
+    pytest can't find Node.js, not that lib/crypto.js is broken. Kept as its own
+    exception so setup_class can turn it into a clean pytest.skip instead of a
+    red ERROR that looks like a security check tripped."""
 
 
 def run_crypto_check():
@@ -23,8 +35,17 @@ def run_crypto_check():
             f"crypto_check.mjs not found at {CHECK_SCRIPT}. "
             "This harness lives next to lib/crypto.js — copy it there if it's missing."
         )
+    node_path = shutil.which("node")
+    if node_path is None:
+        raise NodeNotFound(
+            "No `node` executable found on PATH for this process. If Node.js is "
+            "installed via a version manager (nvm, nvm-windows, volta), make sure "
+            "the shell/terminal you're running `pytest` from is the one that has "
+            "`node` on PATH — try running `node --version` in that exact same "
+            "terminal window to confirm."
+        )
     proc = subprocess.run(
-        ["node", str(CHECK_SCRIPT)],
+        [node_path, str(CHECK_SCRIPT)],
         capture_output=True,
         text=True,
         timeout=15,
@@ -48,7 +69,10 @@ class TestCryptoRoundTrip:
 
     @classmethod
     def setup_class(cls):
-        cls.results = {r["name"]: r for r in run_crypto_check()}
+        try:
+            cls.results = {r["name"]: r for r in run_crypto_check()}
+        except NodeNotFound as e:
+            pytest.skip(str(e))
 
     def _assert(self, name):
         r = self.results.get(name)

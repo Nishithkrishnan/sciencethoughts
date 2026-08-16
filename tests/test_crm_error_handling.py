@@ -4,7 +4,7 @@ import hashlib
 import json
 import os
 import responses
-from tests.clients.crm_adapter import CRMAdapter
+from clients.crm_adapter import CRMAdapter
 
 @pytest.fixture
 def adapter(tmp_path):

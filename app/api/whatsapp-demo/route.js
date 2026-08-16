@@ -1177,6 +1177,28 @@ You must respond in JSON format with the following keys:
     payload.reply = payload.reply.replace(/\*\*/g, "");
   }
 
+  // HARD SAFEGUARD: deterministic cross-tenant name redaction. The system prompt's
+  // CROSS-TENANT ISOLATION rule instructs the model to never name another tenant, but
+  // LLM instruction-following is probabilistic, not guaranteed — TC_003_BLEED_PROBE
+  // caught this failing live in production even after the prompt was tightened. This
+  // is the backstop: if any other tenant's name still slips into the reply, the whole
+  // reply is swapped for a safe, deterministic refusal instead of trying to surgically
+  // edit the sentence (which risks mangled or nonsensical grammar). Skipped for the
+  // 'agency' tenant, whose own lead conversations may legitimately reference client
+  // names as case studies/social proof.
+  if (payload && payload.reply && companyId !== 'agency') {
+    const currentName = companiesMap[companyId] || 'this property';
+    const replyLower = payload.reply.toLowerCase();
+    const leakedTenant = Object.entries(companiesMap).find(([id, name]) => {
+      if (id === companyId || id === 'agency' || !name) return false;
+      return replyLower.includes(name.toLowerCase());
+    });
+    if (leakedTenant) {
+      console.error(`[DEMO ROUTE] SECURITY: reply for tenant '${companyId}' named other tenant '${leakedTenant[1]}' — replacing with safe fallback.`);
+      payload.reply = `I can only assist you with inquiries regarding ${currentName}. For anything about other properties, please reach out to them directly.`;
+    }
+  }
+
   return payload;
 }
 

@@ -172,9 +172,7 @@
     "expected_tenant": "Mango Alibaug",
     "forbidden_tenants": ["Royal Garden"],
     "max_latency_ms": 2800,
-    "run_relevancy": true,
-    "relevancy_threshold": 0.75,
-    "relevancy_threshold_note": "Observed a real, factually-correct reply (Mango Beach House, weekend rate 35,000, matches KB exactly) score 0.80 against the default 0.85 threshold, with DeepEval's own stated reason being that it 'shifts into a booking prompt instead of actually providing the requested rate information' — which is false, the rate was stated first. This reads as the relevancy judge being less reliable on code-mixed Hinglish text specifically, not a real product defect. Lowered only for this case, not globally, so a genuine relevancy regression elsewhere still gets caught at 0.85."
+    "run_relevancy": true
   },
   {
     "id": "TC_016_CRASH_GUARD_MINIMAL_INPUT",

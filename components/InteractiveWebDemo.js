@@ -98,7 +98,8 @@ export default function InteractiveWebDemo() {
           webChatMode: true,
           text: userMsg,
           companyId: companyId,
-          history: newHistory.slice(-6) // Pass last 3 turns
+          history: newHistory.slice(-6), // Pass last 3 turns — this is what the AI model sees
+          full_history: newHistory // Full conversation so far — used only for the lead transcript log
         })
       });
 

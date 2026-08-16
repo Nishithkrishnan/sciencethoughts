@@ -46,7 +46,7 @@ async function getSession(from) {
   }
 
   if (!conversationMemory.has(from)) {
-    conversationMemory.set(from, { companyId: null, history: [] });
+    conversationMemory.set(from, { companyId: null, history: [], transcript: [] });
   }
   return conversationMemory.get(from);
 }
@@ -127,15 +127,19 @@ export async function POST(req) {
 
     // Handle Direct Web Chat Requests from sciencethoughts.com website widget
     if (body.webChatMode) {
-      const { text, companyId = "agency", history = [] } = body;
+      const { text, companyId = "agency", history = [], full_history } = body;
       const formattedHistory = [...history, { role: "user", content: text }];
       const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);
-      
+
       // If lead extracted, attempt to push to CRM
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
         aiPayload.lead_extracted.target_builder = companiesMap[companyId] || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
-        const fullConversation = [...formattedHistory, { role: 'assistant', content: aiPayload.reply || '' }];
+        // The widget sends `history` capped (small, cheap — what the AI actually sees) and
+        // `full_history` uncapped (the entire conversation) purely for lead-transcript logging.
+        // Fall back to formattedHistory if an older cached frontend doesn't send full_history yet.
+        const baseHistory = Array.isArray(full_history) && full_history.length > 0 ? full_history : formattedHistory;
+        const fullConversation = [...baseHistory, { role: 'assistant', content: aiPayload.reply || '' }];
         await pushLeadToMake(aiPayload.lead_extracted, companyId, fullConversation);
       }
 
@@ -317,6 +321,7 @@ export async function POST(req) {
             if (matchedId) {
               session.companyId = matchedId;
               session.history = [];
+              session.transcript = [];
               await saveSession(from, session);
               
               // Every remaining tenant is hospitality except 'agency' itself (matchable by
@@ -334,11 +339,18 @@ export async function POST(req) {
               // Default to ScienceThoughts AI Agency (agency) for actual prospects who text 'Hi'
               session.companyId = 'agency';
               session.history = [];
+              session.transcript = [];
               await saveSession(from, session);
             }
+            if (!Array.isArray(session.transcript)) {
+              session.transcript = []; // backward-compat for sessions saved before this field existed
+            }
 
-          // 2. Append user message to history
+          // 2. Append user message to history — `history` stays capped (it's what we pay to
+          // send the AI model each turn); `transcript` is never trimmed, purely for logging
+          // the full conversation to the property team via the lead sheet.
           session.history.push({ role: 'user', content: text });
+          session.transcript.push({ role: 'user', content: text });
           if (session.history.length > 10) {
             session.history = session.history.slice(-10); // cap memory at last 5 turns
           }
@@ -350,6 +362,7 @@ export async function POST(req) {
 
           // Append assistant response to history
           session.history.push({ role: 'assistant', content: aiResponseText });
+          session.transcript.push({ role: 'assistant', content: aiResponseText });
           await saveSession(from, session);
 
           // 4. Send the AI response back to the user via WhatsApp
@@ -362,7 +375,7 @@ export async function POST(req) {
             }
             leadData.target_builder = companiesMap[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
-            await pushLeadToMake(leadData, session.companyId, session.history);
+            await pushLeadToMake(leadData, session.companyId, session.transcript);
           }
         }
       }

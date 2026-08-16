@@ -185,7 +185,8 @@ async function main() {
   console.log('\n[onboard] Done. One manual step left:');
   console.log(`  Add this line to companiesMap in app/api/whatsapp-demo/route.js, then commit + push:`);
   console.log(`    '${tenantId}': '${displayName}',`);
-  console.log('\nEverything else (knowledge base, WhatsApp token, phone routing' + (zoho ? ', Zoho creds' : '') + ') is already live — no deploy needed for those.\n');
+  console.log('\nEverything else (knowledge base, WhatsApp token, phone routing' + (zoho ? ', Zoho creds' : '') + ') is already live — no deploy needed for those.');
+  console.log('Got (or later get) their booking calendar link? Run: node scripts/set-tenant-ical.mjs\n');
 }
 
 main().catch((err) => {

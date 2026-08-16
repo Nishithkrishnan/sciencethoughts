@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createZohoLead } from '../../../lib/zoho';
 import { decrypt } from '../../../lib/crypto';
+import { getTenantAvailability, formatAvailabilityForPrompt } from '../../../lib/ical';
 
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -1138,6 +1139,21 @@ async function getGeminiResponse(history, systemInstruction) {
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
   let builderPrompt = await getCompanyKnowledge(companyId);
   const isHospitality = HOSPITALITY_IDS.has(companyId);
+
+  // Only tenants with an iCal feed configured (tenant:ical:{id} in KV) get this block — for
+  // every other tenant this is a single cheap cached KV lookup that returns '' and changes
+  // nothing. Never claim or imply live availability for a tenant that hasn't configured one.
+  if (isHospitality) {
+    try {
+      const availability = await getTenantAvailability(companyId);
+      const availabilityBlock = formatAvailabilityForPrompt(availability);
+      if (availabilityBlock) {
+        builderPrompt = `${builderPrompt}\n\n${availabilityBlock}`;
+      }
+    } catch (e) {
+      console.error(`[DEMO ROUTE] Availability lookup failed for tenant ${companyId}, continuing without it:`, e);
+    }
+  }
 
   const systemInstruction = `${builderPrompt}
 

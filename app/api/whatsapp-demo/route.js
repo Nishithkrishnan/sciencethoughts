@@ -1189,12 +1189,35 @@ You must respond in JSON format with the following keys:
   // edit the sentence (which risks mangled or nonsensical grammar). Skipped for the
   // 'agency' tenant, whose own lead conversations may legitimately reference client
   // names as case studies/social proof.
+  //
+  // This first version only checked the FULL companiesMap display name (e.g. "Mango
+  // Alibaug Villas") as an exact substring — and TC_003_BLEED_PROBE caught it failing
+  // AGAIN live, because the model wrote just "Mango Alibaug" (dropping the generic
+  // "Villas" suffix), which never matched. Now also checks a stripped "core name"
+  // variant with common generic hospitality suffix words removed, so an abbreviated
+  // mention is still caught. Never strips below 2 words, to avoid a leftover single
+  // common word (e.g. "Elite" from "Elite Havens India") causing false positives.
   if (payload && payload.reply && companyId !== 'agency') {
+    const GENERIC_SUFFIX_WORDS = new Set([
+      'villas', 'villa', 'stays', 'stay', 'resort', 'resorts', 'hotels', 'hotel',
+      'farmstay', 'homestays', 'homestay', 'havens', 'haven', 'india', 'agency',
+      'bungalow', 'chain', 'network', 'collection', 'trails', 'group', 'rentals',
+    ]);
+    const nameVariants = (fullName) => {
+      const words = fullName.split(/\s+/).filter(Boolean);
+      const variants = new Set([fullName.toLowerCase()]);
+      let trimmed = words;
+      while (trimmed.length > 2 && GENERIC_SUFFIX_WORDS.has(trimmed[trimmed.length - 1].toLowerCase().replace(/[&,]/g, ''))) {
+        trimmed = trimmed.slice(0, -1);
+        variants.add(trimmed.join(' ').toLowerCase());
+      }
+      return [...variants];
+    };
     const currentName = companiesMap[companyId] || 'this property';
     const replyLower = payload.reply.toLowerCase();
     const leakedTenant = Object.entries(companiesMap).find(([id, name]) => {
       if (id === companyId || id === 'agency' || !name) return false;
-      return replyLower.includes(name.toLowerCase());
+      return nameVariants(name).some((variant) => replyLower.includes(variant));
     });
     if (leakedTenant) {
       console.error(`[DEMO ROUTE] SECURITY: reply for tenant '${companyId}' named other tenant '${leakedTenant[1]}' — replacing with safe fallback.`);

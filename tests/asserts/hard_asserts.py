@@ -7,7 +7,16 @@ class HardAsserter:
         assert latency <= max_ms, f"Latency SLA failed: {latency:.0f}ms > {max_ms}ms"
 
     @staticmethod
-    def assert_char_limit(result: Dict, limit: int = 1024):
+    def assert_char_limit(result: Dict, limit: int = 4096):
+        # 4096 is Meta's actual documented max for a WhatsApp Cloud API `type: "text"`
+        # message body (confirmed against developers.facebook.com/docs/whatsapp/cloud-api
+        # /reference/messages), which is what sendWhatsAppMessage() in route.js sends.
+        # This was previously 1024, which is Meta's limit for an *interactive* message
+        # body — a different message type this app doesn't use for the main reply. That
+        # mismatch made TC_017_CRASH_GUARD_LONG_INPUT fail on a reply (1198 chars) that
+        # would have sent to WhatsApp successfully; it was never actually over the real
+        # limit. Interactive-specific limits (header 24, button title 20) are still
+        # separately enforced in assert_interactive_payload below.
         reply = result["reply"]
         assert len(reply) <= limit, f"WhatsApp char limit exceeded: {len(reply)} > {limit}"
 

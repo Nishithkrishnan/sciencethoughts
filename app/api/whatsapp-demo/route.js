@@ -1138,9 +1138,15 @@ async function getGeminiResponse(history, systemInstruction) {
 // Deterministic backstop for the "NO GENERIC CLOSERS" prompt rule above — prompt-only instructions
 // have proven unreliable on their own for this exact class of issue (see TC_012), so this strips
 // known generic catch-all closers in code too. It ONLY ever removes the LAST sentence of a reply,
-// and ONLY when that sentence is a full, exact match (whole-sentence, not substring/partial) against
-// a known filler template — a specific, substantive closer like "Would you like me to check
-// availability?" is never touched, and a reply is never stripped down to nothing.
+// and ONLY when that whole sentence matches a known filler shape (never a partial/substring match)
+// — a specific, substantive closer like "Would you like me to check availability?" is never
+// touched, and a reply is never stripped down to nothing.
+//
+// Real production examples this has had to be extended to catch (the model keeps rephrasing the
+// same filler-closer intent in new words, so exact-string matching alone is not enough):
+//   "Is there anything else I can assist you with?"
+//   "Let me know if you have any other questions!"
+//   "If you have any other questions or need assistance, feel free to ask!"
 const GENERIC_CLOSER_TEMPLATES = [
   "is there anything else i can help you with",
   "is there anything else i can assist you with",
@@ -1152,6 +1158,20 @@ const GENERIC_CLOSER_TEMPLATES = [
   "feel free to ask if you have any questions",
   "feel free to ask any other questions",
   "please let me know if you have any questions",
+];
+
+// Each pattern is anchored (^...$) against the whole normalized last sentence — never a partial
+// match — so a specific closer that merely contains a similar word is left untouched.
+const GENERIC_CLOSER_PATTERNS = [
+  /^is there (anything|something) else (i )?(can )?(help|assist) (you )?with\??$/,
+  /^is there anything else you (need|require)\??$/,
+  /^is there anything else i can do for you\??$/,
+  /^(please )?let me know if you (need|have|require) (anything|any ?(thing)? else|any other questions?|any questions?|any ?(further)? assistance)\.?!?$/,
+  /^if you (need|have) (anything else|any (other )?questions?)(,)?\s*(just )?(please )?let me know\.?!?$/,
+  /^feel free to (ask|reach out)( if you have any (other )?questions?)?\.?!?$/,
+  /^if you have any (other )?questions?( or (need|require) (any ?(thing)?|further)? ?(assistance|help))?,?\s*(feel free to ask|let me know|don'?t hesitate to ask)\.?!?$/,
+  /^i'?m here (to help|if you need (anything|any ?(thing)? else|further assistance))\.?!?$/,
+  /^don'?t hesitate to (ask|reach out)( if you have (any )?(more|other)? ?questions?)?\.?!?$/,
 ];
 
 function stripGenericFillerClosers(reply) {
@@ -1167,7 +1187,9 @@ function stripGenericFillerClosers(reply) {
     .replace(/[!?.]+$/g, "")
     .replace(/\s+/g, " ");
 
-  const isGenericCloser = GENERIC_CLOSER_TEMPLATES.some((t) => normalized === t);
+  const isGenericCloser =
+    GENERIC_CLOSER_TEMPLATES.includes(normalized) ||
+    GENERIC_CLOSER_PATTERNS.some((p) => p.test(normalized));
   if (!isGenericCloser) return reply;
 
   const remaining = sentences.slice(0, -1).join("").trim();
@@ -1216,7 +1238,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share more details or book a quick discovery call?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
-- **NO GENERIC CLOSERS:** Do not end a reply with a vague catch-all question like "Is there anything else I can help you with?" or "Let me know if you need anything else!" — these add no information and should never follow a complete, direct answer (e.g. a simple yes/no on policy). A follow-up is only worth adding if it is specific AND grounded in this property's actual knowledge base above — never invent or offer a recommendation you don't have real data for (e.g. after confirming pets aren't allowed, do NOT offer to suggest pet-friendly alternatives unless that information is genuinely in your knowledge base — instead offer another real fact you do know, like check-in timing, or simply end cleanly on the answer itself).
+- **NO GENERIC CLOSERS:** Do not end a reply with a vague catch-all closer — none of these, or anything similar in spirit: "Is there anything else I can help you with?", "Is there anything else I can assist you with?", "Let me know if you have any other questions!", "If you have any other questions or need assistance, feel free to ask!", "Don't hesitate to reach out if you have more questions." These add no information and should never follow a complete, direct answer (e.g. a simple yes/no on policy). A follow-up is only worth adding if it is specific AND grounded in this property's actual knowledge base above — never invent or offer a recommendation you don't have real data for (e.g. after confirming pets aren't allowed, do NOT offer to suggest pet-friendly alternatives unless that information is genuinely in your knowledge base — instead offer another real fact you do know, like check-in timing, or simply end cleanly on the answer itself).
 - **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
 - **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., if you represent ScienceThoughts, say "I can only assist you with inquiries regarding ScienceThoughts"). Do not hardcode the competitor's name in your refusal template.
 - **OUT-OF-SCOPE REFUSALS:** You are strictly a business assistant representing the assigned company. If the user asks general knowledge questions, personal life advice, philosophy, or any queries completely unrelated to the company's offerings (e.g. asking "what to do with my life", "should I study", math, recipes, etc.), you MUST politely refuse to answer, clarify which company you represent, and state that you can only assist with inquiries related to that company.

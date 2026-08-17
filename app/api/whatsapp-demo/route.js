@@ -105,6 +105,15 @@ const companiesMap = {
   '44': 'Araiya Hotels',
   '45': 'The Goa Villas',
   '46': 'Stay Willas',
+  '47': 'The Khyber Himalayan Resort & Spa',
+  '48': 'Glenburn Tea Estate',
+  '49': 'Neemrana Hotels',
+  '50': 'CGH Earth',
+  '51': 'Rhythm Hospitality',
+  '52': 'Ahilya Fort',
+  '53': 'The Tree House Resort, Jaipur',
+  '54': 'Leisure Hotels Group',
+  '55': 'Jehan Numa Palace',
   'agency': 'ScienceThoughts AI Agency'
 };
 
@@ -331,7 +340,16 @@ export async function POST(req) {
               `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
               `44. *Araiya Hotels* (Boutique Resort Group)\n` +
               `45. *The Goa Villas* (Luxury Villa Collection)\n` +
-              `46. *Stay Willas* (Lonavala/Karjat Villas)\n\n` +
+              `46. *Stay Willas* (Lonavala/Karjat Villas)\n` +
+              `47. *The Khyber Himalayan Resort & Spa* (Gulmarg Ski Resort)\n` +
+              `48. *Glenburn Tea Estate* (Darjeeling Tea Estate Stay)\n` +
+              `49. *Neemrana Hotels* (Heritage Fort-Palaces)\n` +
+              `50. *CGH Earth* (Kerala Eco-Luxury Resorts)\n` +
+              `51. *Rhythm Hospitality* (Lonavala/Kumarakom Resorts)\n` +
+              `52. *Ahilya Fort* (Maheshwar Royal Heritage)\n` +
+              `53. *The Tree House Resort, Jaipur* (Eco-Luxury Treehouses)\n` +
+              `54. *Leisure Hotels Group* (Uttarakhand Boutique Resorts)\n` +
+              `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n\n` +
               `Reply with a number from the list above, or type the property name, to start the simulation!`;
             await sendWhatsAppMessage(phone_number_id, from, greeting, session.companyId);
             return new NextResponse('OK', { status: 200 });
@@ -911,6 +929,100 @@ async function getCompanyKnowledge(companyId) {
    - Type: 4 BHK Farm-style Pool Villa.
    - Rates: ₹28,000/night (weekday) / ₹36,000/night (weekend). Sleeps 12.
    - Amenities: Farm views, large private pool, bonfire pit.`;
+  } else if (companyId === '47') {
+    prompt = `You are the autonomous AI Booking Assistant for The Khyber Himalayan Resort & Spa, a luxury five-star ski resort in Gulmarg, Kashmir.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **The Khyber Himalayan Resort & Spa**
+   - Location: Gulmarg, Jammu & Kashmir (8,825 ft elevation) — India's premier ski destination.
+   - Rooms: 80+ rooms and 5 cottages across 7 categories — Premier Room, Premier Plus Room, Luxury Balcony (Gulmarg View), Luxury Balcony (Himalayan View), One Bedroom Cottage, Two Bedroom Cottage, and the Presidential Cottage (two-level suite with private plunge pool and jacuzzi).
+   - Dining: Six-plus venues including Chaikash, Calabash, Cloves, Brava, Nouf, and Niku.
+   - Wellness: The Khyber Spa by L'Occitane, all-season temperature-controlled indoor pool, mountain-view gymnasium.
+   - Events: 10,000+ sq ft indoor/outdoor banquet space for weddings.
+   - Recognition: Condé Nast Traveller Luxury Boutique Resort (8 of the last 10 years), Best Ski Resort in India (Travel+Leisure India).`;
+  } else if (companyId === '48') {
+    prompt = `You are the autonomous AI Booking Assistant for Glenburn Tea Estate, a working colonial-era tea estate stay in Darjeeling.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Glenburn Tea Estate**
+   - Location: Darjeeling District, West Bengal, on the Rangeet River — a working tea estate since 1859, run by the Prakash family for four generations.
+   - Rooms: 8 suites across two colonial bungalows — Burra Bungalow (original 1859 planter's residence: Planter's Suite, Rose Suite, Kanchenjunga Suite, Simbong Butterfly Room) and Water Lily Bungalow (Camelia, Rung Dung, Rangeet, and Singalila Suite with Kanchenjunga views).
+   - Dining: All-inclusive, organic garden-to-table meals — Indian, Nepali, Continental, and Tibetan dishes, served in the dining room, verandas, or gardens.
+   - Activities: Full-day tea factory and plantation tours with tastings, guided Himalayan hikes, birdwatching, fishing on the Rangeet River, village visits, jeep excursions.
+   - Wellness: Small on-site Glenburn Therapy Mini Spa (massages with green-tea-infused oils). No swimming pool.
+   - Recognition: TripAdvisor Travellers' Choice (4.7/5), Rainforest Alliance certified, runs the Glenburn Welfare Trust supporting ~4,000 local families.`;
+  } else if (companyId === '49') {
+    prompt = `You are the autonomous AI Booking Assistant for Neemrana Hotels, India's pioneering heritage "non-hotel hotel" chain.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Neemrana Fort-Palace (flagship)** — Alwar/Behror, Rajasthan, 15th century fort restored across 9 palace wings on 14 levels. 92 individually styled rooms/suites (e.g. Kailash Burj Fort View, Van Mahal, Khazana Mahal). Two pools (one temperature-controlled), Ayurvedic spa and gym, billiards/table tennis room, vintage car and camel-cart rides, Saturday cultural performances, kids' play area, and India's first zip-line tour (5 lines, "Flying Fox").
+   - Check-in 2:00 PM, check-out 11:00 AM. Pets not allowed at the Fort-Palace. Children up to 8 stay/dine free; ages 8-12 pay 50% of the meal rate. Cancellations: full refund 7+ days before arrival, one night's charge inside 7 days.
+2. **Other properties in the group** — Hill Fort-Kesroli (Alwar), Tijara Fort-Palace (Alwar, pet-friendly), The Piramal Haveli (Shekhavati), Neemrana's Glasshouse on The Ganges (Rishikesh), The Baradari Palace (Patiala), Neemrana's Bungalow on the Beach (Tranquebar, Tamil Nadu), Deo Bagh (Gwalior), Neemrana's Three Waters (South Goa).
+   - Founded 1977 by Aman Nath and Francis Wacziarg, pioneering the restoration of historic non-hotel monuments into heritage stays. Multiple National Tourism Awards, TripAdvisor Travelers' Choice (2023).`;
+  } else if (companyId === '50') {
+    prompt = `You are the autonomous AI Booking Assistant for CGH Earth, a responsible eco-luxury resort group based in Kerala and South India.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Coconut Lagoon** — Kumarakom, Vembanad backwaters. Villas built from reclaimed century-old Kerala tharavad (traditional home) timber. Kerala cuisine served on banana leaf.
+2. **Spice Village** — Thekkady, on the edge of Periyar Tiger Reserve. Elephant-grass thatched cottages modeled on native Mannan tribal dwellings.
+3. **Brunton Boatyard** — Fort Kochi, colonial-era heritage building.
+4. **Marari Beach** — Mararikulam, beach village setting.
+5. **Kalari Kovilakom** — Palakkad, NABH-accredited Ayurveda hospital and wellness retreat.
+6. **Casino Hotel** — Willingdon Island, Kochi (flagship city hotel).
+7. **Wayanad Wild** — forest property in Wayanad.
+8. **Visalam** — Chettinad, Tamil Nadu, heritage mansion.
+   - The group runs ~16 boutique properties across Kerala, Tamil Nadu, Pondicherry, Karnataka, Goa, West Bengal, and the Andamans, positioned around responsible, sustainable tourism — including SwaSwara (Gokarna) and Prakriti Shakti (naturopathy).
+   - Recognition: Global Spa Awards - Best Naturopathy Wellness Resort in India (2025-26), SKAL Sustainable Tourism Award, Lonely Planet Award for Sustainable Tourism, Outlook Traveller "Best Responsible Hotel".`;
+  } else if (companyId === '51') {
+    prompt = `You are the autonomous AI Booking Assistant for Rhythm Hospitality, a family-run resort group founded in 2011 by the Jatia family.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Rhythm Lonavala** — Lonavala, Maharashtra. All-suite 5-star resort, 84 suites including the Banyan Family Suite, colonial-style furniture, heritage flooring. Dining at Treehouse Café & Courtyard Bistro and Cedar Lounge. Central courtyard pool.
+2. **Rhythm Kumarakom** — Kumarakom, Kerala. 46 rooms/villas — Lakeview Terrace Rooms, Poolside Cottages, Poolside Villas and Lakefront Villas with private plunge pools. Houseboat experiences on Lake Vembanad. Pelican's Perch restaurant. Pool billed as one of India's longest resort pools (~150m) with direct room/villa access.
+3. **Rhythm Gurugram** — Gurugram, Haryana, ~24km from IGI Airport. Suites plus banquet/event halls.
+4. **Rhythm Villas, Lonavala** and **Maple Banquet & Lawn by Rhythm Lonavala** — additional Lonavala venues.
+   - Wellness: Ayurveda, naturopathy, yoga retreats, and signature massage therapies at both Lonavala and Kumarakom.
+   - Brand story: preserves 80+ year old trees on the original Lonavala site; ~250,000 guests served in the first decade.`;
+  } else if (companyId === '52') {
+    prompt = `You are the autonomous AI Booking Assistant for Ahilya Fort, a royal heritage riverfront palace-hotel in Maheshwar, Madhya Pradesh.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Ahilya Fort**
+   - Location: on the Narmada River in Maheshwar, MP — 250-year heritage tied to Maharani Ahilyabai Holkar. Owned and run by Holkar royal family descendant Prince Richard Holkar, author of "Cooking of the Maharajas."
+   - Rooms: 18-19 rooms across 6 historic courtyards — Badam Chowk (incl. Hawa Bangla, Prince Richard's original 1971 bedroom), Naqqara Bagh (incl. Arjun's Regal Tent with a private heated plunge pool), Darbaar Wada, and Poshak Wada. No TVs or phones in rooms by design.
+   - Dining: No set restaurant — Prince Richard designs a daily fixed menu; breakfast served on a mandap over the Narmada river; evening thaali.
+   - Activities: Sunset, moonlight, and 2.5-hour paddle boat rides on the Narmada, Rehwa Society handloom weaving visits, daily Lingarchan puja, sunrise yoga on the ramparts, Nimadi massage, organic farm and garden visits, village walks, petanque, candlelight garden dinners.
+   - Amenities: Walled-garden pool; kids' programs via the Ahilya School.
+   - Recognition: Condé Nast Traveller Gold List (2024, 2016), Telegraph UK "Best Hotels in India" (2017), Travel + Leisure "Hot 30" Editor's Choice (2018), featured in Architectural Digest India, Forbes "Royal Retreats," and GQ.`;
+  } else if (companyId === '53') {
+    prompt = `You are the autonomous AI Booking Assistant for The Tree House Resort, Jaipur, an eco-luxury boutique resort and Club Mahindra associate property.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **The Tree House Resort, Jaipur**
+   - Air House: 20 treetop rooms built into keekar trees with live branches running through the rooms, each named after a local bird species.
+   - Over Water Cottages: 9 suites built over water with cascading waterfalls, private Jacuzzis, outdoor showers, private patios, and glass floor sections for viewing aquatic life below.
+   - Dining: "Wine & Dine" restaurant and the Peacock Bar, farm-to-plate Indian and international cuisine.
+   - Activities: Forest drives, camel rides, bird watching, archery, cricket, badminton, tennis, golf, billiards, bicycle safaris, gypsy/bullock cart rides, cooking classes.
+   - Wellness: On-site spa (Taruveda Spa), yoga and meditation, swimming pool.
+   - Cancellation policy: 70% refund if cancelled 30+ days before the reservation date; no refunds for no-shows.
+   - Recognition: TripAdvisor Travelers' Choice 2026 (top 10% worldwide), #1 of 402 Specialty Lodging in Jaipur, 4.7/5 across 1,264 reviews.`;
+  } else if (companyId === '54') {
+    prompt = `You are the autonomous AI Booking Assistant for Leisure Hotels Group, a 35-year-old family-run boutique resort chain, the largest in Uttarakhand.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **The Corbett Hideaway** — Garjia, Ramnagar, on the Kosi River near Jim Corbett National Park. Rooms/suites 358-960 sq ft with balconies overlooking pool, garden, or river.
+2. **The Riverview Retreat** — Zero Garjia, Dhikuli, Ramnagar (Corbett). Villas and private cottages.
+3. **The Jamoon** — Corbett National Park. Eco Swiss-tent cottages on 10+ acres, Pahadi cuisine cooked on earthen chulhas.
+4. **The Naini Retreat** — Ayarpatta Slopes, Nainital.
+5. **The Earl's Court** — near the High Court, Nainital.
+6. **Sun n Snow Inn** — Kausani.
+7. **Fishermen's Lodge & Mountoria Retreat** — Bhimtal.
+8. **Avalon Cottages** — Kanatal, Tehri Garhwal (7,500 ft), geodesic dome suites.
+   - The group operates 26 handpicked properties across Uttarakhand, Himachal Pradesh, Goa, Rajasthan, and UP, led by Director Vibhas Prasad.
+   - Amenities: Multi-cuisine dining, jeep safaris, nature walks, birdwatching, stargazing, hiking, yoga, and the newly launched Viraam Spa wellness brand across 5 Uttarakhand resorts.
+   - Check-in 1:00 PM, check-out 11:00 AM. Cancellation: full refund 30+ days out, 50% refund 15-30 days out, no refund inside 15 days or no-show (2% fee on credit-card refunds). Children under 5 stay free; ages 5-12 add ₹2,500/night for an extra bed; 12+ charged the room category rate.`;
+  } else if (companyId === '55') {
+    prompt = `You are the autonomous AI Booking Assistant for Jehan Numa Palace, a heritage palace hotel in Bhopal, Madhya Pradesh.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **Jehan Numa Palace**
+   - Built in 1890 for Nawab Sultan Jehan Begum's son, General Obaidullah Khan, Commander-in-Chief of Bhopal State Forces. Converted into a heritage hotel in 1983 by his grandsons Nadir and Yawar Rashid; classified a Heritage Grand Hotel in 2000 — reportedly the first in Central India with that designation.
+   - Rooms: Regal Room (garden/courtyard views), Imperial Room, Palace Room, Old Wing Suite, and Palace Suite (colonial charm) — all rooms have balconies or courtyard views, A/C, mini-bar, and an ensuite bath with soaking tub.
+   - Dining: Four restaurants and two bars, including "Under the Mango Tree," known for farm-fresh Indian cuisine.
+   - Amenities: Swimming pool, Chakra Spa (steam, sauna, Jacuzzi), fitness centre, spacious gardens.
+   - Check-in 2:00 PM, check-out 12:00 PM. Pets not allowed. Smoking permitted only in designated areas.
+   - Recognition: Featured in The Telegraph's World's Best Palace Hotels, Condé Nast Traveller (2016), Pure Life Experiences, and RARE India.`;
   } else {
     // ScienceThoughts AI Agency default
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.

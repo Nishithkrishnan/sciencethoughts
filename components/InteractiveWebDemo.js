@@ -41,7 +41,16 @@ export default function InteractiveWebDemo() {
     "43": "Villa Rentals Goa (Pool Stays)",
     "44": "Araiya Hotels (Boutique Hotels)",
     "45": "The Goa Villas (Luxury Villa Collection)",
-    "46": "Stay Willas (Lonavala Villas)"
+    "46": "Stay Willas (Lonavala Villas)",
+    "47": "The Khyber Himalayan Resort & Spa (Gulmarg Ski Resort)",
+    "48": "Glenburn Tea Estate (Darjeeling Tea Estate)",
+    "49": "Neemrana Hotels (Heritage Fort-Palaces)",
+    "50": "CGH Earth (Kerala Eco-Luxury Resorts)",
+    "51": "Rhythm Hospitality (Lonavala/Kumarakom Resorts)",
+    "52": "Ahilya Fort (Maheshwar Royal Heritage)",
+    "53": "The Tree House Resort, Jaipur (Eco-Luxury Treehouses)",
+    "54": "Leisure Hotels Group (Uttarakhand Boutique Resorts)",
+    "55": "Jehan Numa Palace (Bhopal Heritage Palace)"
   };
 
   useEffect(() => {

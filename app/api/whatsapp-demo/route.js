@@ -1135,6 +1135,45 @@ async function getGeminiResponse(history, systemInstruction) {
   return JSON.parse(cleanContent);
 }
 
+// Deterministic backstop for the "NO GENERIC CLOSERS" prompt rule above — prompt-only instructions
+// have proven unreliable on their own for this exact class of issue (see TC_012), so this strips
+// known generic catch-all closers in code too. It ONLY ever removes the LAST sentence of a reply,
+// and ONLY when that sentence is a full, exact match (whole-sentence, not substring/partial) against
+// a known filler template — a specific, substantive closer like "Would you like me to check
+// availability?" is never touched, and a reply is never stripped down to nothing.
+const GENERIC_CLOSER_TEMPLATES = [
+  "is there anything else i can help you with",
+  "is there anything else i can assist you with",
+  "is there anything else you need",
+  "is there anything else i can do for you",
+  "let me know if you need anything else",
+  "let me know if you have any other questions",
+  "let me know if you have any questions",
+  "feel free to ask if you have any questions",
+  "feel free to ask any other questions",
+  "please let me know if you have any questions",
+];
+
+function stripGenericFillerClosers(reply) {
+  if (!reply || typeof reply !== "string") return reply;
+
+  const sentences = reply.match(/[^.!?]+[.!?]*/g);
+  if (!sentences || sentences.length < 2) return reply; // never strip a reply down to nothing
+
+  const last = sentences[sentences.length - 1];
+  const normalized = last
+    .trim()
+    .toLowerCase()
+    .replace(/[!?.]+$/g, "")
+    .replace(/\s+/g, " ");
+
+  const isGenericCloser = GENERIC_CLOSER_TEMPLATES.some((t) => normalized === t);
+  if (!isGenericCloser) return reply;
+
+  const remaining = sentences.slice(0, -1).join("").trim();
+  return remaining || reply; // safety net
+}
+
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
   let builderPrompt = await getCompanyKnowledge(companyId);
@@ -1177,6 +1216,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share more details or book a quick discovery call?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
+- **NO GENERIC CLOSERS:** Do not end a reply with a vague catch-all question like "Is there anything else I can help you with?" or "Let me know if you need anything else!" — these add no information and should never follow a complete, direct answer (e.g. a simple yes/no on policy). If a follow-up genuinely helps, make it specific to what was just discussed (e.g. after confirming pets aren't allowed, you could offer to share nearby pet-friendly options if relevant — otherwise just end cleanly on the answer itself).
 - **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
 - **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., if you represent ScienceThoughts, say "I can only assist you with inquiries regarding ScienceThoughts"). Do not hardcode the competitor's name in your refusal template.
 - **OUT-OF-SCOPE REFUSALS:** You are strictly a business assistant representing the assigned company. If the user asks general knowledge questions, personal life advice, philosophy, or any queries completely unrelated to the company's offerings (e.g. asking "what to do with my life", "should I study", math, recipes, etc.), you MUST politely refuse to answer, clarify which company you represent, and state that you can only assist with inquiries related to that company.
@@ -1255,9 +1295,10 @@ You must respond in JSON format with the following keys:
     payload = simulateOfflineResponse(companyId, history);
   }
 
-  // Format safeguard: remove forbidden markdown double asterisks
+  // Format safeguard: remove forbidden markdown double asterisks, then strip generic filler closers
   if (payload && payload.reply) {
     payload.reply = payload.reply.replace(/\*\*/g, "");
+    payload.reply = stripGenericFillerClosers(payload.reply);
   }
 
   return payload;

@@ -132,6 +132,7 @@ async function main() {
   const displayName = (await ask('Display name (e.g. "Coral Bay Villas"): ')).trim();
   const waToken = (await ask('WhatsApp access token: ')).trim();
   const phoneNumberId = (await ask('WhatsApp phone_number_id: ')).trim();
+  const notifyEmail = (await ask('Alert email — who should get emailed the instant a guest question needs a human answer? (blank = use your default): ')).trim();
 
   console.log('\nKnowledge base — paste the full system-prompt text (rates, capacity, per-unit');
   console.log('amenities, house rules, meals, cancellation policy, etc). End with a line that');
@@ -171,6 +172,13 @@ async function main() {
 
   await kvSet(KV_URL, KV_TOKEN, `tenant:phone:${phoneNumberId}`, tenantId);
   console.log(`  ✓ tenant:phone:${phoneNumberId} -> ${tenantId}`);
+
+  if (notifyEmail) {
+    await kvSet(KV_URL, KV_TOKEN, `tenant:notifyEmail:${tenantId}`, notifyEmail);
+    console.log(`  ✓ tenant:notifyEmail:${tenantId} -> ${notifyEmail}`);
+  } else {
+    console.log(`  - No alert email given; this tenant will alert DEFAULT_NOTIFY_EMAIL until you set tenant:notifyEmail:${tenantId} in KV.`);
+  }
 
   if (zoho) {
     await kvSet(KV_URL, KV_TOKEN, `tenant:crm:zoho:${tenantId}`, JSON.stringify({

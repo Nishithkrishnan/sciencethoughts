@@ -9,6 +9,19 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY?.trim();
 const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL?.trim();
 
+// Instant escalation alerts — the moment a question gets deferred, an email goes out through the
+// same Make.com -> Gmail webhook already used for the daily digest (Make's Gmail "To" field just
+// needs to be mapped from the webhook's `to` field instead of being hardcoded, so one Make
+// scenario serves every tenant, forever, with zero per-tenant setup in Make itself).
+const MAKE_DIGEST_WEBHOOK_URL = (process.env.MAKE_DIGEST_WEBHOOK_URL || "").trim();
+// Who gets alerted for a tenant that hasn't been given its own address yet — set this to your own
+// email today so every demo tenant alerts you; once a tenant is a real client, set
+// tenant:notifyEmail:{id} in KV to THEIR email (scripts/onboard-tenant.mjs asks for this) and
+// alerts for that tenant switch over automatically, no code change.
+const DEFAULT_NOTIFY_EMAIL = (process.env.DEFAULT_NOTIFY_EMAIL || "").trim();
+const DASHBOARD_SECRET = (process.env.DASHBOARD_SECRET || "").trim();
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || "").trim();
+
 // Simple in-memory cache to store conversation history (5 turns limit per user)
 const conversationMemory = new Map();
 
@@ -209,7 +222,9 @@ export async function POST(req) {
         const webContact = aiPayload.lead_extracted?.phone && aiPayload.lead_extracted.phone !== 'Web Visitor'
           ? aiPayload.lead_extracted.phone
           : (aiPayload.lead_extracted?.email || 'Web visitor (no contact captured)');
-        after(() => logEscalation(companyId, companiesMap[companyId] || 'Web Demo', aiPayload.escalation_question, webContact, aiPayload.reply));
+        const escCompanyName = companiesMap[companyId] || 'Web Demo';
+        after(() => logEscalation(companyId, escCompanyName, aiPayload.escalation_question, webContact, aiPayload.reply));
+        after(() => notifyEscalation(companyId, escCompanyName, aiPayload.escalation_question, webContact));
       }
 
       return NextResponse.json(aiPayload);
@@ -463,7 +478,9 @@ export async function POST(req) {
           // promise instead of just words — see the dashboard at /dashboard. On WhatsApp we
           // always have the guest's real number, unlike anonymous web chat.
           if (aiResponse.escalation_question) {
-            after(() => logEscalation(session.companyId, companiesMap[session.companyId] || session.companyId, aiResponse.escalation_question, from, aiResponseText));
+            const escCompanyName = companiesMap[session.companyId] || session.companyId;
+            after(() => logEscalation(session.companyId, escCompanyName, aiResponse.escalation_question, from, aiResponseText));
+            after(() => notifyEscalation(session.companyId, escCompanyName, aiResponse.escalation_question, from));
           }
         }
       }
@@ -1601,6 +1618,67 @@ async function logEscalation(companyId, companyName, question, contact, aiReply)
     });
   } catch (e) {
     console.error("[DEMO ROUTE] logEscalation failed (non-fatal):", e);
+  }
+}
+
+// Who should get emailed the instant a question is deferred for THIS tenant. Looks up
+// tenant:notifyEmail:{id} (set once per tenant — by scripts/onboard-tenant.mjs during onboarding,
+// or by hand in KV) and falls back to DEFAULT_NOTIFY_EMAIL so this works immediately for every
+// tenant that hasn't been given its own address yet. This one lookup is the entire mechanism that
+// makes alerting "scale to N clients" — adding a client's alert routing is just writing one KV
+// value, never a code change or a new integration.
+async function getTenantNotifyEmail(companyId) {
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/tenant:notifyEmail:${companyId}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) return data.result;
+    } catch (e) {
+      console.error(`[NOTIFY] Failed to load notify email for tenant ${companyId}:`, e);
+    }
+  }
+  return DEFAULT_NOTIFY_EMAIL || null;
+}
+
+// Fires the instant "a guest needs an answer" email — this is the real-time alert industry
+// support tools (Intercom, Zendesk, etc.) send on every handoff, rather than a batched digest.
+// Delivery is the same Make.com webhook -> Gmail action already set up; only the payload's `to`
+// field changes per tenant, so this one Make scenario covers every tenant without being touched
+// again. Fails silently (fail-open) — a guest's reply must never be blocked by a notification
+// hiccup, and logEscalation() has already safely recorded the question in KV regardless.
+async function notifyEscalation(companyId, companyName, question, contact) {
+  if (!MAKE_DIGEST_WEBHOOK_URL || !question) return;
+  try {
+    const to = await getTenantNotifyEmail(companyId);
+    if (!to) return;
+    const dashboardLink = SITE_BASE_URL && DASHBOARD_SECRET
+      ? `${SITE_BASE_URL.replace(/\/$/, '')}/dashboard?key=${DASHBOARD_SECRET}`
+      : null;
+    const html = `
+      <div style="font-family:sans-serif;color:#222;">
+        <h2 style="margin-bottom:4px;">A guest question needs an answer</h2>
+        <p style="color:#555;margin-top:0;"><strong>${companyName}</strong></p>
+        <p style="font-size:16px;">"${question}"</p>
+        <p style="color:#555;">Guest contact: ${contact || 'not captured'}</p>
+        ${dashboardLink ? `<p style="margin-top:16px;"><a href="${dashboardLink}">Open the dashboard to answer &rarr;</a></p>` : ''}
+      </div>`;
+    await fetch(MAKE_DIGEST_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event: 'escalation_created',
+        to,
+        subjectLine: `New question from a guest — ${companyName}`,
+        summaryHtml: html,
+        property: companyName,
+        question,
+        contact
+      })
+    });
+  } catch (e) {
+    console.error("[DEMO ROUTE] notifyEscalation failed (non-fatal):", e);
   }
 }
 

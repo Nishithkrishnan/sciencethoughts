@@ -143,6 +143,104 @@ const HOSPITALITY_IDS = new Set(
   Object.keys(companiesMap).filter((id) => id !== 'agency')
 );
 
+// Resolves a free-typed WhatsApp message (e.g. "join Villa Rentals Goa", "43", "ELIVAAS") to a
+// companiesMap id. Used both by the shared-sandbox "join"/"connect" flow and by the direct-name
+// routing block below. Three passes, each preferring the MOST SPECIFIC match rather than the
+// first one encountered in companiesMap's id order:
+//   1. Exact numeric id — the ENTIRE trimmed string must be digits, not just a parseable leading
+//      number ("29Bungalow" is not id "29").
+//   2. Full company-name substring match, preferring the LONGEST company name that fits inside
+//      the query (so "Villa Rentals Goa" resolves to itself instead of "Sol de Goa" just because
+//      both happen to contain the word "Goa").
+//   3. Fallback: single-keyword substring match (the original behavior), preferring the LONGEST
+//      keyword among all candidates instead of whichever tenant happens to sort first.
+// A single-pass "first match wins in id order" version of this used to silently misroute "Villa
+// Rentals Goa" and "The Goa Villas" to "Sol de Goa", and "29Bungalow" to "ELIVAAS" — confirmed via
+// a regression test that every real tenant's own exact name now resolves to itself.
+function matchTenantId(rawQuery) {
+  const query = (rawQuery || '').trim();
+  if (!query) return null;
+
+  if (/^\d+$/.test(query) && companiesMap[query]) {
+    return query;
+  }
+
+  const searchLower = query.toLowerCase();
+  const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
+  const cleanNameFor = (name) => name.toLowerCase().replace(/&/g, "").replace(/at/g, "").trim();
+
+  let bestFullNameMatch = null;
+  for (const [id, name] of Object.entries(companiesMap)) {
+    const cleanName = cleanNameFor(name);
+    if (cleanName && searchLower.includes(cleanName)) {
+      if (!bestFullNameMatch || cleanName.length > bestFullNameMatch.cleanName.length) {
+        bestFullNameMatch = { id, cleanName };
+      }
+    }
+  }
+  if (bestFullNameMatch) return bestFullNameMatch.id;
+
+  let bestKeywordMatch = null;
+  for (const [id, name] of Object.entries(companiesMap)) {
+    const cleanName = cleanNameFor(name);
+    const cleanWords = cleanName.split(' ').filter((w) => w.length > 2 && !stopWords.includes(w));
+    for (const word of cleanWords) {
+      if (searchLower.includes(word)) {
+        if (!bestKeywordMatch || word.length > bestKeywordMatch.word.length) {
+          bestKeywordMatch = { id, word };
+        }
+      }
+    }
+  }
+  return bestKeywordMatch ? bestKeywordMatch.id : null;
+}
+
+// The shared "pick a sandbox" menu — sent on /reset for both the shared demo number and any
+// dedicated tenant number. Pulled out to a function (rather than left inline) so it's defined
+// exactly once instead of drifting between two copies.
+function buildDemoHubMenu() {
+  return `Demo Hub Reset! 🔄 Please select which AI Concierge you would like to test:\n\n` +
+    `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
+    `18. *The Machan* (Lonavala Treehouses)\n` +
+    `19. *Lost Traveller* (Goa Villas)\n` +
+    `21. *Destiny Farmstay* (Ooty Resort)\n` +
+    `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
+    `23. *The Rentalgram* (Family Villas)\n` +
+    `24. *Melhor Stays* (Goa Beach Villas)\n` +
+    `25. *StayVista* (Premium Villa Chain)\n` +
+    `26. *SaffronStays* (Premium Villa Network)\n` +
+    `27. *Lohono Stays* (Premium Luxury Villas)\n` +
+    `28. *amã Stays & Trails* (Taj Group Homestays)\n` +
+    `29. *ELIVAAS* (Luxury Villa Rentals)\n` +
+    `30. *Barefoot at Havelock* (Andaman Resort)\n` +
+    `31. *Roamhome* (Curated Holiday Homes)\n` +
+    `32. *Elite Havens India* (Ultra-Luxury Retreats)\n` +
+    `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
+    `34. *Sol de Goa* (Nerul Boutique Stay)\n` +
+    `35. *LuxUnlock* (Restored Heritage Villas)\n` +
+    `36. *Abode Bombay* (Colaba Boutique Hotel)\n` +
+    `37. *The Postcard Hotel* (Boutique Resorts)\n` +
+    `38. *Seclude Hotels* (Experiential Stays)\n` +
+    `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
+    `40. *Royal Garden Villas* (Lonavala Pool Villas)\n` +
+    `41. *Ebony Stays* (Private Pool Villas)\n` +
+    `42. *29Bungalow* (Infinity Pool Villas)\n` +
+    `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
+    `44. *Araiya Hotels* (Boutique Resort Group)\n` +
+    `45. *The Goa Villas* (Luxury Villa Collection)\n` +
+    `46. *Stay Willas* (Lonavala/Karjat Villas)\n` +
+    `47. *The Khyber Himalayan Resort & Spa* (Gulmarg Ski Resort)\n` +
+    `48. *Glenburn Tea Estate* (Darjeeling Tea Estate Stay)\n` +
+    `49. *Neemrana Hotels* (Heritage Fort-Palaces)\n` +
+    `50. *CGH Earth* (Kerala Eco-Luxury Resorts)\n` +
+    `51. *Rhythm Hospitality* (Lonavala/Kumarakom Resorts)\n` +
+    `52. *Ahilya Fort* (Maheshwar Royal Heritage)\n` +
+    `53. *The Tree House Resort, Jaipur* (Eco-Luxury Treehouses)\n` +
+    `54. *Leisure Hotels Group* (Uttarakhand Boutique Resorts)\n` +
+    `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n\n` +
+    `Reply with a number from the list above, or type the property name, to start the simulation!`;
+}
+
 // Very small, best-effort daily rate limit for the public web-chat demo endpoint only.
 // This does NOT cap real prospect usage — 60/day is far above what any genuine visitor would
 // hit. It exists purely to stop a script hitting this public endpoint directly (it's a bare
@@ -276,33 +374,7 @@ export async function POST(req) {
             // Check for join code to launch a specific trial sandbox
             if (lowerText.startsWith("join ") || lowerText.startsWith("connect ")) {
               const query = trimmedText.slice(5).trim();
-              const num = parseInt(query);
-              let matchedId = null;
-
-              // Validate against companiesMap directly rather than a numeric range — tenant
-              // ids are no longer contiguous (real-estate/gifting ids were removed), so a
-              // bare range check would set matchedId to an id that no longer exists and
-              // produce "Welcome to *undefined*!" below.
-              if (!isNaN(num) && companiesMap[String(num)]) {
-                matchedId = String(num);
-              } else {
-                const searchLower = query.toLowerCase();
-                const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
-                for (const [id, name] of Object.entries(companiesMap)) {
-                  const cleanName = name.toLowerCase()
-                    .replace(/&/g, "")
-                    .replace(/at/g, "")
-                    .trim();
-                  
-                  const cleanWords = cleanName.split(' ').filter(w => w.length > 2 && !stopWords.includes(w));
-                  const matchesKeyword = cleanWords.some(word => searchLower.includes(word));
-                  
-                  if (matchesKeyword || searchLower.includes(cleanName)) {
-                    matchedId = id;
-                    break;
-                  }
-                }
-              }
+              const matchedId = matchTenantId(query);
 
               if (matchedId) {
                 session.companyId = matchedId;
@@ -323,6 +395,17 @@ export async function POST(req) {
               await saveSession(from, session);
               await sendWhatsAppMessage(phone_number_id, from, `Sandbox deactivated. ↩️ You are back in the ScienceThoughts Agency assistant. Type *join [number/name]* to test a specific client bot.`, session.companyId);
               return new NextResponse('OK', { status: 200 });
+            } else if (lowerText === '/reset') {
+              // This is the command the site's own "Chat on WhatsApp" button (sciencethoughts.com/case-studies)
+              // pre-fills — it used to only work on a dedicated tenant number, which meant clicking that
+              // button on the shared/permanent number (what every visitor actually uses today, since no
+              // tenant has its own dedicated number live yet) silently sent "/reset" as if it were a real
+              // guest question instead of showing the picker menu. Now it works here too.
+              session.companyId = null;
+              session.history = [];
+              await saveSession(from, session);
+              await sendWhatsAppMessage(phone_number_id, from, buildDemoHubMenu(), session.companyId);
+              return new NextResponse('OK', { status: 200 });
             }
 
             // Ensure session has a valid default if it was null
@@ -332,84 +415,21 @@ export async function POST(req) {
             }
           }
 
-          // Handle reset command (disabled for the permanent number)
+          // Handle reset command — dedicated tenant numbers only reach here (the permanent/shared
+          // number now handles its own /reset above and returns before this point).
           if (trimmedText.toLowerCase() === '/reset' && !isPermanentNumber) {
             session.companyId = null;
             session.history = [];
             await saveSession(from, session);
-            
-            const greeting = `Demo Hub Reset! 🔄 Please select which AI Concierge you would like to test:\n\n` +
-              `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
-              `18. *The Machan* (Lonavala Treehouses)\n` +
-              `19. *Lost Traveller* (Goa Villas)\n` +
-              `21. *Destiny Farmstay* (Ooty Resort)\n` +
-              `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
-              `23. *The Rentalgram* (Family Villas)\n` +
-              `24. *Melhor Stays* (Goa Beach Villas)\n` +
-              `25. *StayVista* (Premium Villa Chain)\n` +
-              `26. *SaffronStays* (Premium Villa Network)\n` +
-              `27. *Lohono Stays* (Premium Luxury Villas)\n` +
-              `28. *amã Stays & Trails* (Taj Group Homestays)\n` +
-              `29. *ELIVAAS* (Luxury Villa Rentals)\n` +
-              `30. *Barefoot at Havelock* (Andaman Resort)\n` +
-              `31. *Roamhome* (Curated Holiday Homes)\n` +
-              `32. *Elite Havens India* (Ultra-Luxury Retreats)\n` +
-              `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
-              `34. *Sol de Goa* (Nerul Boutique Stay)\n` +
-              `35. *LuxUnlock* (Restored Heritage Villas)\n` +
-              `36. *Abode Bombay* (Colaba Boutique Hotel)\n` +
-              `37. *The Postcard Hotel* (Boutique Resorts)\n` +
-              `38. *Seclude Hotels* (Experiential Stays)\n` +
-              `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
-              `40. *Royal Garden Villas* (Lonavala Pool Villas)\n` +
-              `41. *Ebony Stays* (Private Pool Villas)\n` +
-              `42. *29Bungalow* (Infinity Pool Villas)\n` +
-              `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
-              `44. *Araiya Hotels* (Boutique Resort Group)\n` +
-              `45. *The Goa Villas* (Luxury Villa Collection)\n` +
-              `46. *Stay Willas* (Lonavala/Karjat Villas)\n` +
-              `47. *The Khyber Himalayan Resort & Spa* (Gulmarg Ski Resort)\n` +
-              `48. *Glenburn Tea Estate* (Darjeeling Tea Estate Stay)\n` +
-              `49. *Neemrana Hotels* (Heritage Fort-Palaces)\n` +
-              `50. *CGH Earth* (Kerala Eco-Luxury Resorts)\n` +
-              `51. *Rhythm Hospitality* (Lonavala/Kumarakom Resorts)\n` +
-              `52. *Ahilya Fort* (Maheshwar Royal Heritage)\n` +
-              `53. *The Tree House Resort, Jaipur* (Eco-Luxury Treehouses)\n` +
-              `54. *Leisure Hotels Group* (Uttarakhand Boutique Resorts)\n` +
-              `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n\n` +
-              `Reply with a number from the list above, or type the property name, to start the simulation!`;
-            await sendWhatsAppMessage(phone_number_id, from, greeting, session.companyId);
+            await sendWhatsAppMessage(phone_number_id, from, buildDemoHubMenu(), session.companyId);
             return new NextResponse('OK', { status: 200 });
           }
 
             // UNCONDITIONAL DIRECT ROUTING:
             // Route by tenant id or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
-            let matchedId = null;
-            if (!isPermanentNumber) {
-              const num = parseInt(trimmedText);
-              // Validate against companiesMap directly rather than a numeric range — see the
-              // matching note in the "join" handler above for why this matters post-cleanup.
-              if (!isNaN(num) && companiesMap[trimmedText]) {
-                matchedId = trimmedText;
-              } else {
-                const lowerText = trimmedText.toLowerCase();
-                const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
-                for (const [id, name] of Object.entries(companiesMap)) {
-                  const cleanName = name.toLowerCase()
-                    .replace(/&/g, "")
-                    .replace(/at/g, "")
-                    .trim();
-                  
-                  const cleanWords = cleanName.split(' ').filter(w => w.length > 2 && !stopWords.includes(w));
-                  const matchesKeyword = cleanWords.some(word => lowerText.includes(word));
-                  
-                  if (matchesKeyword || lowerText.includes(cleanName)) {
-                    matchedId = id;
-                    break;
-                  }
-                }
-              }
-            }
+            // — only relevant for a dedicated (non-shared) tenant number; the shared/permanent
+            // number handles matching via matchTenantId() in the join/connect flow above instead.
+            const matchedId = isPermanentNumber ? null : matchTenantId(trimmedText);
 
             if (matchedId) {
               session.companyId = matchedId;

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { createZohoLead } from '../../../lib/zoho';
 import { decrypt } from '../../../lib/crypto';
 import { getTenantAvailability, formatAvailabilityForPrompt } from '../../../lib/ical';
@@ -197,7 +197,10 @@ export async function POST(req) {
         // Fall back to formattedHistory if an older cached frontend doesn't send full_history yet.
         const baseHistory = Array.isArray(full_history) && full_history.length > 0 ? full_history : formattedHistory;
         const fullConversation = [...baseHistory, { role: 'assistant', content: aiPayload.reply || '' }];
-        await pushLeadToMake(aiPayload.lead_extracted, companyId, fullConversation);
+        // Fire the CRM/Make push AFTER the reply is sent to the browser instead of blocking on
+        // it — pushLeadToMake already catches its own errors internally, and after() keeps the
+        // function instance alive just long enough to finish this in the background.
+        after(() => pushLeadToMake(aiPayload.lead_extracted, companyId, fullConversation));
       }
 
       return NextResponse.json(aiPayload);
@@ -441,7 +444,10 @@ export async function POST(req) {
             }
             leadData.target_builder = companiesMap[session.companyId];
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
-            await pushLeadToMake(leadData, session.companyId, session.transcript);
+            // The WhatsApp reply itself was already sent above (step 4) — this only affects how
+            // long we hold the webhook ack open for Meta, not what the user sees. Push it in the
+            // background the same way as the web widget, for consistency and a faster ack.
+            after(() => pushLeadToMake(leadData, session.companyId, session.transcript));
           }
         }
       }
@@ -939,7 +945,8 @@ async function getCompanyKnowledge(companyId) {
    - Wellness: The Khyber Spa by L'Occitane, all-season temperature-controlled indoor pool, mountain-view gymnasium.
    - Events: 10,000+ sq ft indoor/outdoor banquet space for weddings.
    - Rates (from the property's own booking engine, Bed & Breakfast, exclusive of tax — current as of mid-August 2026, subject to change by season and exact dates so always frame as indicative): Premier Room from approx. ₹25,800/night; Premier Plus Room from approx. ₹29,400/night. If asked for other room categories or exact current pricing, confirm those with the property team rather than guessing.
-   - Recognition: Condé Nast Traveller Luxury Boutique Resort (8 of the last 10 years), Best Ski Resort in India (Travel+Leisure India).`;
+   - Recognition: Condé Nast Traveller Luxury Boutique Resort (8 of the last 10 years), Best Ski Resort in India (Travel+Leisure India).
+   - Policies (from the property's own published FAQs and Terms & Conditions): Check-in 14:00, check-out 12:00 (late check-out after 12:00 is chargeable on a sliding scale, up to 100% of the room rate after 18:00). Pets are not allowed on the property. Wheelchair access is available to most areas and restaurants (not every corner) and a specially-abled room is offered. Max occupancy is 3 guests/room; a third occupant over 10 years old is chargeable even without an extra bed (no rollaway beds — the in-room sofa converts to a bed instead). Kids up to 8 stay free (incl. breakfast); ages 8-15 are ₹4,500/night; above 15 are billed at ₹10,000/night (all incl. taxes and breakfast). Smoking is only permitted on Luxury Balcony room balconies and designated areas — not sold or served: liquor is not sold on the premises. Front desk and concierge operate 24/7. A photo ID is required at check-in (Aadhar/PAN/Driving License/Voter ID/Passport for Indian nationals; passport + visa for foreign nationals). Cancellations made 40+ days before arrival get a full refund; cancellations closer to arrival (per their stated policy, within 45 days) incur full retention, as do no-shows and early departures for the remaining nights. These are the property's own published terms — always cite them as current policy, but note exact figures should be reconfirmed with the team for anything the guest is relying on to finalize a booking.`;
   } else if (companyId === '48') {
     prompt = `You are the autonomous AI Booking Assistant for Glenburn Tea Estate, a working colonial-era tea estate stay in Darjeeling.
 === PROPERTY KNOWLEDGE BASE ===
@@ -1311,21 +1318,33 @@ function stripGenericFillerClosers(reply) {
 
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
-  let builderPrompt = await getCompanyKnowledge(companyId);
   const isHospitality = HOSPITALITY_IDS.has(companyId);
 
-  // Only tenants with an iCal feed configured (tenant:ical:{id} in KV) get this block — for
-  // every other tenant this is a single cheap cached KV lookup that returns '' and changes
-  // nothing. Never claim or imply live availability for a tenant that hasn't configured one.
-  if (isHospitality) {
+  // getCompanyKnowledge (KB) and getTenantAvailability (iCal) are independent KV round-trips —
+  // run them concurrently instead of sequentially awaiting one then the other, to shave off
+  // latency on every reply. Only tenants with an iCal feed configured (tenant:ical:{id} in KV)
+  // get a non-empty availability block — for every other tenant this is a single cheap cached
+  // KV lookup that returns '' and changes nothing. Never claim or imply live availability for a
+  // tenant that hasn't configured one.
+  const [builderPromptBase, availability] = await Promise.all([
+    getCompanyKnowledge(companyId),
+    isHospitality
+      ? getTenantAvailability(companyId).catch((e) => {
+          console.error(`[DEMO ROUTE] Availability lookup failed for tenant ${companyId}, continuing without it:`, e);
+          return null;
+        })
+      : Promise.resolve(null)
+  ]);
+
+  let builderPrompt = builderPromptBase;
+  if (isHospitality && availability) {
     try {
-      const availability = await getTenantAvailability(companyId);
       const availabilityBlock = formatAvailabilityForPrompt(availability);
       if (availabilityBlock) {
         builderPrompt = `${builderPrompt}\n\n${availabilityBlock}`;
       }
     } catch (e) {
-      console.error(`[DEMO ROUTE] Availability lookup failed for tenant ${companyId}, continuing without it:`, e);
+      console.error(`[DEMO ROUTE] Availability formatting failed for tenant ${companyId}, continuing without it:`, e);
     }
   }
 
@@ -1349,6 +1368,10 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
 - **UNLISTED AMENITIES/POLICIES/FACTS (use this for ANY legitimate but undocumented question about this business):** This covers amenities and policies (spa, gym, child policies, early check-in/out) AND exact current pricing/rates AND ownership, leadership, or "who owns/runs/founded this place" — any real question about THIS business that simply isn't in your knowledge base above. Do NOT say 'currently it's not mentioned', 'not in my files', or refuse to answer — that sounds robotic and, for ownership/pricing questions, is a misfire of the OUT-OF-SCOPE rule below (this is a legitimate business question, not an unrelated topic). Instead, answer warmly that you'll confirm the exact detail with the property team and get back to them shortly (e.g. "Great question — let me confirm the exact current rate with the team and get back to you shortly!"). NEVER state a specific policy, price, ownership detail, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer.
+  **WORKED EXAMPLES (follow this exact pattern, do not substitute a refusal):**
+  - User: "who is the owner" / "who owns this place" / "who runs this hotel" → NOT out-of-scope, NOT a refusal. Reply like: "That's a great question — let me confirm that with the property team and get back to you shortly! In the meantime, is there anything about the rooms or amenities I can help with?"
+  - User: "whats the daily cost" / "how much does it cost" (when no rate is in the knowledge base) → NOT a refusal. Reply like: "Let me confirm the exact current rate with the team and get back to you shortly! Happy to share more on the rooms or amenities in the meantime."
+  - Contrast: User: "what should I study in college" or "give me a chicken recipe" → THIS is genuinely out-of-scope; use the OUT-OF-SCOPE REFUSALS rule below instead.
 - **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share more details or book a quick discovery call?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).

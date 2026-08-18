@@ -203,6 +203,15 @@ export async function POST(req) {
         after(() => pushLeadToMake(aiPayload.lead_extracted, companyId, fullConversation));
       }
 
+      // If the AI deferred ("let me confirm with the team"), log it so the deferral is an actual
+      // promise instead of just words — see the dashboard at /dashboard.
+      if (aiPayload.escalation_question) {
+        const webContact = aiPayload.lead_extracted?.phone && aiPayload.lead_extracted.phone !== 'Web Visitor'
+          ? aiPayload.lead_extracted.phone
+          : (aiPayload.lead_extracted?.email || 'Web visitor (no contact captured)');
+        after(() => logEscalation(companyId, companiesMap[companyId] || 'Web Demo', aiPayload.escalation_question, webContact, aiPayload.reply));
+      }
+
       return NextResponse.json(aiPayload);
     }
     
@@ -448,6 +457,13 @@ export async function POST(req) {
             // long we hold the webhook ack open for Meta, not what the user sees. Push it in the
             // background the same way as the web widget, for consistency and a faster ack.
             after(() => pushLeadToMake(leadData, session.companyId, session.transcript));
+          }
+
+          // 6. If the AI deferred ("let me confirm with the team"), log it so it's an actual
+          // promise instead of just words — see the dashboard at /dashboard. On WhatsApp we
+          // always have the guest's real number, unlike anonymous web chat.
+          if (aiResponse.escalation_question) {
+            after(() => logEscalation(session.companyId, companiesMap[session.companyId] || session.companyId, aiResponse.escalation_question, from, aiResponseText));
           }
         }
       }
@@ -1334,17 +1350,23 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   // get a non-empty availability block — for every other tenant this is a single cheap cached
   // KV lookup that returns '' and changes nothing. Never claim or imply live availability for a
   // tenant that hasn't configured one.
-  const [builderPromptBase, availability] = await Promise.all([
+  const [builderPromptBase, availability, learnedFacts] = await Promise.all([
     getCompanyKnowledge(companyId),
     isHospitality
       ? getTenantAvailability(companyId).catch((e) => {
           console.error(`[DEMO ROUTE] Availability lookup failed for tenant ${companyId}, continuing without it:`, e);
           return null;
         })
-      : Promise.resolve(null)
+      : Promise.resolve(null),
+    getLearnedFacts(companyId)
   ]);
 
   let builderPrompt = builderPromptBase;
+  if (learnedFacts) {
+    // Facts the property team taught the bot by answering a past deferral via the dashboard —
+    // treated as real knowledge base content, not a guess, same as everything else above.
+    builderPrompt = `${builderPrompt}\n\n=== ADDITIONAL FACTS CONFIRMED BY THE PROPERTY TEAM ===\n${learnedFacts}`;
+  }
   if (isHospitality && availability) {
     try {
       const availabilityBlock = formatAvailabilityForPrompt(availability);
@@ -1375,7 +1397,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   1. Confirm you're scheduling a discovery call about the Sciencethoughts AI WhatsApp concierge product, not a hospitality booking.
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
-- **UNLISTED AMENITIES/POLICIES/FACTS (use this for ANY legitimate but undocumented question about this business):** This covers amenities and policies (spa, gym, child policies, early check-in/out) AND exact current pricing/rates AND ownership, leadership, or "who owns/runs/founded this place" — any real question about THIS business that simply isn't in your knowledge base above. Do NOT say 'currently it's not mentioned', 'not in my files', or refuse to answer — that sounds robotic and, for ownership/pricing questions, is a misfire of the OUT-OF-SCOPE rule below (this is a legitimate business question, not an unrelated topic). Instead, answer warmly that you'll confirm the exact detail with the property team and get back to them shortly (e.g. "Great question — let me confirm the exact current rate with the team and get back to you shortly!"). NEVER state a specific policy, price, ownership detail, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer.
+- **UNLISTED AMENITIES/POLICIES/FACTS (use this for ANY legitimate but undocumented question about this business):** This covers amenities and policies (spa, gym, child policies, early check-in/out) AND exact current pricing/rates AND ownership, leadership, or "who owns/runs/founded this place" — any real question about THIS business that simply isn't in your knowledge base above. Do NOT say 'currently it's not mentioned', 'not in my files', or refuse to answer — that sounds robotic and, for ownership/pricing questions, is a misfire of the OUT-OF-SCOPE rule below (this is a legitimate business question, not an unrelated topic). Instead, answer warmly that you'll confirm the exact detail with the property team and get back to them shortly (e.g. "Great question — let me confirm the exact current rate with the team and get back to you shortly!"). NEVER state a specific policy, price, ownership detail, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer. Whenever you use this deferral, you MUST also populate "escalation_question" in your JSON response (see schema below) with the guest's exact question, so the property team can review and answer it later — this is what makes the "get back to you shortly" promise real instead of an empty line.
   **WORKED EXAMPLES (follow this exact pattern, do not substitute a refusal):**
   - User: "who is the owner" / "who owns this place" / "who runs this hotel" → NOT out-of-scope, NOT a refusal. Reply like: "That's a great question — let me confirm that with the property team and get back to you shortly! In the meantime, is there anything about the rooms or amenities I can help with?"
   - User: "whats the daily cost" / "how much does it cost" (when no rate is in the knowledge base) → NOT a refusal. Reply like: "Let me confirm the exact current rate with the team and get back to you shortly! Happy to share more on the rooms or amenities in the meantime."
@@ -1403,7 +1425,8 @@ You must respond in JSON format with the following keys:
   - "check_in_time": "string or null (e.g. 'early check-in at 10 AM')"
   - "check_out_time": "string or null (e.g. 'late check-out at 2 PM')"
   - "additional_requirements": "string summarizing dynamic requests (e.g., 'requires chef', 'spa service booking', 'needs pet toys') or null"
-  - "budget": "string or null"`;
+  - "budget": "string or null"
+- "escalation_question": "string or null — REQUIRED whenever you use the UNLISTED AMENITIES/POLICIES/FACTS deferral above: the guest's exact question, verbatim or close to it, so the property team can follow up. Leave null for every other reply (answered questions, bookings, out-of-scope refusals, etc.) — only set this on a genuine deferral."`;
 
   let payload = null;
 
@@ -1536,6 +1559,70 @@ function formatConversationTranscript(history = []) {
       return `${speaker}: ${turn.content}`;
     })
     .join('\n');
+}
+
+// Logs a deferred ("let me confirm with the team") question so it actually surfaces somewhere a
+// human can answer it, instead of the AI's promise going nowhere. Each entry is a standalone KV
+// key (escalation:{id}) plus its id gets appended to a per-day index list (escalations:{date})
+// so the dashboard can list "today's unanswered questions" without scanning every key. Both are
+// given a 14-day TTL so this never grows unbounded. Fails silently (fail-open) if KV isn't
+// configured or the write errors — an unlogged escalation is a lot better than a crashed reply.
+async function logEscalation(companyId, companyName, question, contact, aiReply) {
+  if (!KV_URL || !KV_TOKEN || !question) return;
+  try {
+    const today = new Date().toISOString().slice(0, 10); // UTC, matches the rate-limiter's date format
+    const id = `${companyId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const record = {
+      id,
+      companyId,
+      companyName: companyName || companyId,
+      question,
+      contact: contact || null,
+      aiReply: aiReply || null,
+      resolved: false,
+      answer: null,
+      createdAt: new Date().toISOString()
+    };
+    const TTL = 1209600; // 14 days
+    await fetch(KV_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['SET', `escalation:${id}`, JSON.stringify(record), 'EX', String(TTL)])
+    });
+    await fetch(KV_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['LPUSH', `escalations:${today}`, id])
+    });
+    await fetch(KV_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['EXPIRE', `escalations:${today}`, String(TTL)])
+    });
+  } catch (e) {
+    console.error("[DEMO ROUTE] logEscalation failed (non-fatal):", e);
+  }
+}
+
+// Fetches any facts the property team has taught the bot via the dashboard (see
+// app/api/escalations/route.js) since this tenant's hardcoded/KV knowledge base was last edited.
+// Appended onto the base prompt in getCompanyKnowledge so an answered escalation actually stops
+// the bot deferring on the same question next time, instead of the human answer being a one-off
+// reply that teaches the system nothing.
+async function getLearnedFacts(companyId) {
+  if (!KV_URL || !KV_TOKEN) return '';
+  try {
+    const res = await fetch(`${KV_URL}/get/tenant:learned:${companyId}`, {
+      headers: { Authorization: `Bearer ${KV_TOKEN}` }
+    });
+    const data = await res.json();
+    if (data.result) {
+      return data.result; // already formatted as a newline-joined bullet list, see the resolve endpoint
+    }
+  } catch (e) {
+    console.error(`[DEMO ROUTE] getLearnedFacts failed for tenant ${companyId} (non-fatal):`, e);
+  }
+  return '';
 }
 
 async function pushLeadToMake(leadData, companyId = 'agency', conversationHistory = []) {

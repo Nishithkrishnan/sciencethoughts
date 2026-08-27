@@ -50,7 +50,17 @@ export default function InteractiveWebDemo() {
     "52": "Ahilya Fort (Maheshwar Royal Heritage)",
     "53": "The Tree House Resort, Jaipur (Eco-Luxury Treehouses)",
     "54": "Leisure Hotels Group (Uttarakhand Boutique Resorts)",
-    "55": "Jehan Numa Palace (Bhopal Heritage Palace)"
+    "55": "Jehan Numa Palace (Bhopal Heritage Palace)",
+    "56": "The Bison, Kabini (Kabini Wildlife Lodge)",
+    "57": "Suján Jawai (Rajasthan Leopard Camp)",
+    "58": "Khem Villas (Ranthambore Eco-Lodge)",
+    "59": "The Belgadia Palace (Odisha Royal Heritage)",
+    "60": "Jalakara (Andaman Islands Villa)",
+    "61": "The Kumaon (Himalayan Boutique Lodge)",
+    "62": "Vivenda Dos Palhaços (Goa Heritage Guesthouse)",
+    "63": "Marari Villas (Kerala Beach Villas)",
+    "64": "Alsisar Mahal (Shekhawati Heritage Palace)",
+    "65": "Windermere Estate (Munnar Plantation Bungalow)"
   };
 
   useEffect(() => {

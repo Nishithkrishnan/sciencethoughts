@@ -94,21 +94,6 @@ export default function CaseStudies() {
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px" }}>
             
-            {/* Mango Alibaug */}
-            <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <Briefcase size={24} color="var(--accent-violet)" />
-                <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>Mango Alibaug</h3>
-              </div>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>ALIBAUG | LUXURY BEACH HOUSE</p>
-              <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "25px" }}>
-                A custom AI host configured to quote weekend rates, calculate Konkani seafood meal packages, and answer pet-access questions from the property's own policies.
-              </p>
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Handles after-hours inquiries the property team would otherwise miss.</span>
-              </div>
-            </div>
-
             {/* Lost Traveller */}
             <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--accent-green)", background: "rgba(10, 10, 12, 0.4)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>

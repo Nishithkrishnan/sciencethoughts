@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextResponse, after } from 'next/server';
 import { createZohoLead } from '../../../lib/zoho';
 import { decrypt } from '../../../lib/crypto';
@@ -5,6 +6,10 @@ import { getTenantAvailability, formatAvailabilityForPrompt } from '../../../lib
 
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
+// Meta App Secret (App Dashboard -> Settings -> Basic -> App Secret). Used to verify that an
+// inbound POST really came from Meta's WhatsApp Cloud API, not a forged request hitting this
+// public URL directly. Required — see verifyMetaSignature() below, which fails closed without it.
+const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET?.trim();
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY?.trim();
 const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL?.trim();
@@ -137,6 +142,14 @@ const companiesMap = {
   '63': 'Marari Villas',
   '64': 'Alsisar Mahal',
   '65': 'Windermere Estate',
+  '66': 'Ramathra Fort',
+  '67': 'Vanghat — The Wildlife Lodge',
+  '68': 'Fort Begu',
+  '69': 'Dera Amer',
+  '70': 'Shergarh Tented Camp',
+  '71': 'Lchang Nang Retreat',
+  '73': 'Rajbari Bawali',
+  '74': 'Diphlu River Lodge',
   'agency': 'ScienceThoughts AI Agency'
 };
 
@@ -289,12 +302,40 @@ async function checkWebDemoRateLimit(ip) {
   }
 }
 
+// Verifies Meta's X-Hub-Signature-256 header (an HMAC-SHA256 of the raw request body, keyed with
+// the App Secret) so a request claiming to be a WhatsApp webhook event can't be forged by anyone
+// who finds this public URL. Fails closed — same convention as CRON_SECRET in the daily-digest
+// route — rather than silently accepting unsigned traffic if the secret isn't configured yet.
+function verifyMetaSignature(rawBody, signatureHeader) {
+  if (!WHATSAPP_APP_SECRET) {
+    console.error('[DEMO ROUTE] WHATSAPP_APP_SECRET is not set — refusing inbound webhook traffic until it is configured (Meta App Dashboard -> Settings -> Basic -> App Secret).');
+    return false;
+  }
+  if (!signatureHeader || !signatureHeader.startsWith('sha256=')) return false;
+
+  const expected = crypto.createHmac('sha256', WHATSAPP_APP_SECRET).update(rawBody, 'utf8').digest('hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  const providedBuf = Buffer.from(signatureHeader.slice(7), 'hex');
+  if (expectedBuf.length !== providedBuf.length) return false;
+  return crypto.timingSafeEqual(expectedBuf, providedBuf);
+}
+
 // POST method receives inbound WhatsApp messages or Web Chat requests
 export async function POST(req) {
   try {
-    const body = await req.json();
+    // Read the raw body once, up front — signature verification below needs the exact bytes Meta
+    // signed, which req.json() would otherwise consume before we could hash them.
+    const rawBody = await req.text();
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return new NextResponse('Invalid JSON', { status: 400 });
+    }
 
-    // Handle Direct Web Chat Requests from sciencethoughts.com website widget
+    // Handle Direct Web Chat Requests from sciencethoughts.com website widget — these come
+    // straight from our own frontend, not from Meta, so they carry no Meta signature and are
+    // exempt from the check below (the existing per-IP rate limit is their protection instead).
     if (body.webChatMode) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || null;
       const rateLimit = await checkWebDemoRateLimit(ip);
@@ -337,7 +378,15 @@ export async function POST(req) {
 
       return NextResponse.json(aiPayload);
     }
-    
+
+    // Everything below here is claimed to originate from Meta's WhatsApp Cloud API webhook, so it
+    // must carry a valid signature — otherwise anyone who finds this URL could forge inbound
+    // messages and run up OpenAI/Gemini spend, fake leads, and fake escalations on our dime.
+    if (!verifyMetaSignature(rawBody, req.headers.get('x-hub-signature-256'))) {
+      console.error('[DEMO ROUTE] Rejected webhook POST: missing or invalid X-Hub-Signature-256');
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+
     // Validate that this is a WhatsApp API event
     if (body.object === 'whatsapp_business_account') {
       const entry = body.entry?.[0];

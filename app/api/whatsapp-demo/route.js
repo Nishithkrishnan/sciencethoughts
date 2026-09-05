@@ -96,8 +96,6 @@ async function saveSession(from, session) {
 const companiesMap = {
   '9': 'Mango Alibaug Villas',
   '18': 'The Machan',
-  '19': 'Lost Traveller',
-  '21': 'Destiny Farmstay',
   '22': 'Eko Stay',
   '23': 'The Rentalgram',
   '24': 'Melhor Stays',
@@ -225,8 +223,6 @@ function buildDemoHubMenu() {
   return `Demo Hub Reset! 🔄 Please select which AI Concierge you would like to test:\n\n` +
     `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
     `18. *The Machan* (Lonavala Treehouses)\n` +
-    `19. *Lost Traveller* (Goa Villas)\n` +
-    `21. *Destiny Farmstay* (Ooty Resort)\n` +
     `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
     `23. *The Rentalgram* (Family Villas)\n` +
     `24. *Melhor Stays* (Goa Beach Villas)\n` +
@@ -622,25 +618,6 @@ async function getCompanyKnowledge(companyId) {
    - Rates: ₹18,000/night (weekday) / ₹26,000/night (weekend - Fri/Sat). Includes breakfast.
    - Capacity: Sleeps up to 3 adults.
    - Amenities: Private valley decks, outdoor bathtubs, solar-powered. No pets allowed.`;
-  } else if (companyId === '19') {
-    prompt = `You are the autonomous AI Booking Assistant for Lost Traveller, managing luxury private pool villas in Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Azure (Vagator, North Goa)**
-   - Location: Vagator, North Goa (5 mins from Ozran Beach).
-   - Type: Luxury 4-BHK private pool villa.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Entire villa only.
-   - Capacity: Sleeps up to 10 guests. Caretaker, pool, gazebo, Wi-Fi.
-   - House Rules: Pet-friendly. Chef on call available (₹3,000/day).`;
-  } else if (companyId === '21') {
-    prompt = `You are the autonomous AI Booking Assistant for Destiny Farmstay, a wilderness farm resort in Ooty.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Destiny Farmstay Resort**
-   - Location: Avalanche Valley, Ooty (25 mins from town).
-   - Type: Experiential lakeview farm resort with stable and agricultural farm.
-   - Rates: ₹8,500/room/night (weekday) / ₹11,500/room/night (weekend).
-   - Amenities: Stables, farming tours, fishing, spa, adventure zipline. (Note: No swimming pool, we have a pristine natural lake instead).
-   - Meals & Chef: On-site farm-to-table restaurant. Chef serves all meals (breakfast included, lunch/dinner package: ₹1,200/person/day).
-   - Pets: Extremely pet-friendly! Free entry for pets, with wide open lawns for them to play.`;
   } else if (companyId === '22') {
     prompt = `You are the autonomous AI Booking Assistant for Eko Stay, a premier brand managing luxury private pool villas in Lonavala and Goa.
 === PROPERTY KNOWLEDGE BASE ===
@@ -1343,12 +1320,12 @@ async function getCompanyKnowledge(companyId) {
     - We reduce lead leakage by responding to guest queries in real-time, 24/7, and syncing captured lead data directly to Zoho CRM when connected.
     - Data privacy is a core design principle: guest and credential data is encrypted, and each client's data is kept isolated from every other client's.
 2. **Core Features:**
-    - Low-temperature, grounded RAG logic — answers are drawn strictly from your property's own knowledge base, and the assistant is instructed to defer rather than invent an answer when information isn't in that data.
+    - Low-temperature, strictly knowledge-base-grounded logic — answers are drawn only from your property's own verified knowledge base, and the assistant is instructed to defer rather than invent an answer when information isn't in that data.
     - Fluently bilingual in English, Hindi, Hinglish, Tamil, and Kannada.
     - Automatic CRM lead push to Zoho when connected.
 3. **Pilot Offer & Pricing:**
-    - Custom 7-day Staging Sandbox pilot for free.
-    - Standard pricing: Setup Fee is ₹75,000 (one-time) and Monthly Retainer is ₹25,000/month.
+    - Free 7-day trial on your own WhatsApp number, no cost, no commitment. If payment hasn't been set up by day 6-7, the agent pauses on day 8 until it is.
+    - Pricing depends on property nightly rate: ₹30,000+/night properties are ₹25,000 one-time + ₹15,000/month; sub-₹15,000/night properties are ₹15,000 one-time + ₹10,000/month. Ask on the discovery call for a specific quote if your rate is in between.
 4. **Booking:**
    - Book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
 === CONVERSION GOAL ===
@@ -1430,15 +1407,11 @@ function simulateOfflineResponse(companyId, history) {
   // Rule B: Price inquiry
   else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
     if (companyId === 'agency') {
-      reply = `Our pricing is a one-time Setup Fee of ₹75,000 plus a Monthly Retainer of ₹25,000. We also offer a free 7-day staging sandbox pilot. Would you like to book a 30-minute discovery call?`;
+      reply = `Pricing scales with your property's nightly rate: ₹30,000+/night properties are ₹25,000 one-time + ₹15,000/month; sub-₹15,000/night properties are ₹15,000 one-time + ₹10,000/month. Every plan starts with a free 7-day trial on your own WhatsApp number, no cost, no commitment. Would you like to book a 30-minute discovery call to get an exact quote?`;
     } else if (companyId === '9') {
       reply = `Our rates for Mango Beach House start at ₹28,000/night on weekdays and ₹35,000/night on weekends. Mango Villa Bougainvillea is ₹32,000/night (weekdays) and ₹42,000/night (weekends). Would you like to check availability?`;
     } else if (companyId === '18') {
       reply = `The Canopy Machan treehouse rates are ₹18,000/night (weekdays) and ₹26,000/night (weekends), including complimentary breakfast. Would you like me to block your dates?`;
-    } else if (companyId === '19') {
-      reply = `Villa Azure in Goa is ₹35,000/night (weekdays) and ₹45,000/night (weekends) for the entire 4 BHK villa. Shall I check booking availability for you?`;
-    } else if (companyId === '21') {
-      reply = `Destiny Farmstay room rates are ₹8,500/night (weekdays) and ₹11,500/night (weekends) with lake & farm views. Shall I check dates for you?`;
     } else if (companyId === '22') {
       reply = `Villa Oasis (Lonavala) is ₹18,000/night (weekdays) / ₹24,000/night (weekends). Villa Sol (Goa) is ₹22,000/night (weekdays) / ₹28,000/night (weekends). Shall we check dates?`;
     } else if (companyId === '23') {
@@ -1457,11 +1430,11 @@ function simulateOfflineResponse(companyId, history) {
   else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food") || lower.includes("spa")) {
     if (companyId === 'agency') {
       reply = `Our AI concierge answers guest questions, quotes accurate rates from your own knowledge base, and captures qualified booking leads on WhatsApp 24/7. Would you like to try the live demo or book a discovery call?`;
-    } else if (companyId === '9' || companyId === '19' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
+    } else if (companyId === '9' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
       reply = `We feature a private swimming pool, Wi-Fi, 100% generator backup, caretakers, and a private chef on call to prepare local fresh delicacies. Selected properties are also pet-friendly. What dates are you planning?`;
     } else if (companyId === '18') {
       reply = `The treehouse features private decks, open-air bathtubs, forest views, and runs on solar power. To protect local wildlife, pets are not allowed. Shall we block dates?`;
-    } else if (companyId === '21' || companyId === '25') {
+    } else if (companyId === '25') {
       reply = `We feature stables, farm tours, fireplace, and private lawns. Our in-house chefs serve premium farm-to-table meals, and we are pet-friendly. (Note: No swimming pool available). What dates do you have in mind?`;
     } else {
       reply = `We offer private pools, high-speed Wi-Fi, fully equipped kitchens, games, and chef services. What dates would you like to request?`;

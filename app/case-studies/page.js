@@ -87,47 +87,6 @@ export default function CaseStudies() {
         </div>
       </section>
 
-      {/* Additional Case Studies Grid */}
-      <section className="section-padding">
-        <div className="container">
-          <h2 style={{ fontSize: "2.2rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "40px", textAlign: "center" }}>More Architecture Showcases</h2>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px" }}>
-            
-            {/* Lost Traveller */}
-            <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--accent-green)", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <Briefcase size={24} color="var(--accent-green)" />
-                <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>Lost Traveller</h3>
-              </div>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>GOA | PREMIUM VILLA NETWORK</p>
-              <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "25px" }}>
-                Replaced static inquiry forms with a WhatsApp reservation chatbot, automatically routing booking inputs and guest details to their central sales CRM.
-              </p>
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Outcome: Accelerated villa pipeline management.</span>
-              </div>
-            </div>
-
-            {/* Destiny Farmstay */}
-            <div className="glass" style={{ padding: "35px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", background: "rgba(10, 10, 12, 0.4)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
-                <Briefcase size={24} color="var(--text-muted)" />
-                <h3 style={{ fontSize: "1.6rem", fontWeight: "700", fontFamily: "var(--font-display)", margin: 0 }}>Destiny Farmstay</h3>
-              </div>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px", fontWeight: "500", letterSpacing: "0.05em" }}>OOTY | EXPERIENTIAL STAY</p>
-              <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "25px" }}>
-                Handles complex questions regarding Ooty farm activity itineraries, animal stables, kids zones, horse riding packages, and check-out rules.
-              </p>
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Outcome: Automated upselling of activity packages.</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
       {/* WhatsApp Demo Play Sandbox */}
       <section className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container" style={{ textAlign: "center" }}>

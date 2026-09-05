@@ -15,8 +15,6 @@ export default function InteractiveWebDemo() {
   const companies = {
     "18": "The Machan (Lonavala Resort)",
     "9": "Mango Alibaug Villas (Alibaug Stay)",
-    "19": "Lost Traveller (Goa Villas)",
-    "21": "Destiny Farmstay (Ooty Resort)",
     "22": "Eko Stay (Lonavala/Goa Villas)",
     "23": "The Rentalgram (Family Villas)",
     "24": "Melhor Stays (Goa Beach Villas)",

@@ -3,16 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare, Send, Bot, User, RefreshCw, CheckCircle2, Sparkles } from "lucide-react";
 
-export default function InteractiveWebDemo() {
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Welcome to The Machan! How can I assist you with checking cabin availability, rates, or forest treehouse amenities today?" }
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [companyId, setCompanyId] = useState("18"); // Default to The Machan (18)
-  const chatEndRef = useRef(null);
-
-  const companies = {
+// Module-level, not component-local: this object never depends on props or state, so keeping it
+// outside the component gives it a stable reference across renders. That's what lets the
+// URL-param effect below list it as a dependency honestly (satisfying exhaustive-deps) without
+// re-running on every render — a literal defined inside the component body is a new object each
+// render, which would make that same dependency fire the effect (and its setState calls) in a loop.
+const companies = {
     "18": "The Machan (Lonavala Resort)",
     "9": "Mango Alibaug Villas (Alibaug Stay)",
     "22": "Eko Stay (Lonavala/Goa Villas)",
@@ -68,7 +64,16 @@ export default function InteractiveWebDemo() {
     "72": "Tranquil Resort (Wayanad Plantation Estate)",
     "73": "Rajbari Bawali (Kolkata Heritage Palace)",
     "74": "Diphlu River Lodge (Kaziranga Eco-Lodge)"
-  };
+};
+
+export default function InteractiveWebDemo() {
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Welcome to The Machan! How can I assist you with checking cabin availability, rates, or forest treehouse amenities today?" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [companyId, setCompanyId] = useState("18"); // Default to The Machan (18)
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
     if (messages.length > 1) {
@@ -81,10 +86,16 @@ export default function InteractiveWebDemo() {
       const params = new URLSearchParams(window.location.search);
       const urlCompanyId = params.get("c") || params.get("companyId") || params.get("tenant");
       if (urlCompanyId && companies[urlCompanyId]) {
+        // Deliberate exception, not the derived-state anti-pattern this rule usually catches:
+        // ?tenant=/?c=/?companyId= only exists in window.location, which isn't available during
+        // the server render, so this can't be read in the initial useState() without the server
+        // and client disagreeing (a hydration mismatch). Syncing it here, once, right after mount,
+        // is the standard fix for state that can only be known on the client.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCompanyId(urlCompanyId);
         const companyName = companies[urlCompanyId].split(" (")[0];
         const isHospitality = true; // All curated selections are hospitality
-        
+
         let welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
 
         setMessages([
@@ -92,7 +103,7 @@ export default function InteractiveWebDemo() {
         ]);
       }
     }
-  }, []);
+  }, []); // `companies` is a module-level constant, not a reactive value — nothing to list here.
 
   const handleCompanyChange = (e) => {
     const newId = e.target.value;

@@ -209,7 +209,16 @@ function matchTenantId(rawQuery) {
   }
   if (bestFullNameMatch) return bestFullNameMatch.id;
 
+  // Same-length keyword ties are tracked explicitly (tieIds) rather than resolved by whichever
+  // tenant happens to be inserted first in companiesMap. Three tenants share the bare keyword
+  // "fort" (Ahilya Fort #52, Ramathra Fort #66, Fort Begu #68) and two share "palace" (Jehan Numa
+  // Palace #55, The Belgadia Palace #59) — before this fix, a guest typing just the shared word
+  // silently got routed to whichever of those was inserted earliest, the same failure mode as the
+  // blanket-regex bug fixed above, just not yet triggered by a real query. Now a genuine tie
+  // between two DIFFERENT tenants returns null (ambiguous — the caller already falls back to
+  // "could not find a sandbox matching..." or the demo menu) instead of guessing.
   let bestKeywordMatch = null;
+  let tieIds = null;
   for (const [id, name] of Object.entries(companiesMap)) {
     const cleanName = cleanNameFor(name);
     const cleanWords = cleanName.split(' ').filter((w) => w.length > 2 && !stopWords.includes(w));
@@ -217,10 +226,14 @@ function matchTenantId(rawQuery) {
       if (searchLower.includes(word)) {
         if (!bestKeywordMatch || word.length > bestKeywordMatch.word.length) {
           bestKeywordMatch = { id, word };
+          tieIds = new Set([id]);
+        } else if (word.length === bestKeywordMatch.word.length && id !== bestKeywordMatch.id) {
+          tieIds.add(id);
         }
       }
     }
   }
+  if (bestKeywordMatch && tieIds.size > 1) return null;
   return bestKeywordMatch ? bestKeywordMatch.id : null;
 }
 

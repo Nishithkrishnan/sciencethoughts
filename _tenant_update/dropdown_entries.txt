@@ -1,0 +1,10 @@
+    "56": "The Bison, Kabini (Kabini Wildlife Lodge)",
+    "57": "Suján Jawai (Rajasthan Leopard Camp)",
+    "58": "Khem Villas (Ranthambore Eco-Lodge)",
+    "59": "The Belgadia Palace (Odisha Royal Heritage)",
+    "60": "Jalakara (Andaman Islands Villa)",
+    "61": "The Kumaon (Himalayan Boutique Lodge)",
+    "62": "Vivenda Dos Palhaços (Goa Heritage Guesthouse)",
+    "63": "Marari Villas (Kerala Beach Villas)",
+    "64": "Alsisar Mahal (Shekhawati Heritage Palace)",
+    "65": "Windermere Estate (Munnar Plantation Bungalow)"

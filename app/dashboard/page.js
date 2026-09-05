@@ -14,8 +14,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [days, setDays] = useState(3);
-  const [drafts, setDrafts] = useState({}); // id -> { answer, teachKb }
+  const [drafts, setDrafts] = useState({}); // id -> { answer, teachKb, sendToGuest }
   const [savingId, setSavingId] = useState(null);
+  const [notice, setNotice] = useState(null); // { type: 'ok' | 'warn', text }
+
+  const looksLikePhoneNumber = (contact) => /^\+?\d{10,15}$/.test((contact || "").replace(/\s+/g, ""));
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -69,6 +72,7 @@ export default function DashboardPage() {
   const resolve = async (id) => {
     const draft = drafts[id] || {};
     setSavingId(id);
+    setNotice(null);
     try {
       const res = await fetch("/api/escalations", {
         method: "POST",
@@ -77,13 +81,22 @@ export default function DashboardPage() {
           key: dashboardKey,
           id,
           answer: draft.answer || "",
-          teachKb: Boolean(draft.teachKb && draft.answer)
+          teachKb: Boolean(draft.teachKb && draft.answer),
+          sendToGuest: draft.sendToGuest !== false // defaults to true unless explicitly unchecked
         })
       });
+      const data = await res.json();
       if (res.ok) {
+        if (data.guestNotified === true) {
+          setNotice({ type: "ok", text: "Sent the answer straight to the guest on WhatsApp." });
+        } else if (data.guestNotified === false) {
+          setNotice({
+            type: "warn",
+            text: `Could not message the guest automatically: ${data.guestNotifyError || "unknown error"}. This usually means it's been more than 24 hours since their last message (WhatsApp requires a pre-approved template outside that window) — you may need to follow up manually.`
+          });
+        }
         await load(dashboardKey, days);
       } else {
-        const data = await res.json();
         setError(data.error || "Failed to resolve");
       }
     } catch (e) {
@@ -147,6 +160,20 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {notice && (
+          <div style={{
+            background: notice.type === "ok" ? "rgba(57,255,20,0.08)" : "rgba(255,180,60,0.1)",
+            border: `1px solid ${notice.type === "ok" ? "rgba(57,255,20,0.3)" : "rgba(255,180,60,0.35)"}`,
+            color: notice.type === "ok" ? "#7fe07f" : "#ffcf7f",
+            padding: "10px 14px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            fontSize: "0.85rem"
+          }}>
+            {notice.text}
+          </div>
+        )}
+
         {loading && <p style={{ color: "#9aa" }}>Loading...</p>}
 
         {!loading && escalations && pending.length === 0 && resolved.length === 0 && (
@@ -174,7 +201,7 @@ export default function DashboardPage() {
                   onChange={(e) => updateDraft(esc.id, "answer", e.target.value)}
                   style={textareaStyle}
                 />
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", flexWrap: "wrap", gap: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "8px" }}>
                   <label style={{ color: "#9aa", fontSize: "0.82rem", display: "flex", alignItems: "center", gap: "6px" }}>
                     <input
                       type="checkbox"
@@ -183,13 +210,29 @@ export default function DashboardPage() {
                     />
                     Add this answer to {esc.companyName}'s knowledge base (stops future deferrals on this question)
                   </label>
-                  <button
-                    onClick={() => resolve(esc.id)}
-                    disabled={savingId === esc.id}
-                    style={{ ...buttonStyle, opacity: savingId === esc.id ? 0.6 : 1 }}
-                  >
-                    {savingId === esc.id ? "Saving..." : "Save & Resolve"}
-                  </button>
+                  {looksLikePhoneNumber(esc.contact) ? (
+                    <label style={{ color: "#9aa", fontSize: "0.82rem", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <input
+                        type="checkbox"
+                        checked={drafts[esc.id]?.sendToGuest !== false}
+                        onChange={(e) => updateDraft(esc.id, "sendToGuest", e.target.checked)}
+                      />
+                      Send this answer to the guest on WhatsApp (may fail if it's been 24h+ since they last messaged)
+                    </label>
+                  ) : (
+                    <span style={{ color: "#667", fontSize: "0.78rem" }}>
+                      No WhatsApp number captured for this guest — can't auto-notify them.
+                    </span>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      onClick={() => resolve(esc.id)}
+                      disabled={savingId === esc.id}
+                      style={{ ...buttonStyle, opacity: savingId === esc.id ? 0.6 : 1 }}
+                    >
+                      {savingId === esc.id ? "Saving..." : "Save & Resolve"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

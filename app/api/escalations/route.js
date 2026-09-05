@@ -1,14 +1,24 @@
 import { NextResponse } from 'next/server';
+import { decrypt } from '../../../lib/crypto';
 
 // Backs the /dashboard page. Lists deferred ("let me confirm with the team") questions logged by
 // app/api/whatsapp-demo/route.js's logEscalation(), and lets you resolve one — optionally teaching
 // the answer back into that tenant's knowledge base so the bot stops deferring on the same
-// question next time. This is intentionally a single shared view (no per-tenant login) since none
-// of these tenants are live clients yet — see engineering notes below before this ever needs to
-// support a real client logging in to see only their own property's questions.
+// question next time, and optionally sending the answer straight back to the guest on WhatsApp.
+// This is intentionally a single shared view (no per-tenant login) since none of these tenants are
+// live clients yet — see engineering notes below before this ever needs to support a real client
+// logging in to see only their own property's questions.
 
 const KV_URL = (process.env.KV_REST_API_URL || process.env.REDIS_REST_API_URL || process.env.REDIS_REST_URL || "").trim();
 const KV_TOKEN = (process.env.KV_REST_API_TOKEN || process.env.REDIS_REST_API_TOKEN || process.env.REDIS_REST_TOKEN || "").trim();
+const WHATSAPP_ACCESS_TOKEN = (process.env.WHATSAPP_ACCESS_TOKEN || "").trim();
+// Every demo tenant currently shares one WhatsApp Business number (the sandbox/permanent number
+// guests "join" a tenant on), so this is the correct phone_number_id to send FROM for all of them
+// today. A real client onboarded with their OWN WhatsApp Business number would need their
+// phone_number_id stored on tenant:whatsapp:{id} in KV (onboard-tenant.mjs only stores it on the
+// reverse tenant:phone:{phone_number_id} key today) — flagging that as a gap for whenever the
+// first real client goes live, rather than silently sending from the wrong number.
+const PERMANENT_PHONE_NUMBER_ID = (process.env.PERMANENT_PHONE_NUMBER_ID || "").trim();
 
 // Shared-secret gate for this internal, single-user dashboard. Set DASHBOARD_SECRET in Vercel env
 // vars. If it's not set, the endpoint fails closed (refuses all requests) rather than silently
@@ -36,6 +46,68 @@ async function kvGet(key) {
 
 function authorized(key) {
   return DASHBOARD_SECRET && key === DASHBOARD_SECRET;
+}
+
+function looksLikePhoneNumber(contact) {
+  return /^\+?\d{10,15}$/.test((contact || '').replace(/\s+/g, ''));
+}
+
+async function getTenantWhatsAppToken(companyId) {
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/tenant:whatsapp:${companyId}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) {
+        const wa = JSON.parse(data.result);
+        const token = decrypt(wa.waba_token);
+        if (token) return token;
+      }
+    } catch (e) {
+      console.error(`[ESCALATIONS] Failed to load WhatsApp token for tenant ${companyId}:`, e);
+    }
+  }
+  return WHATSAPP_ACCESS_TOKEN;
+}
+
+// Sends the answer straight back to the guest on WhatsApp instead of leaving the loop closed only
+// on the dashboard side. IMPORTANT LIMITATION: WhatsApp's Business API only allows a free-form
+// text message like this within 24 hours of the guest's last message ("the customer service
+// window") — outside that window, Meta rejects it and a pre-approved Message Template is required
+// instead. Since escalations are explicitly meant to be answered "the next day," many of these
+// will legitimately fall outside the window. We don't silently swallow that: the failure and
+// Meta's real error reason are returned to the dashboard so it's visible, not guessed at.
+async function sendWhatsAppFollowUp(to, companyId, companyName, question, answer) {
+  if (!PERMANENT_PHONE_NUMBER_ID) {
+    return { ok: false, error: 'PERMANENT_PHONE_NUMBER_ID is not configured' };
+  }
+  const token = await getTenantWhatsAppToken(companyId);
+  if (!token) {
+    return { ok: false, error: 'No WhatsApp access token configured' };
+  }
+  const messageText = `Hi! Following up on your question to ${companyName}:\n"${question}"\n\n${answer}`;
+  try {
+    const response = await fetch(`https://graph.facebook.com/v19.0/${PERMANENT_PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'text',
+        text: { body: messageText }
+      })
+    });
+    const result = await response.json();
+    if (result.error) {
+      console.error('[ESCALATIONS] WhatsApp follow-up failed:', result.error);
+      return { ok: false, error: result.error.message || 'WhatsApp API rejected the message', code: result.error.code };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.error('[ESCALATIONS] WhatsApp follow-up request failed:', e);
+    return { ok: false, error: e.message };
+  }
 }
 
 export async function GET(req) {
@@ -94,7 +166,7 @@ export async function POST(req) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
-  const { key, id, answer, teachKb } = body || {};
+  const { key, id, answer, teachKb, sendToGuest } = body || {};
   if (!authorized(key)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -112,6 +184,18 @@ export async function POST(req) {
     record.answer = answer || null;
     record.resolvedAt = new Date().toISOString();
 
+    // Optionally send the answer straight back to the guest on WhatsApp — only attempted when the
+    // contact actually looks like a phone number (web-chat visitors with no captured number, or
+    // an email-only contact, can't receive a WhatsApp message). Only outcome is recorded on the
+    // record so the dashboard can show whether it actually reached the guest, not just that a send
+    // was attempted.
+    let notifyResult = null;
+    if (sendToGuest && answer && looksLikePhoneNumber(record.contact)) {
+      notifyResult = await sendWhatsAppFollowUp(record.contact, record.companyId, record.companyName, record.question, answer);
+      record.guestNotified = notifyResult.ok;
+      record.guestNotifyError = notifyResult.ok ? null : notifyResult.error;
+    }
+
     // Re-save with a fresh 14-day TTL so it stays visible in the dashboard for a while after
     // resolution (useful for "what did we already answer this week" review), then expires.
     await kvCommand(['SET', `escalation:${id}`, JSON.stringify(record), 'EX', '1209600']);
@@ -127,7 +211,12 @@ export async function POST(req) {
       await kvCommand(['SET', learnedKey, updated]); // no TTL — this is real, durable knowledge base content
     }
 
-    return NextResponse.json({ ok: true, taughtKb: Boolean(teachKb && answer) });
+    return NextResponse.json({
+      ok: true,
+      taughtKb: Boolean(teachKb && answer),
+      guestNotified: notifyResult ? notifyResult.ok : null,
+      guestNotifyError: notifyResult && !notifyResult.ok ? notifyResult.error : null
+    });
   } catch (e) {
     console.error('[ESCALATIONS] POST failed:', e);
     return NextResponse.json({ error: 'Failed to resolve escalation' }, { status: 500 });

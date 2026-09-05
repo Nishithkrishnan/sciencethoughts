@@ -58,7 +58,16 @@ export default function InteractiveWebDemo() {
     "62": "Vivenda Dos Palhaços (Goa Heritage Guesthouse)",
     "63": "Marari Villas (Kerala Beach Villas)",
     "64": "Alsisar Mahal (Shekhawati Heritage Palace)",
-    "65": "Windermere Estate (Munnar Plantation Bungalow)"
+    "65": "Windermere Estate (Munnar Plantation Bungalow)",
+    "66": "Ramathra Fort (Rajasthan Heritage Fort)",
+    "67": "Vanghat — The Wildlife Lodge (Corbett Wildlife Lodge)",
+    "68": "Fort Begu (Rajasthan Ancestral Fort)",
+    "69": "Dera Amer (Jaipur Elephant Camp)",
+    "70": "Shergarh Tented Camp (Kanha Luxury Camp)",
+    "71": "Lchang Nang Retreat (Ladakh Boutique Retreat)",
+    "72": "Tranquil Resort (Wayanad Plantation Estate)",
+    "73": "Rajbari Bawali (Kolkata Heritage Palace)",
+    "74": "Diphlu River Lodge (Kaziranga Eco-Lodge)"
   };
 
   useEffect(() => {

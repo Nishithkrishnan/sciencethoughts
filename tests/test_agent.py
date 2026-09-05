@@ -18,16 +18,19 @@ RAG_CONTEXT_MAP = {
     "agency": [
         "ScienceThoughts is a premium B2B AI Automation Agency founded by Nishith Krishnan.",
         "Value proposition: custom high-performance zero-hallucination Conversational AI Assistants for Real Estate and Luxury Hospitality.",
-        # Was "25,000 INR setup / 10,000 INR/month" — that was the OLD pricing and had drifted
-        # out of sync with the live system prompt (app/api/whatsapp-demo/route.js, line ~1071),
-        # which was already quoting 75,000/25,000. A stale RAG context here doesn't just make
-        # this comment wrong — it actively breaks the DeepEval FaithfulnessMetric for any test
-        # case that asks about pricing: the live agent (correctly) says 75k/25k, the metric
-        # compares that against this context, sees a contradiction, and would fail a CORRECT
-        # response as a "hallucination". Keep this in sync with the live price by hand until
-        # there's a single source of truth both the app and the tests read from.
-        "Pricing: Setup Fee is 75,000 INR (one-time) and Monthly Retainer is 25,000 INR/month.",
-        "Pilot offer: Custom 7-day Staging Sandbox pilot for free."
+        # 5 Sep: pricing changed AGAIN since the "75,000/25,000" comment below was written —
+        # flat pricing was retired in favor of a tiered structure (₹25,000 one-time + ₹15,000/mo
+        # for ₹30,000+/night properties; ₹15,000 one-time + ₹10,000/mo for sub-₹15,000/night
+        # properties), and the live system prompt (route.js, "Pilot Offer & Pricing" section)
+        # was separately rewritten so a GENERIC pricing question (no nightly rate given) gets a
+        # RANGE — "₹10,000-15,000/month plus a one-time onboarding fee of ₹15,000-25,000" — and
+        # leads with the free 7-day trial, not a bare rate card. Only a rate-qualified question
+        # gets one of the two specific numbers. Keep this in sync with the live prompt by hand
+        # until there's a single source of truth both the app and the tests read from — this is
+        # the second time it's drifted.
+        "Pricing: every property starts with a free 7-day trial on its own WhatsApp number, no cost, no commitment.",
+        "After the trial, pricing is tiered by the property's nightly rate: ₹25,000 one-time setup + ₹15,000/month for properties at ₹30,000+/night, or ₹15,000 one-time setup + ₹10,000/month for properties under ₹15,000/night. When no nightly rate is given, the range quoted is ₹10,000-15,000/month plus a ₹15,000-25,000 one-time onboarding fee.",
+        "Pilot offer: free 7-day trial connected live to the prospect's own WhatsApp number."
     ],
     "43": [
         "Villa Rentals Goa offers a curated collection of luxury private pool villas in Goa.",
@@ -39,13 +42,77 @@ RAG_CONTEXT_MAP = {
         "The Canopy Machan treehouse has private decks, open-air bathtubs, forest views, and runs on solar power.",
         "Rates: 18,000 weekday / 26,000 weekend, including complimentary breakfast.",
         "Pets are not allowed, to protect local wildlife."
+    ],
+    # Batch 3 (added 5 Sep) — mirrors the exact KB text in app/api/whatsapp-demo/route.js's
+    # getCompanyKnowledge() for each id, so FaithfulnessMetric is checking the agent's reply
+    # against the same ground truth it was actually given, not a generic placeholder.
+    "39": [
+        "Coco Shambhala is a collection of private luxury Bali-style villas in Nerul, North Goa, run by director Giles Knapton.",
+        "Standard Package (airport transfers, breakfast, welcome drinks): Rs 55,000/day low season (1 May-30 Sep), Rs 80,000/day standard season (1 Oct-30 Apr).",
+        "Premium Package (airport transfers, all meals, one spa treatment per adult): Rs 80,000/day low season, Rs 1,15,000/day standard season.",
+        "Peak season (15 Dec-7 Jan): rates on request. Minimum stay: 3 nights."
+    ],
+    "66": [
+        "Ramathra Fort is a heritage fort hotel in Karauli district, Rajasthan, personally run by the Raj Pal family (11th generation) - Ravi Raj Pal and Gitanjali Raj Pal.",
+        "Rates: approximately Rs 18,000-27,000/night depending on room category and season.",
+        "Activities: village walks, boating on the adjoining lake, pottery and craft demonstrations, birdwatching, jeep excursions, sunset views from the fort ramparts."
+    ],
+    "67": [
+        "Vanghat - The Wildlife Lodge is an off-grid eco lodge on the Ramganga river in the Corbett buffer zone, Uttarakhand, founded and personally run by Sumantha Ghosh since 1999.",
+        "Rates: approximately Rs 10,500-11,500 per person per night plus GST, fully inclusive of meals and most activities - a couple's night runs roughly Rs 21,000-23,000 combined.",
+        "Activities: guided walking safaris, birdwatching, wildlife photography, Mahseer angling, wellness/healing retreats."
+    ],
+    "68": [
+        "Fort Begu is an ancestral fort dating to 1430 in Chittorgarh district, Rajasthan, run by the Rawat family (23rd generation) - Kr. Ajay Raj Singh and his brothers.",
+        "5 suites total. Rates: Suites around Rs 15,000/night, Deluxe Rooms around Rs 10,000/night.",
+        "Amenities: AC, room service, pool, garden, on-site parking, airport transfer. Dining: Rajasthani, Indian, Chinese, Continental."
+    ],
+    "69": [
+        "Dera Amer is an ethical wilderness elephant camp near Amer, Jaipur, Rajasthan, run by Udaijit Singh.",
+        "Rates: approximately Rs 37,500/night.",
+        "Experience: ethical, non-riding elephant interactions - feeding, bathing, painting, and walks - positioned as a sanctuary, not a ride-based attraction."
+    ],
+    "70": [
+        "Shergarh Tented Camp is a tiny, owner-run luxury tented camp bordering Kanha Tiger Reserve, Madhya Pradesh, founded in 2004 by Jehan and Katie Bhujwala.",
+        "Just 8 tents. Rates: luxury tented doubles from around Rs 15,000/night including meals plus taxes. Jungle safaris booked separately at approximately Rs 5,800/couple for a shared jeep.",
+        "Open seasonally 15 October to 15 May only."
+    ],
+    "71": [
+        "Lchang Nang Retreat - The House of Trees is a boutique retreat in Nubra Valley, Ladakh, founded and run by Rigzin Wangtak Kalon.",
+        "17 individual cottages built in mud, stone, and poplar wood, each with a private garden and sit-out. A Tranquil Family Cottage option offers two interconnected units.",
+        "Activities: yoga and Ayurvedic wellness, stargazing and bonfire evenings, monastery visits, mountain biking, camel rides, spa services, Panamik Hot Springs (~17km).",
+        "No nightly rate is listed in the knowledge base for this property - it has not been re-verified yet."
+    ],
+    "72": [
+        "Tranquil Resort is a 400-acre, 126-year-old working coffee and spice plantation estate in Wayanad, Kerala, personally run by Ajay Issac Mathulla and his wife Nisha since 1991.",
+        "Five room categories: Serenetree Tree Villa, Tranquilitree Tree House (award-winning), Luxury Suite, Deluxe Suite, Garden Rooms.",
+        "Rates: approximately Rs 13,000-28,552/night depending on room category; the Planters Garden Room and above clear Rs 15,000/night.",
+        "Amenities: pool with jacuzzi, Ayurvedic spa, communal dining. Activities: ten marked walking trails, birdwatching (130+ species), canine trekking companions."
+    ],
+    "73": [
+        "The Rajbari Bawali is a 300-year-old restored heritage palace resort near Kolkata, personally restored by owner Ajay Rawla (2009-2016+, with INTACH and the Aga Khan Foundation).",
+        "Classic Heritage: ~270 sq.ft, from Rs 10,613/night (breakfast included).",
+        "Zamindari Room: ~500 sq.ft, from Rs 13,267/night (breakfast included).",
+        "Royal Suite: ~850 sq.ft, palace view, from Rs 17,512/night (breakfast included). Royal Suite Premium Package (full board): from Rs 36,508/night."
+    ],
+    "74": [
+        "Diphlu River Lodge is a riverside eco-lodge bordering Kaziranga National Park, Assam, founded in 2008 by Ashish and Jahnabi Phookan.",
+        "Jungle Plan (mid-Nov to April): approximately Rs 16,940/adult/night twin-share (Rs 21,940 solo), includes all meals and two daily jeep safaris.",
+        "Monsoon Special (May-Oct, park closed): approximately Rs 15,500/cottage/night twin-share, breakfast and dinner only, no safaris.",
+        "River-facing cottages carry a ~Rs 4,000/night supplement. Amenities: AC cottages, Wi-Fi, campfire, village visits, birdwatching, tea garden walks, optional Dolphin Boat Ride."
     ]
 }
 
 # Named constants so a future pricing change is a one-line fix instead of a silent drift
 # between what the agent actually says and what these tests expect it to say.
-LIVE_AGENCY_SETUP_FEE = "75,000"
-LIVE_AGENCY_MONTHLY_FEE = "25,000"
+# 5 Sep: replaced the old flat LIVE_AGENCY_SETUP_FEE/MONTHLY_FEE ("75,000"/"25,000") pair —
+# a generic pricing question (no nightly rate volunteered) is now answered with a RANGE, not
+# one fixed number, so the deterministic check below can no longer assert one exact figure.
+# It instead checks the two boundary numbers of the quoted range actually appear, and that the
+# retired flat price never reappears (a regression to it would mean the system prompt reverted).
+LIVE_AGENCY_MONTHLY_FEE_LOW = "10,000"
+LIVE_AGENCY_SETUP_FEE_HIGH = "25,000"
+RETIRED_FLAT_SETUP_FEE = "75,000"
 
 def get_rag_context(company_id: str) -> list:
     """Dynamically retrieves RAG context from map or defaults to avoid crashes."""
@@ -160,10 +227,15 @@ class TestWhatsAppAgent:
         # figures against the known-current price directly instead of only trusting an
         # LLM-judged faithfulness score.
         if test_case.get("check_pricing_accuracy"):
-            assert LIVE_AGENCY_SETUP_FEE in final_reply, \
-                f"Expected current setup fee ({LIVE_AGENCY_SETUP_FEE}) in reply, got: {final_reply}"
-            assert LIVE_AGENCY_MONTHLY_FEE in final_reply, \
-                f"Expected current monthly fee ({LIVE_AGENCY_MONTHLY_FEE}) in reply, got: {final_reply}"
+            assert RETIRED_FLAT_SETUP_FEE not in final_reply, \
+                f"Reply quoted the retired flat setup fee ({RETIRED_FLAT_SETUP_FEE}) — pricing prompt may have reverted: {final_reply}"
+            assert LIVE_AGENCY_MONTHLY_FEE_LOW in final_reply, \
+                f"Expected the current monthly range's low end ({LIVE_AGENCY_MONTHLY_FEE_LOW}) in reply, got: {final_reply}"
+            assert LIVE_AGENCY_SETUP_FEE_HIGH in final_reply, \
+                f"Expected the current setup range's high end ({LIVE_AGENCY_SETUP_FEE_HIGH}) in reply, got: {final_reply}"
+            trial_phrases = ["trial", "free"]
+            assert any(phrase in final_reply.lower() for phrase in trial_phrases), \
+                f"Expected the free trial to be mentioned before/alongside pricing, got: {final_reply}"
 
         # ---- 5c. Hallucination-guard phrasing check for "not in the knowledge base" cases ----
         # Regression check for the earlier fix that stopped the agent from inventing Wi-Fi/

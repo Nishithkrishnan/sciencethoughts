@@ -146,6 +146,7 @@ const companiesMap = {
   '69': 'Dera Amer',
   '70': 'Shergarh Tented Camp',
   '71': 'Lchang Nang Retreat',
+  '72': 'Tranquil Resort',
   '73': 'Rajbari Bawali',
   '74': 'Diphlu River Lodge',
   'agency': 'ScienceThoughts AI Agency'
@@ -188,7 +189,14 @@ function matchTenantId(rawQuery) {
 
   const searchLower = query.toLowerCase();
   const stopWords = ["villa", "villas", "stay", "stays", "resort", "resorts", "hotel", "hotels", "the", "group", "constructions", "builders", "developers", "and", "trails", "homes"];
-  const cleanNameFor = (name) => name.toLowerCase().replace(/&/g, "").replace(/at/g, "").trim();
+  // \bat\b (word boundary) — NOT a blanket /at/g. A blanket substring replace was here before and
+  // quietly mangled any name that merely *contains* the letters "at" (Ramathra, Vanghat, Estate,
+  // Retreat), not just the standalone connector word "at" it was meant for (e.g. "Barefoot at
+  // Havelock"). That corruption broke "Ramathra Fort" typed on WhatsApp from matching itself, and
+  // the keyword fallback below then collided with "Ahilya Fort" (both share the generic "fort"
+  // keyword; insertion order decided the tie) — confirmed via a full self-match regression test
+  // across every tenant name, id, and lowercased name in companiesMap.
+  const cleanNameFor = (name) => name.toLowerCase().replace(/&/g, "").replace(/\bat\b/g, "").trim();
 
   let bestFullNameMatch = null;
   for (const [id, name] of Object.entries(companiesMap)) {
@@ -256,7 +264,26 @@ function buildDemoHubMenu() {
     `52. *Ahilya Fort* (Maheshwar Royal Heritage)\n` +
     `53. *The Tree House Resort, Jaipur* (Eco-Luxury Treehouses)\n` +
     `54. *Leisure Hotels Group* (Uttarakhand Boutique Resorts)\n` +
-    `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n\n` +
+    `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n` +
+    `56. *The Bison, Kabini* (Kabini Wildlife Lodge)\n` +
+    `57. *Suján Jawai* (Rajasthan Leopard Camp)\n` +
+    `58. *Khem Villas* (Ranthambore Eco-Lodge)\n` +
+    `59. *The Belgadia Palace* (Odisha Royal Heritage)\n` +
+    `60. *Jalakara* (Andaman Islands Villa)\n` +
+    `61. *The Kumaon* (Himalayan Boutique Lodge)\n` +
+    `62. *Vivenda Dos Palhaços* (Goa Heritage Guesthouse)\n` +
+    `63. *Marari Villas* (Kerala Beach Villas)\n` +
+    `64. *Alsisar Mahal* (Shekhawati Heritage Palace)\n` +
+    `65. *Windermere Estate* (Munnar Plantation Bungalow)\n` +
+    `66. *Ramathra Fort* (Rajasthan Heritage Fort)\n` +
+    `67. *Vanghat* (Corbett Wildlife Lodge)\n` +
+    `68. *Fort Begu* (Rajasthan Ancestral Fort)\n` +
+    `69. *Dera Amer* (Jaipur Elephant Camp)\n` +
+    `70. *Shergarh Tented Camp* (Kanha Luxury Camp)\n` +
+    `71. *Lchang Nang Retreat* (Ladakh Boutique Retreat)\n` +
+    `72. *Tranquil Resort* (Wayanad Plantation Estate)\n` +
+    `73. *Rajbari Bawali* (Kolkata Heritage Palace)\n` +
+    `74. *Diphlu River Lodge* (Kaziranga Eco-Lodge)\n\n` +
     `Reply with a number from the list above, or type the property name, to start the simulation!`;
 }
 
@@ -1291,6 +1318,16 @@ async function getCompanyKnowledge(companyId) {
    - Meals: Locally-sourced, seasonal dining - farm-table meals, chef tastings, and themed dinners built around what is fresh that day.
    - Activities: Yoga and Ayurvedic wellness treatments, stargazing and bonfire evenings, monastery visits and village walks, mountain biking, camel rides at the nearby sand dunes, spa services, and access to the Panamik Hot Springs, about 17 km away.
    - Ownership: Founded and run by Rigzin Wangtak Kalon.`;
+  } else if (companyId === '72') {
+    prompt = `You are the autonomous AI Booking Assistant for Tranquil Resort, a 400-acre, 126-year-old working coffee and spice plantation estate in Wayanad, Kerala, personally run by Ajay Issac Mathulla and his wife Nisha since 1991.
+=== PROPERTY KNOWLEDGE BASE ===
+1. **The Estate**
+   - Location: Kolagappara-Ambalavayal Road, Wayanad, Kerala - a 400-acre working coffee and spice plantation also growing exotic fruits, set within remote rainforest.
+   - Rooms: Five categories - Serenetree Tree Villa, Tranquilitree Tree House (award-winning), Luxury Suite, Deluxe Suite, and Garden Rooms.
+   - Rates: Approximately Rs 13,000-28,552/night depending on room category; the Planters Garden Room and above clear Rs 15,000/night.
+   - Amenities: Crystal-clear swimming pool with jacuzzi, authentic Ayurvedic spa services, communal dining experiences.
+   - Activities: Ten marked walking trails of varying difficulty (including "The Braveheart," "The Indiana Jones," and "The Coffee Walk"), birdwatching (130+ species recorded on the estate), canine trekking companions.
+   - Ownership: Personally run by hosts Ajay Issac Mathulla and his wife Nisha since 1991 - they host culinary demonstrations and maintain a hands-on, personal presence throughout a guest's stay.`;
   } else if (companyId === '73') {
     prompt = `You are the autonomous AI Booking Assistant for The Rajbari Bawali, a 300-year-old restored heritage palace resort near Kolkata, personally restored by owner Ajay Rawla.
 === PROPERTY KNOWLEDGE BASE ===

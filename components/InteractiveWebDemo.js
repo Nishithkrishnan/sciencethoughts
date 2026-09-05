@@ -155,7 +155,7 @@ export default function InteractiveWebDemo() {
           <div>
             <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
               Live AI Concierge Interactive Demo
-              <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>LIVE RAG</span>
+              <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>KB-GROUNDED</span>
             </h3>
             <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Select a resort or villa brand to test availability queries</p>
           </div>

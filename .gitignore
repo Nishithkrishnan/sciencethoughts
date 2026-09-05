@@ -42,3 +42,8 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# python (tests/ - pytest + DeepEval eval suite)
+__pycache__/
+*.pyc
+.pytest_cache/

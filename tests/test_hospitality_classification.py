@@ -46,7 +46,14 @@ ROUTE_JS = Path(__file__).parent.parent / "app" / "api" / "whatsapp-demo" / "rou
 # now a hospitality-only product, so both sets are intentionally empty.
 EXPECTED_REAL_ESTATE_IDS = set()
 EXPECTED_NON_HOSPITALITY_OTHER_IDS = set()
-EXPECTED_HOSPITALITY_IDS = {"9", "18", "19"} | {str(i) for i in range(21, 47)}
+# Updated 6-7 Sep: ids 19 and 21 ("Lost Traveller" and "Destiny Farmstay") were removed from
+# companiesMap entirely — two fabricated demo personas with invented villa/pricing details and
+# no real client relationship, pulled per the same integrity pass that removed the fabricated
+# Mango Alibaug case-study numbers (see claude/weekend-legitimacy-plan.md, Part 2). Ids 47-74
+# were added across Batch 2/3 outreach (see claude/all-tenants-routing-test-5-sep.md) and were
+# never added here, which is exactly the "ground truth going stale" failure mode this test's own
+# docstring warns about — caught when the full suite actually ran again after those changes.
+EXPECTED_HOSPITALITY_IDS = {"9", "18"} | {str(i) for i in range(22, 75)}
 
 
 def _read_source():

@@ -554,6 +554,21 @@ export async function POST(req) {
               session.transcript = []; // backward-compat for sessions saved before this field existed
             }
 
+          // 1b. One-time guest-data disclosure — fires once per new conversation (history is
+          // empty), not on every message. A published Guest Data Notice a guest never sees
+          // doesn't amount to disclosure at the point of collection, so this sends a short
+          // heads-up as its own WhatsApp message before the AI's actual reply. See
+          // /app/data-notice/page.js for the linked page and the Guest Data Notice draft's
+          // own appendix for the wording this is based on.
+          if (session.history.length === 0) {
+            const disclosurePropertyName = companiesMap[session.companyId];
+            const disclosureIntro = disclosurePropertyName
+              ? `${disclosurePropertyName}'s AI assistant`
+              : "this property's AI assistant";
+            const disclosureText = `Hi — you're chatting with ${disclosureIntro}. Anything you type is used to answer you and, if you'd like a follow-up, is passed to our team. Details: https://sciencethoughts.com/data-notice. Please don't share card or ID numbers here.`;
+            await sendWhatsAppMessage(phone_number_id, from, disclosureText, session.companyId);
+          }
+
           // 2. Append user message to history — `history` stays capped (it's what we pay to
           // send the AI model each turn); `transcript` is never trimmed, purely for logging
           // the full conversation to the property team via the lead sheet.
@@ -1375,8 +1390,8 @@ async function getCompanyKnowledge(companyId) {
     - Automatic CRM lead push to Zoho when connected.
 3. **Pilot Offer & Pricing:**
     - Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so they can see it working before any pricing conversation matters. If payment hasn't been set up by day 6-7, the agent pauses on day 8 until it is.
-    - When asked about price, ALWAYS mention the free trial first, then give pricing as a simple range rather than reciting rigid brackets: typically ₹10,000-15,000/month plus a one-time onboarding fee of ₹15,000-25,000, scaled to the property's nightly rate. Never say something like "ask on a call if your rate falls in between" — that reads as though the pricing isn't actually figured out. If they share their exact nightly rate, quote the specific number confidently: ₹30,000+/night is ₹25,000 one-time + ₹15,000/month; under ₹15,000/night is ₹15,000 one-time + ₹10,000/month.
-    - End a pricing answer with two options, not just one: start the trial directly, or book a discovery call for an exact quote.
+    - When asked about price, ALWAYS mention the free trial first, then quote the flat rate confidently: ₹25,000 one-time onboarding fee + ₹12,000/month, the same for every property regardless of nightly rate. Never hedge with "it depends on your rate" or "ask on a call for your number" — the price is the same for everyone, say so plainly.
+    - End a pricing answer with two options, not just one: start the trial directly, or book a discovery call to see it set up on their own property before deciding.
 4. **Booking:**
    - Book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
 === CONVERSION GOAL ===
@@ -1458,7 +1473,7 @@ function simulateOfflineResponse(companyId, history) {
   // Rule B: Price inquiry
   else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
     if (companyId === 'agency') {
-      reply = `Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so you can see it working before pricing matters. After that, it typically runs ₹10,000-15,000/month plus a one-time onboarding fee of ₹15,000-25,000, scaled to your property's nightly rate. Want to start the trial, or book a quick call to get your exact number?`;
+      reply = `Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so you can see it working before pricing matters. After that, it's a flat ₹25,000 one-time onboarding fee + ₹12,000/month — the same for every property. Want to start the trial, or book a quick call?`;
     } else if (companyId === '9') {
       reply = `Our rates for Mango Beach House start at ₹28,000/night on weekdays and ₹35,000/night on weekends. Mango Villa Bougainvillea is ₹32,000/night (weekdays) and ₹42,000/night (weekends). Would you like to check availability?`;
     } else if (companyId === '18') {

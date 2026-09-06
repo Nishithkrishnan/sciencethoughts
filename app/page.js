@@ -196,9 +196,9 @@ export default async function Home() {
             {/* Service 1 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
               <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Boutique Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹25,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹75,000 Custom Setup Fee</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Best for single-property luxury stays or boutique setups needing intelligent automated guest interactions on WhatsApp.</p>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹12,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹25,000 one-time setup fee</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>One flat rate for any single-property luxury stay or boutique setup needing intelligent automated guest interactions on WhatsApp — a free 7-day trial included, regardless of nightly rate.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
                 <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Brand-Safe FAQ & Booking Guard</li>
                 <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 Guest Engagement on WhatsApp</li>

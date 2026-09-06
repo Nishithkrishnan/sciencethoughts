@@ -105,14 +105,15 @@ RAG_CONTEXT_MAP = {
 
 # Named constants so a future pricing change is a one-line fix instead of a silent drift
 # between what the agent actually says and what these tests expect it to say.
-# 5 Sep: replaced the old flat LIVE_AGENCY_SETUP_FEE/MONTHLY_FEE ("75,000"/"25,000") pair —
-# a generic pricing question (no nightly rate volunteered) is now answered with a RANGE, not
-# one fixed number, so the deterministic check below can no longer assert one exact figure.
-# It instead checks the two boundary numbers of the quoted range actually appear, and that the
-# retired flat price never reappears (a regression to it would mean the system prompt reverted).
-LIVE_AGENCY_MONTHLY_FEE_LOW = "10,000"
-LIVE_AGENCY_SETUP_FEE_HIGH = "25,000"
+# 6 Sep: moved from the 5 Sep tiered range ("10,000-15,000/mo + 15,000-25,000 one-time",
+# scaled by nightly rate) to ONE flat rate for every property regardless of nightly rate:
+# Rs 25,000 one-time setup + Rs 12,000/month. The deterministic check below now asserts the
+# exact flat figures appear, and guards against either retired structure reappearing — the
+# original flat 75k/25k pricing, and the 5 Sep tiered range's low end.
+LIVE_AGENCY_SETUP_FEE = "25,000"
+LIVE_AGENCY_MONTHLY_FEE = "12,000"
 RETIRED_FLAT_SETUP_FEE = "75,000"
+RETIRED_TIERED_MONTHLY_FEE_LOW = "10,000"
 
 def get_rag_context(company_id: str) -> list:
     """Dynamically retrieves RAG context from map or defaults to avoid crashes."""
@@ -222,17 +223,19 @@ class TestWhatsAppAgent:
 
         # ---- 5b. Pricing accuracy hard assert (deterministic, not left to DeepEval) ----
         # Guards against exactly the kind of drift found in this session: the live system
-        # prompt was updated to 75k/25k pricing but a test fixture elsewhere still said
-        # 25k/10k. If a case is marked as a pricing question, check the actual quoted
-        # figures against the known-current price directly instead of only trusting an
-        # LLM-judged faithfulness score.
+        # prompt drifted out of sync with what a test fixture elsewhere expected. If a case
+        # is marked as a pricing question, check the actual quoted figures against the
+        # known-current flat price directly instead of only trusting an LLM-judged
+        # faithfulness score.
         if test_case.get("check_pricing_accuracy"):
             assert RETIRED_FLAT_SETUP_FEE not in final_reply, \
                 f"Reply quoted the retired flat setup fee ({RETIRED_FLAT_SETUP_FEE}) — pricing prompt may have reverted: {final_reply}"
-            assert LIVE_AGENCY_MONTHLY_FEE_LOW in final_reply, \
-                f"Expected the current monthly range's low end ({LIVE_AGENCY_MONTHLY_FEE_LOW}) in reply, got: {final_reply}"
-            assert LIVE_AGENCY_SETUP_FEE_HIGH in final_reply, \
-                f"Expected the current setup range's high end ({LIVE_AGENCY_SETUP_FEE_HIGH}) in reply, got: {final_reply}"
+            assert RETIRED_TIERED_MONTHLY_FEE_LOW not in final_reply, \
+                f"Reply quoted the retired tiered range's low end ({RETIRED_TIERED_MONTHLY_FEE_LOW}) — pricing prompt may have reverted to tiered pricing: {final_reply}"
+            assert LIVE_AGENCY_SETUP_FEE in final_reply, \
+                f"Expected the current flat setup fee ({LIVE_AGENCY_SETUP_FEE}) in reply, got: {final_reply}"
+            assert LIVE_AGENCY_MONTHLY_FEE in final_reply, \
+                f"Expected the current flat monthly fee ({LIVE_AGENCY_MONTHLY_FEE}) in reply, got: {final_reply}"
             trial_phrases = ["trial", "free"]
             assert any(phrase in final_reply.lower() for phrase in trial_phrases), \
                 f"Expected the free trial to be mentioned before/alongside pricing, got: {final_reply}"

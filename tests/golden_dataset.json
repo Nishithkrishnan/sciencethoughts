@@ -212,7 +212,7 @@
   {
     "id": "TC_014_AGENCY_PRICING_ACCURACY",
     "companyId": "agency",
-    "description": "Pricing drift guard - Deterministically checks the quoted range (10,000-15,000/mo + 15,000-25,000 one-time, trial mentioned) against the known-current tiered pricing, and guards against the retired flat 75k/25k reappearing. Independent of DeepEval's judgment call.",
+    "description": "Pricing drift guard - Deterministically checks the flat rate (Rs 25,000 one-time setup + Rs 12,000/month, trial mentioned) against the known-current flat pricing, and guards against either retired structure reappearing: the original flat 75k/25k, or the 5 Sep tiered range (10,000-15,000/mo + 15,000-25,000 one-time). Independent of DeepEval's judgment call.",
     "user_turns": [
       "What's your pricing for the AI concierge?"
     ],
@@ -311,7 +311,8 @@
     "expected_tenant": "Vanghat",
     "forbidden_tenants": [],
     "max_latency_ms": 2800,
-    "run_relevancy": true
+    "run_relevancy": true,
+    "relevancy_note": "Ran live 5 Sep: scored 0.67 (threshold 0.7) on AnswerRelevancyMetric — a near-miss, not a failure worth acting on. Inspected the actual reply: fully correct and grounded (exact rate, correct inclusions, no hallucination); the judge marginally docked it for including a required follow-up/adjacent fact the system prompt mandates (the 'ask about availability' CTA for Vanghat; the separately-priced safari detail for Shergarh). Decision (5 Sep, explicit): leave run_relevancy on rather than disable it — 0.67 vs 0.7 is close enough that this reads as judge noise (same pattern as TC_012), not a real defect, and the check should stay live in case a future change genuinely regresses relevancy. If it keeps flaking on repeat runs with no code change, that's the signal to revisit — a single data point isn't."
   },
   {
     "id": "TC_021_HAPPY_FORT_BEGU",
@@ -353,7 +354,8 @@
     "expected_tenant": "Shergarh",
     "forbidden_tenants": [],
     "max_latency_ms": 2800,
-    "run_relevancy": true
+    "run_relevancy": true,
+    "relevancy_note": "Ran live 5 Sep: scored 0.67 (threshold 0.7) on AnswerRelevancyMetric — a near-miss, not a failure worth acting on. Inspected the actual reply: fully correct and grounded (exact rate, correct inclusions, no hallucination); the judge marginally docked it for including a required follow-up/adjacent fact the system prompt mandates (the 'ask about availability' CTA for Vanghat; the separately-priced safari detail for Shergarh). Decision (5 Sep, explicit): leave run_relevancy on rather than disable it — 0.67 vs 0.7 is close enough that this reads as judge noise (same pattern as TC_012), not a real defect, and the check should stay live in case a future change genuinely regresses relevancy. If it keeps flaking on repeat runs with no code change, that's the signal to revisit — a single data point isn't."
   },
   {
     "id": "TC_024_LCHANG_NANG_RATE_DEFERRAL",

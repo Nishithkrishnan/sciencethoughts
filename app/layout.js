@@ -88,9 +88,9 @@ export default function RootLayout({ children }) {
             <div className="footer-bottom">
               <p>&copy; {new Date().getFullYear()} Science Thoughts. All rights reserved.</p>
               <p style={{ display: "flex", gap: "15px" }}>
-                <a href="#" className="footer-link">Privacy Policy</a>
+                <a href="/privacy-policy" className="footer-link">Privacy Policy</a>
                 <span>&middot;</span>
-                <a href="#" className="footer-link">Terms of Service</a>
+                <a href="/terms-of-service" className="footer-link">Terms of Service</a>
               </p>
             </div>
           </div>

@@ -18,18 +18,19 @@ RAG_CONTEXT_MAP = {
     "agency": [
         "ScienceThoughts is a premium B2B AI Automation Agency founded by Nishith Krishnan.",
         "Value proposition: custom high-performance zero-hallucination Conversational AI Assistants for Real Estate and Luxury Hospitality.",
-        # 5 Sep: pricing changed AGAIN since the "75,000/25,000" comment below was written —
-        # flat pricing was retired in favor of a tiered structure (₹25,000 one-time + ₹15,000/mo
-        # for ₹30,000+/night properties; ₹15,000 one-time + ₹10,000/mo for sub-₹15,000/night
-        # properties), and the live system prompt (route.js, "Pilot Offer & Pricing" section)
-        # was separately rewritten so a GENERIC pricing question (no nightly rate given) gets a
-        # RANGE — "₹10,000-15,000/month plus a one-time onboarding fee of ₹15,000-25,000" — and
-        # leads with the free 7-day trial, not a bare rate card. Only a rate-qualified question
-        # gets one of the two specific numbers. Keep this in sync with the live prompt by hand
-        # until there's a single source of truth both the app and the tests read from — this is
-        # the second time it's drifted.
+        # 6 Sep: pricing changed AGAIN — the 5 Sep tiered range (kept above in git history/the
+        # comment this replaces) was retired in favor of ONE flat rate for every property,
+        # regardless of nightly rate. This RAG_CONTEXT_MAP entry is the "ground truth" DeepEval's
+        # FaithfulnessMetric checks the agent's reply against — it was NOT updated when the 6 Sep
+        # pricing fix landed in route.js and test_agent.py's own LIVE_AGENCY_* constants, which
+        # would have made every agency pricing faithfulness check fail against a stale context
+        # (agent correctly says flat 25k/12k, "faithfulness" metric says that's unsupported by a
+        # context still describing the old tiered range). Fixed here, same day, before it could
+        # cause exactly that false failure. Keep this in sync with the live prompt by hand until
+        # there's a single source of truth both the app and the tests read from — this is the
+        # third time it's drifted.
         "Pricing: every property starts with a free 7-day trial on its own WhatsApp number, no cost, no commitment.",
-        "After the trial, pricing is tiered by the property's nightly rate: ₹25,000 one-time setup + ₹15,000/month for properties at ₹30,000+/night, or ₹15,000 one-time setup + ₹10,000/month for properties under ₹15,000/night. When no nightly rate is given, the range quoted is ₹10,000-15,000/month plus a ₹15,000-25,000 one-time onboarding fee.",
+        "After the trial, pricing is one flat rate for every property, regardless of nightly rate: ₹25,000 one-time onboarding fee plus ₹12,000/month.",
         "Pilot offer: free 7-day trial connected live to the prospect's own WhatsApp number."
     ],
     "43": [

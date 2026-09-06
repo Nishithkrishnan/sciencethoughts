@@ -4,18 +4,32 @@ import os
 from pathlib import Path
 from clients.agent_client import AgentClient
 
-# Automatically load OpenAI API key into session environment
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    env_local_path = Path(__file__).parent.parent / ".env.local"
-    if env_local_path.exists():
-        with open(env_local_path, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip().startswith("OPENAI_API_KEY="):
-                    OPENAI_API_KEY = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    break
-if OPENAI_API_KEY:
-    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+def _load_from_env_local(var_name: str):
+    """Falls back to .env.local for a var not already in the environment, mirroring how
+    Next.js itself reads that file — so pytest and `next dev` can share one secrets file."""
+    value = os.getenv(var_name)
+    if not value:
+        env_local_path = Path(__file__).parent.parent / ".env.local"
+        if env_local_path.exists():
+            with open(env_local_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip().startswith(f"{var_name}="):
+                        value = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        break
+    if value:
+        os.environ[var_name] = value
+    return value
+
+# Automatically load OpenAI API key into session environment — required for DeepEval's own
+# judge-model calls (Faithfulness/Relevancy), separate from whatever key production itself uses.
+_load_from_env_local("OPENAI_API_KEY")
+
+# Optional — if set (same value as Vercel's EVAL_BYPASS_TOKEN), AgentClient sends it as a header
+# so this run skips the public web-demo's per-IP daily rate limit. Without it, running the full
+# suite twice in the same UTC day from the same machine trips that limit partway through the
+# second run (see all-tenants-routing-test-5-sep.md). Safe to leave unset — tests just run
+# against the real rate limit like a normal visitor would, same as before this existed.
+_load_from_env_local("EVAL_BYPASS_TOKEN")
 
 # Load golden dataset
 def load_test_cases():

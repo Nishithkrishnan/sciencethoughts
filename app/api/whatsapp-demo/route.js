@@ -26,6 +26,12 @@ const MAKE_DIGEST_WEBHOOK_URL = (process.env.MAKE_DIGEST_WEBHOOK_URL || "").trim
 const DEFAULT_NOTIFY_EMAIL = (process.env.DEFAULT_NOTIFY_EMAIL || "").trim();
 const DASHBOARD_SECRET = (process.env.DASHBOARD_SECRET || "").trim();
 const SITE_BASE_URL = (process.env.SITE_BASE_URL || "").trim();
+// Lets the DeepEval test harness (tests/clients/agent_client.py) skip the public web-demo rate
+// limit below when it sends a matching x-eval-bypass-token header, so the full suite can be run
+// twice in the same UTC day without tripping the same per-IP limit meant for random script abuse.
+// Unset (default) means no bypass is possible — set this in Vercel's env AND wherever pytest runs
+// (or .env.local) to the same secret value to enable it. Never commit an actual value here.
+const EVAL_BYPASS_TOKEN = (process.env.EVAL_BYPASS_TOKEN || "").trim();
 
 // Simple in-memory cache to store conversation history (5 turns limit per user)
 const conversationMemory = new Map();
@@ -374,7 +380,11 @@ export async function POST(req) {
     // exempt from the check below (the existing per-IP rate limit is their protection instead).
     if (body.webChatMode) {
       const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || null;
-      const rateLimit = await checkWebDemoRateLimit(ip);
+      // Eval-harness bypass — see EVAL_BYPASS_TOKEN above. A plain string compare is fine here:
+      // worst case if this leaked is someone skips a mild anti-spam limit on a public demo
+      // endpoint, not an access-control or data boundary, so this doesn't need timingSafeEqual.
+      const isEvalBypass = Boolean(EVAL_BYPASS_TOKEN) && req.headers.get('x-eval-bypass-token') === EVAL_BYPASS_TOKEN;
+      const rateLimit = isEvalBypass ? { allowed: true, bypassed: true } : await checkWebDemoRateLimit(ip);
       if (!rateLimit.allowed) {
         return NextResponse.json({
           reply: "Thanks for all the questions today! This demo has a daily limit per visitor to keep things fair. Please try again tomorrow, or reach out directly and we'll get you set up right away.",

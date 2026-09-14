@@ -16,27 +16,13 @@ export default function FloatingWebChat() {
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const urlCompanyId = params.get("tenant") || params.get("companyId") || params.get("c");
-      if (urlCompanyId && urlCompanyId !== "agency") {
-        setCompanyId(urlCompanyId);
-        
-        const names = {
-          "9": "Mango Alibaug Villas",
-          "18": "The Machan Lonavala"
-        };
-        const companyName = names[urlCompanyId] || `Property ${urlCompanyId}`;
-        setMessages([
-          {
-            role: "assistant",
-            content: `Welcome to ${companyName}! How can I assist you with checking villa availability, rates, or booking inquiries today?`
-          }
-        ]);
-      }
-    }
-  }, []);
+  // Deliberately no URL-param-reading effect here (unlike InteractiveWebDemo.js, which is
+  // meant to switch tenants via ?tenant=). This widget is mounted sitewide in app/layout.js —
+  // it must always represent ScienceThoughts itself, regardless of what page (or what query
+  // string, e.g. a case-studies link with ?tenant=9) it happens to be sitting on. A previous
+  // version read ?tenant=/?companyId=/?c= off the page URL and switched this widget's own
+  // persona to match, which meant any prospect visiting a tenant demo link saw ScienceThoughts'
+  // own sales bubble silently pretending to be that tenant's property instead. Fixed 14 Sep 2026.
 
   useEffect(() => {
     if (isOpen) {

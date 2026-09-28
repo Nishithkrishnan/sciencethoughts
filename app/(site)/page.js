@@ -1,6 +1,6 @@
-import SearchInput from "../components/SearchInput";
-import ContactForm from "../components/ContactForm";
-import InteractiveWebDemo from "../components/InteractiveWebDemo";
+import SearchInput from "../../components/SearchInput";
+import ContactForm from "../../components/ContactForm";
+import InteractiveWebDemo from "../../components/InteractiveWebDemo";
 import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home as HomeIcon } from "lucide-react";
 
 export default async function Home() {

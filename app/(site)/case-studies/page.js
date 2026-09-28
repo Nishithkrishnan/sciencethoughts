@@ -1,7 +1,7 @@
 "use client";
 
 import { Activity, ArrowRight, CheckCircle2, Briefcase } from "lucide-react";
-import InteractiveWebDemo from "../../components/InteractiveWebDemo";
+import InteractiveWebDemo from "../../../components/InteractiveWebDemo";
 
 export default function CaseStudies() {
   return (

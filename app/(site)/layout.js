@@ -1,5 +1,5 @@
-import "./globals.css";
-import FloatingWebChat from "../components/FloatingWebChat";
+import "../globals.css";
+import FloatingWebChat from "../../components/FloatingWebChat";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 

@@ -1,4 +1,4 @@
-import { getPostById } from "../../../lib/wordpress";
+import { getPostById } from "../../../../lib/wordpress";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 
 // Dynamically generate SEO metadata for the post

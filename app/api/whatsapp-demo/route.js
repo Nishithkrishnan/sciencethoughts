@@ -155,7 +155,8 @@ const companiesMap = {
   '72': 'Tranquil Resort',
   '73': 'Rajbari Bawali',
   '74': 'Diphlu River Lodge',
-  'agency': 'ScienceThoughts AI Agency'
+  'agency': 'ScienceThoughts AI Agency',
+  'm3resorts': 'M3 Resorts'
 };
 
 // Single source of truth for "is this tenant a hospitality property (villa/resort/stay)?"

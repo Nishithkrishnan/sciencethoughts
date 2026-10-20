@@ -130,8 +130,10 @@ async function main() {
   }
 
   const displayName = (await ask('Display name (e.g. "Coral Bay Villas"): ')).trim();
-  const waToken = (await ask('WhatsApp access token: ')).trim();
-  const phoneNumberId = (await ask('WhatsApp phone_number_id: ')).trim();
+  console.log('\n(Onboarded via Embedded Signup at /onboard? Leave the next two blank: the token and phone');
+  console.log(' mapping are already stored, and leaving them blank keeps them untouched.)');
+  const waToken = (await ask('WhatsApp access token (blank = skip): ')).trim();
+  const phoneNumberId = waToken ? (await ask('WhatsApp phone_number_id: ')).trim() : '';
   const notifyEmail = (await ask('Alert email — who should get emailed the instant a guest question needs a human answer? (blank = use your default): ')).trim();
 
   console.log('\nKnowledge base — paste the full system-prompt text (rates, capacity, per-unit');
@@ -167,11 +169,17 @@ async function main() {
   await kvSet(KV_URL, KV_TOKEN, `tenant:knowledge:${tenantId}`, JSON.stringify({ prompt: knowledgePrompt }));
   console.log(`  ✓ tenant:knowledge:${tenantId}`);
 
-  await kvSet(KV_URL, KV_TOKEN, `tenant:whatsapp:${tenantId}`, JSON.stringify({ waba_token: encrypt(waToken, APP_ENCRYPTION_KEY) }));
-  console.log(`  ✓ tenant:whatsapp:${tenantId}`);
+  if (waToken) {
+    await kvSet(KV_URL, KV_TOKEN, `tenant:whatsapp:${tenantId}`, JSON.stringify({ waba_token: encrypt(waToken, APP_ENCRYPTION_KEY), phone_number_id: phoneNumberId || null }));
+    console.log(`  ✓ tenant:whatsapp:${tenantId}`);
+  } else {
+    console.log(`  - Skipped tenant:whatsapp:${tenantId} (left blank)`);
+  }
 
-  await kvSet(KV_URL, KV_TOKEN, `tenant:phone:${phoneNumberId}`, tenantId);
-  console.log(`  ✓ tenant:phone:${phoneNumberId} -> ${tenantId}`);
+  if (phoneNumberId) {
+    await kvSet(KV_URL, KV_TOKEN, `tenant:phone:${phoneNumberId}`, tenantId);
+    console.log(`  ✓ tenant:phone:${phoneNumberId} -> ${tenantId}`);
+  }
 
   if (notifyEmail) {
     await kvSet(KV_URL, KV_TOKEN, `tenant:notifyEmail:${tenantId}`, notifyEmail);
@@ -193,7 +201,7 @@ async function main() {
   console.log('\n[onboard] Done. One manual step left:');
   console.log(`  Add this line to companiesMap in app/api/whatsapp-demo/route.js, then commit + push:`);
   console.log(`    '${tenantId}': '${displayName}',`);
-  console.log('\nEverything else (knowledge base, WhatsApp token, phone routing' + (zoho ? ', Zoho creds' : '') + ') is already live — no deploy needed for those.');
+  console.log('\nEverything else (knowledge base' + (waToken ? ', WhatsApp token, phone routing' : '') + (zoho ? ', Zoho creds' : '') + ') is already live — no deploy needed for those.');
   console.log('Got (or later get) their booking calendar link? Run: node scripts/set-tenant-ical.mjs\n');
 }
 

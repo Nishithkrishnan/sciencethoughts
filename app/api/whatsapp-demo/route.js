@@ -1557,6 +1557,8 @@ function simulateOfflineResponse(companyId, history) {
       check_out_date: extractedCheckOutDate || "Next Weekend",
       check_in_time: extractedCheckInTime || null,
       check_out_time: extractedCheckOutTime || null,
+      room_type: null,
+      guests: null,
       additional_requirements: requirements.length > 0 ? requirements.join(', ') : "Direct Booking Requested",
       budget: isHospitality ? "25000" : null
     };
@@ -1753,6 +1755,8 @@ You must respond in JSON format with the following keys:
   - "check_out_date": "string or null (e.g. 'Oct 15th' or relative like 'following Sunday')"
   - "check_in_time": "string or null (e.g. 'early check-in at 10 AM')"
   - "check_out_time": "string or null (e.g. 'late check-out at 2 PM')"
+  - "room_type": "string or null — the room, villa, suite or cottage category the guest asked for (e.g. 'Pool Cottage', 'Villa Verde')"
+  - "guests": "string or null — how many people are staying, as the guest said it (e.g. '2 adults', '2 adults, 1 child aged 6')"
   - "additional_requirements": "string summarizing dynamic requests (e.g., 'requires chef', 'spa service booking', 'needs pet toys') or null"
   - "budget": "string or null"
 - "escalation_question": "string or null — REQUIRED whenever you use the UNLISTED AMENITIES/POLICIES/FACTS deferral above: the guest's exact question, verbatim or close to it, so the property team can follow up. Leave null for every other reply (answered questions, bookings, out-of-scope refusals, etc.) — only set this on a genuine deferral."`;
@@ -2044,6 +2048,8 @@ async function pushLeadToMake(leadData, companyId = 'agency', conversationHistor
         check_out_date: leadData.check_out_date || null,
         check_in_time: leadData.check_in_time || null,
         check_out_time: leadData.check_out_time || null,
+        room_type: leadData.room_type || null,
+        guests: leadData.guests || null,
         additional_requirements: leadData.additional_requirements || null,
         budget: leadData.budget,
         builder: leadData.target_builder || "The Machan",

@@ -1401,7 +1401,7 @@ async function getCompanyKnowledge(companyId) {
     - Automatic CRM lead push to Zoho when connected.
 3. **Pilot Offer & Pricing:**
     - Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so they can see it working before any pricing conversation matters. If payment hasn't been set up by day 6-7, the agent pauses on day 8 until it is.
-    - When asked about price, ALWAYS mention the free trial first, then quote the flat rate confidently: ₹25,000 one-time onboarding fee + ₹12,000/month, the same for every property regardless of nightly rate. Never hedge with "it depends on your rate" or "ask on a call for your number" — the price is the same for everyone, say so plainly.
+    - When asked about price, ALWAYS mention the free trial first, then quote the rate confidently: ₹9,999 one-time onboarding fee + ₹4,999/month for a single property (one villa, resort, hotel or homestay), whatever its nightly rate. Groups running several properties get custom pricing, agreed on a call. Never hedge with "it depends on your rate" or "ask on a call for your number" — the single-property price is the same for everyone, say so plainly.
     - End a pricing answer with two options, not just one: start the trial directly, or book a discovery call to see it set up on their own property before deciding.
 4. **Booking:**
    - Book a 30-minute discovery call at: https://calendly.com/nishithmanu/30min
@@ -1484,7 +1484,7 @@ function simulateOfflineResponse(companyId, history) {
   // Rule B: Price inquiry
   else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
     if (companyId === 'agency') {
-      reply = `Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so you can see it working before pricing matters. After that, it's a flat ₹25,000 one-time onboarding fee + ₹12,000/month — the same for every property. Want to start the trial, or book a quick call?`;
+      reply = `Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so you can see it working before pricing matters. After that, it's ₹9,999 one-time onboarding + ₹4,999/month for a single property, whatever its nightly rate (groups get custom pricing). Want to start the trial, or book a quick call?`;
     } else if (companyId === '9') {
       reply = `Our rates for Mango Beach House start at ₹28,000/night on weekdays and ₹35,000/night on weekends. Mango Villa Bougainvillea is ₹32,000/night (weekdays) and ₹42,000/night (weekends). Would you like to check availability?`;
     } else if (companyId === '18') {

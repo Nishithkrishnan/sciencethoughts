@@ -30,7 +30,7 @@ RAG_CONTEXT_MAP = {
         # there's a single source of truth both the app and the tests read from — this is the
         # third time it's drifted.
         "Pricing: every property starts with a free 7-day trial on its own WhatsApp number, no cost, no commitment.",
-        "After the trial, pricing is one flat rate for every property, regardless of nightly rate: ₹25,000 one-time onboarding fee plus ₹12,000/month.",
+        "After the trial, pricing is one flat rate per single property, regardless of nightly rate: ₹9,999 one-time onboarding fee plus ₹4,999/month. Groups get custom pricing.",
         "Pilot offer: free 7-day trial connected live to the prospect's own WhatsApp number."
     ],
     "43": [
@@ -111,8 +111,11 @@ RAG_CONTEXT_MAP = {
 # Rs 25,000 one-time setup + Rs 12,000/month. The deterministic check below now asserts the
 # exact flat figures appear, and guards against either retired structure reappearing — the
 # original flat 75k/25k pricing, and the 5 Sep tiered range's low end.
-LIVE_AGENCY_SETUP_FEE = "25,000"
-LIVE_AGENCY_MONTHLY_FEE = "12,000"
+# 23 Oct 2026: lowered to Rs 9,999 one-time + Rs 4,999/month per single property (groups: custom).
+LIVE_AGENCY_SETUP_FEE = "9,999"
+LIVE_AGENCY_MONTHLY_FEE = "4,999"
+RETIRED_SEP_SETUP_FEE = "25,000"
+RETIRED_SEP_MONTHLY_FEE = "12,000"
 RETIRED_FLAT_SETUP_FEE = "75,000"
 RETIRED_TIERED_MONTHLY_FEE_LOW = "10,000"
 
@@ -233,6 +236,8 @@ class TestWhatsAppAgent:
                 f"Reply quoted the retired flat setup fee ({RETIRED_FLAT_SETUP_FEE}) — pricing prompt may have reverted: {final_reply}"
             assert RETIRED_TIERED_MONTHLY_FEE_LOW not in final_reply, \
                 f"Reply quoted the retired tiered range's low end ({RETIRED_TIERED_MONTHLY_FEE_LOW}) — pricing prompt may have reverted to tiered pricing: {final_reply}"
+            assert RETIRED_SEP_SETUP_FEE not in final_reply and RETIRED_SEP_MONTHLY_FEE not in final_reply, \
+                f"Reply quoted the retired Sep pricing (25,000 / 12,000) — pricing prompt may have reverted: {final_reply}"
             assert LIVE_AGENCY_SETUP_FEE in final_reply, \
                 f"Expected the current flat setup fee ({LIVE_AGENCY_SETUP_FEE}) in reply, got: {final_reply}"
             assert LIVE_AGENCY_MONTHLY_FEE in final_reply, \

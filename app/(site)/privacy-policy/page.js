@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
           <h1 style={{ fontSize: "2.4rem", fontWeight: "900", fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "10px" }}>
             Privacy Policy
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 6 September 2026</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 23 October 2026</p>
 
           <p style={pStyle}>
             This policy covers sciencethoughts.com itself — the marketing site, the live demo widget, and the
@@ -87,7 +87,7 @@ export default function PrivacyPolicy() {
             <p style={pStyle}>
               Under India&rsquo;s Digital Personal Data Protection Act, 2023, you may ask for access to information
               held about you, ask for it to be corrected or erased, or raise a grievance. Contact Sciencethoughts at{" "}
-              <a href="mailto:nishithmanu@gmail.com" style={linkStyle}>nishithmanu@gmail.com</a>. Grievances are
+              <a href="mailto:nishith@sciencethoughts.com" style={linkStyle}>nishith@sciencethoughts.com</a>. Grievances are
               acknowledged and responded to within 30 days.
             </p>
           </div>

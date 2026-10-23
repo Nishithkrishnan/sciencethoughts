@@ -1,5 +1,6 @@
 import "../globals.css";
 import FloatingWebChat from "../../components/FloatingWebChat";
+import { BUSINESS } from "../../lib/business-info";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -78,19 +79,26 @@ export default function RootLayout({ children }) {
               <div>
                 <h4 className="footer-heading">Contact & Collabs</h4>
                 <ul className="footer-links">
-                  <li><span style={{ color: "var(--text-secondary)" }}>nishithmanu@gmail.com</span></li>
-                  <li><a href="/#contact" className="footer-link">Schedule a Consultation</a></li>
-                  <li><span style={{ color: "var(--text-muted)" }}>Bangalore, India</span></li>
+                  <li><a href={`mailto:${BUSINESS.email}`} className="footer-link">{BUSINESS.email}</a></li>
+                  <li><span style={{ color: "var(--text-secondary)" }}>{BUSINESS.phone}</span></li>
+                  <li><a href="/contact" className="footer-link">Contact details</a></li>
+                  <li><span style={{ color: "var(--text-muted)" }}>{BUSINESS.location}</span></li>
                 </ul>
               </div>
             </div>
             
             <div className="footer-bottom">
-              <p>&copy; {new Date().getFullYear()} Science Thoughts. All rights reserved.</p>
-              <p style={{ display: "flex", gap: "15px" }}>
+              <p>&copy; {new Date().getFullYear()} {BUSINESS.name} &middot; Udyam {BUSINESS.udyam}</p>
+              <p style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
                 <a href="/privacy-policy" className="footer-link">Privacy Policy</a>
                 <span>&middot;</span>
                 <a href="/terms-of-service" className="footer-link">Terms of Service</a>
+                <span>&middot;</span>
+                <a href="/refund-policy" className="footer-link">Cancellation &amp; Refunds</a>
+                <span>&middot;</span>
+                <a href="/data-notice" className="footer-link">Guest Data Notice</a>
+                <span>&middot;</span>
+                <a href="/contact" className="footer-link">Contact</a>
               </p>
             </div>
           </div>

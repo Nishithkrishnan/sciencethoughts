@@ -212,7 +212,7 @@
   {
     "id": "TC_014_AGENCY_PRICING_ACCURACY",
     "companyId": "agency",
-    "description": "Pricing drift guard - Deterministically checks the flat rate (Rs 25,000 one-time setup + Rs 12,000/month, trial mentioned) against the known-current flat pricing, and guards against either retired structure reappearing: the original flat 75k/25k, or the 5 Sep tiered range (10,000-15,000/mo + 15,000-25,000 one-time). Independent of DeepEval's judgment call.",
+    "description": "Pricing drift guard - Deterministically checks the flat rate (Rs 9,999 one-time setup + Rs 4,999/month per single property, trial mentioned; Sep pricing of 25,000/12,000 retired) against the known-current flat pricing, and guards against either retired structure reappearing: the original flat 75k/25k, or the 5 Sep tiered range (10,000-15,000/mo + 15,000-25,000 one-time). Independent of DeepEval's judgment call.",
     "user_turns": [
       "What's your pricing for the AI concierge?"
     ],

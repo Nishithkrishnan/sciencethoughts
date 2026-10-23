@@ -17,13 +17,13 @@ export default function TermsOfService() {
           <h1 style={{ fontSize: "2.4rem", fontWeight: "900", fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "10px" }}>
             Terms of Service
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 6 September 2026</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 23 October 2026</p>
 
           <p style={pStyle}>
             These terms cover your use of sciencethoughts.com — the marketing site and its live demo — and are
             separate from the terms of any actual paid engagement. Sciencethoughts is operated by Nishith Krishnan,
-            trading as Sciencethoughts, an individual/sole proprietor based in India, not a registered company, LLP,
-            or partnership.
+            trading as Sciencethoughts, an individual/sole proprietor based in Chennai, India, registered as a micro
+            enterprise under Udyam (UDYAM-TN-08-0148470). It is not a registered company, LLP, or partnership.
           </p>
 
           <div style={sectionStyle}>
@@ -103,7 +103,7 @@ export default function TermsOfService() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>9. Contact</h2>
             <p style={pStyle}>
-              Questions about these terms: <a href="mailto:nishithmanu@gmail.com" style={linkStyle}>nishithmanu@gmail.com</a>.
+              Questions about these terms: <a href="mailto:nishith@sciencethoughts.com" style={linkStyle}>nishith@sciencethoughts.com</a>.
             </p>
           </div>
         </div>

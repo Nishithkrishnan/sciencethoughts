@@ -20,7 +20,7 @@ export default function GuestDataNotice() {
             How the Sciencethoughts AI concierge handles information you share on WhatsApp
           </p>
           <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>
-            Last updated: 6 September 2026
+            Last updated: 23 October 2026
           </p>
 
           <p style={pStyle}>
@@ -136,11 +136,11 @@ export default function GuestDataNotice() {
             </p>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}>For information already passed to the property — contact that property&rsquo;s own guest services or reservations team directly.</li>
-              <li style={liStyle}>For anything still held in our own systems — the 14-day escalation window, or a booking-inquiry copy kept while the property is a client, both described in Section 4 — contact Sciencethoughts at <a href="mailto:nishithmanu@gmail.com" style={{ color: "var(--accent-teal)" }}>nishithmanu@gmail.com</a>.</li>
+              <li style={liStyle}>For anything still held in our own systems — the 14-day escalation window, or a booking-inquiry copy kept while the property is a client, both described in Section 4 — contact Sciencethoughts at <a href="mailto:nishith@sciencethoughts.com" style={{ color: "var(--accent-teal)" }}>nishith@sciencethoughts.com</a>.</li>
             </ul>
             <p style={pStyle}>
               Grievances are acknowledged and responded to within 30 days. The person responsible is Nishith
-              Krishnan, reachable at <a href="mailto:nishithmanu@gmail.com" style={{ color: "var(--accent-teal)" }}>nishithmanu@gmail.com</a>.
+              Krishnan, reachable at <a href="mailto:nishith@sciencethoughts.com" style={{ color: "var(--accent-teal)" }}>nishith@sciencethoughts.com</a>.
             </p>
           </div>
 

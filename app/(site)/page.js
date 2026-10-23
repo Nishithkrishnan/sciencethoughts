@@ -139,7 +139,7 @@ export default async function Home() {
               </span>
             </div>
             <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "12px" }}>Test Our AI Concierge Live</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>Interact with our enterprise real-time RAG engine directly from your browser.</p>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>Chat with a live demo concierge right here in your browser.</p>
           </div>
 
           <InteractiveWebDemo />
@@ -188,51 +188,37 @@ export default async function Home() {
                 <Briefcase size={24} />
               </span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Bespoke Implementation Plans</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Scale your direct booking conversions with our SLA-managed integrations.</p>
+            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Simple, flat pricing</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>One price per property, starting with a free 7-day trial on your own WhatsApp number.</p>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px", alignItems: "stretch" }}>
             {/* Service 1 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
               <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Boutique Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹12,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹25,000 one-time setup fee</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>One flat rate for any single-property luxury stay or boutique setup needing intelligent automated guest interactions on WhatsApp — a free 7-day trial included, regardless of nightly rate.</p>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹4,999 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹9,999 one-time setup fee</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>One flat price for a single villa, resort, hotel or homestay, whatever your nightly rate. Starts with a free 7-day trial on your own WhatsApp number.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Brand-Safe FAQ & Booking Guard</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> 24/7 Guest Engagement on WhatsApp</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Structured Lead Capture (Name, Dates, Contact Info)</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Answers only from your property&rsquo;s facts, and checks with you when unsure</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Replies to guests 24/7 on your own WhatsApp number</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Booking enquiries (name, dates, room, guests) sent to your Google Sheet</li>
               </ul>
               <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
             </div>
 
             {/* Service 2 */}
             <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Portfolio Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹45,000 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹100,000 Custom Setup Fee</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Designed for growing networks, multi-property vacation portfolios, and active hospitality groups requiring CRM pipelines.</p>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Several properties?</h3>
+              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom</p>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>Priced per group, agreed on a call</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>For owners running more than one villa, resort or homestay. Each property gets its own knowledge base and its own lead sheet, under one agreement.</p>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Multi-Property Knowledge Base Routing</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Zoho CRM Integration (other CRMs on request)</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Custom Field Attribute Extraction</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> A separate knowledge base for each property</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Leads sent to each property&rsquo;s own Google Sheet</li>
+                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Zoho CRM sync (other CRMs on request)</li>
               </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
-            </div>
-
-            {/* Service 3 */}
-            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--text-muted)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Enterprise / Bespoke</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom SLA</p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>Bespoke Architecture Pricing</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>Custom RAG datasets, dedicated vector instances, custom telephony voice callers, and fully SLA-backed support contracts.</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Custom PMS & Booking Engine Integration (Built to Order)</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Encrypted, Per-Tenant Data Isolation</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--text-muted)"/> Dedicated Vector Database Hosting (on request)</li>
-              </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto", background: "var(--bg-card)", border: "1px solid var(--border-color)" }}>Request Quote</a>
+              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Talk to us</a>
             </div>
           </div>
         </div>

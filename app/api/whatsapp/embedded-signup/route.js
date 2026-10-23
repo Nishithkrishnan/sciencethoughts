@@ -2,6 +2,8 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { encrypt } from '../../../../lib/crypto';
 import { verifyOnboardingLink, TENANT_ID_PATTERN } from '../../../../lib/onboarding-link';
+import { kvCommand, kvConfigured } from '../../../../lib/kv-rest';
+import { hasAcceptedCurrentTerms } from '../../../../lib/client-terms-store';
 
 // Server side of WhatsApp Embedded Signup (the page is app/(site)/onboard/).
 //
@@ -25,21 +27,8 @@ const META_APP_ID = (process.env.NEXT_PUBLIC_META_APP_ID || process.env.META_APP
 // The Meta App Secret. WHATSAPP_APP_SECRET already holds it (used for webhook signature checks).
 const META_APP_SECRET = (process.env.META_APP_SECRET || process.env.WHATSAPP_APP_SECRET || '').trim();
 const DASHBOARD_SECRET = (process.env.DASHBOARD_SECRET || '').trim();
-const KV_URL = (process.env.KV_REST_API_URL || process.env.REDIS_REST_API_URL || process.env.REDIS_REST_URL || '').trim();
-const KV_TOKEN = (process.env.KV_REST_API_TOKEN || process.env.REDIS_REST_API_TOKEN || process.env.REDIS_REST_TOKEN || '').trim();
 
 const META_ID_PATTERN = /^\d{5,25}$/;
-
-async function kvCommand(command) {
-  const res = await fetch(KV_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(command)
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(`KV ${command[0]} failed: ${data.error}`);
-  return data.result;
-}
 
 class GraphError extends Error {
   constructor(message, meta) {
@@ -120,9 +109,18 @@ export async function POST(req) {
   const tenant = body.tenant;
   if (!TENANT_ID_PATTERN.test(tenant)) return NextResponse.json({ ok: false, error: 'Invalid tenant' }, { status: 400 });
 
-  if (!META_APP_SECRET || !KV_URL || !KV_TOKEN) {
+  if (!META_APP_SECRET || !kvConfigured()) {
     console.error('[EMBEDDED SIGNUP] Missing META_APP_SECRET/WHATSAPP_APP_SECRET or KV credentials');
     return NextResponse.json({ ok: false, error: 'Server is not configured for onboarding yet' }, { status: 500 });
+  }
+  // The property must accept the Client Service Terms (/client-terms) before we connect its number.
+  try {
+    if (!(await hasAcceptedCurrentTerms(tenant))) {
+      return NextResponse.json({ ok: false, error: 'Please accept the Client Service Terms on this page before connecting your number.' }, { status: 403 });
+    }
+  } catch (e) {
+    console.error(`[EMBEDDED SIGNUP] Could not check terms acceptance for tenant ${tenant}:`, e.message);
+    return NextResponse.json({ ok: false, error: 'We could not check your terms acceptance. Please try again.' }, { status: 500 });
   }
   const code = typeof body.code === 'string' ? body.code.trim() : '';
   if (!code) return NextResponse.json({ ok: false, error: 'Missing code from Meta' }, { status: 400 });

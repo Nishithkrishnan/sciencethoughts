@@ -78,8 +78,8 @@ export default function TermsOfService() {
             <p style={pStyle}>
               This site and its demo are provided &ldquo;as is,&rdquo; without warranty of any kind, for evaluation
               purposes. To the extent permitted by law, Sciencethoughts is not liable for any loss arising from your
-              use of this website or its demo. This does not limit any liability terms agreed separately in a signed
-              client agreement.
+              use of this website or its demo. This does not limit any liability terms in the{" "}
+              <a href="/client-terms" style={linkStyle}>Client Service Terms</a> or a signed client agreement.
             </p>
           </div>
 

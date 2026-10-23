@@ -51,6 +51,7 @@ export default function ContactPage() {
             <div style={valueStyle}>
               <a href="/terms-of-service" style={linkStyle}>Terms of Service</a> &middot;{" "}
               <a href="/privacy-policy" style={linkStyle}>Privacy Policy</a> &middot;{" "}
+              <a href="/client-terms" style={linkStyle}>Client Service Terms</a> &middot;{" "}
               <a href="/refund-policy" style={linkStyle}>Cancellation &amp; Refund Policy</a> &middot;{" "}
               <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>
             </div>

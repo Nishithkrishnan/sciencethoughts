@@ -23,8 +23,9 @@ export default function RefundPolicy() {
 
           <p style={pStyle}>
             This policy covers the paid {BUSINESS.name} AI WhatsApp concierge. {BUSINESS.name} is run by {BUSINESS.owner} as
-            a {BUSINESS.legalForm}, registered as a micro enterprise under Udyam ({BUSINESS.udyam}). Each client also signs a
-            service agreement; if anything here differs from your signed agreement, the agreement applies.
+            a {BUSINESS.legalForm}, registered as a micro enterprise under Udyam ({BUSINESS.udyam}). Each client also accepts our{" "}
+            <a href="/client-terms" style={linkStyle}>Client Service Terms</a> when signing up; if anything here differs from
+            those terms, the Client Service Terms apply.
           </p>
 
           <div style={sectionStyle}>
@@ -41,7 +42,7 @@ export default function RefundPolicy() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}>One property (a villa, resort, hotel or homestay): ₹9,999 one-time setup fee, then ₹4,999 per month.</li>
               <li style={liStyle}>Several properties: pricing agreed in writing before you start.</li>
-              <li style={liStyle}>The monthly fee is billed between the 1st and 5th of each month.</li>
+              <li style={liStyle}>The monthly fee is charged in advance, on the same date each month as your go-live date.</li>
               <li style={liStyle}>{BUSINESS.name} is not currently registered for GST, so no GST is added. Business clients may deduct TDS where the law requires it.</li>
             </ul>
           </div>
@@ -49,7 +50,7 @@ export default function RefundPolicy() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>3. Cancelling</h2>
             <p style={pStyle}>
-              After the trial, the service runs for a minimum of 6 months from the day your assistant goes live. After
+              After the trial, the service runs for a minimum of 6 months from your go-live date (the first day of paid service, the day after your trial ends). After
               that, either side can cancel with one month&rsquo;s written notice, sent by email to{" "}
               <a href={`mailto:${BUSINESS.email}`} style={linkStyle}>{BUSINESS.email}</a>.
             </p>
@@ -58,7 +59,7 @@ export default function RefundPolicy() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>4. Refunds</h2>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={liStyle}><strong>Setup fee:</strong> refunded in full if you cancel before your assistant goes live on your number. Once it is live, the setup fee is not refundable.</li>
+              <li style={liStyle}><strong>Setup fee:</strong> refunded in full if you cancel before your go-live date. From your go-live date, the setup fee is not refundable.</li>
               <li style={liStyle}><strong>Monthly fee:</strong> a month that has already started is not refunded, with one exception below.</li>
               <li style={liStyle}><strong>If the assistant costs you a booking:</strong> if a reply from the assistant contradicts the information you gave us and a guest documents that they did not book because of it, we refund that month&rsquo;s fee.</li>
             </ul>
@@ -73,7 +74,7 @@ export default function RefundPolicy() {
             <h2 style={headingStyle}>5. How the service is delivered</h2>
             <p style={pStyle}>
               The service is delivered online; nothing is shipped. You connect your WhatsApp number through our setup
-              link, and the assistant goes live once Meta (WhatsApp&rsquo;s owner) has approved your business. Meta&rsquo;s
+              link, and your free trial starts once Meta (WhatsApp&rsquo;s owner) has approved your business. Meta&rsquo;s
               review usually takes a few days.
             </p>
           </div>

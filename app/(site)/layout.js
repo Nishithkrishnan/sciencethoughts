@@ -94,6 +94,8 @@ export default function RootLayout({ children }) {
                 <span>&middot;</span>
                 <a href="/terms-of-service" className="footer-link">Terms of Service</a>
                 <span>&middot;</span>
+                <a href="/client-terms" className="footer-link">Client Terms</a>
+                <span>&middot;</span>
                 <a href="/refund-policy" className="footer-link">Cancellation &amp; Refunds</a>
                 <span>&middot;</span>
                 <a href="/data-notice" className="footer-link">Guest Data Notice</a>

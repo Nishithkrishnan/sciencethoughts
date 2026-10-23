@@ -1,9 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CLIENT_TERMS } from "../lib/client-terms";
 
 // Front end of WhatsApp Embedded Signup (v4). Flow:
 //  1. Check the signed link (tenant/exp/sig) with the server.
+//  1b. The client enters their business details and accepts the Client Service Terms
+//      (/client-terms). This is recorded by /api/onboarding/accept-terms, and the server refuses
+//      step 4 without it.
 //  2. Load Meta's JS SDK; the client clicks "Connect" and completes Meta's popup.
 //  3. Meta posts a WA_EMBEDDED_SIGNUP message (WABA id, phone_number_id) to this window, and the
 //     FB.login callback returns a code that expires in ~30 seconds.
@@ -33,12 +37,114 @@ const box = (color) => ({
   marginTop: "20px", color: "var(--text-primary)", lineHeight: 1.6
 });
 
+const label = { display: "block", color: "var(--text-primary)", fontWeight: 600, fontSize: "0.92rem", margin: "14px 0 6px" };
+const input = {
+  width: "100%", boxSizing: "border-box", padding: "11px 12px", borderRadius: "var(--radius-sm)",
+  border: "1px solid var(--border-hover)", background: "rgba(255,255,255,0.04)", color: "var(--text-primary)", fontSize: "0.98rem"
+};
+const fieldError = { color: "#ff7a7a", fontSize: "0.85rem", marginTop: "4px" };
+const primaryButton = { ...button, background: "var(--accent-teal)", color: "#04121a" };
+
+const FIELDS = [
+  { key: "legalName", label: "Legal name of the business", required: true, placeholder: "As on your GST / Udyam / registration" },
+  { key: "tradingName", label: "Property name (if different)" },
+  { key: "registration", label: "GST, Udyam or Shop & Establishment number", required: true },
+  { key: "pan", label: "PAN (needed if you deduct TDS)", placeholder: "ABCDE1234F" },
+  { key: "address", label: "Business address", required: true, multiline: true },
+  { key: "contactName", label: "Your name", required: true },
+  { key: "contactTitle", label: "Your role", placeholder: "Owner, Manager…" },
+  { key: "email", label: "Email for notices and invoices", required: true, type: "email" },
+];
+
+// Step 1b: business details + click-to-accept of the Client Service Terms.
+function TermsStep({ link, onAccepted }) {
+  const [details, setDetails] = useState({ tds: "" });
+  const [agree, setAgree] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const set = (k) => (e) => setDetails((d) => ({ ...d, [k]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!agree) { setFormError("Please tick the box to accept the Client Service Terms."); return; }
+    setSaving(true);
+    setFormError("");
+    setErrors({});
+    try {
+      const res = await fetch("/api/onboarding/accept-terms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...link, agree: true, termsVersion: CLIENT_TERMS.version, details })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        onAccepted({ acceptedAt: data.acceptedAt, legalName: details.legalName });
+      } else {
+        setErrors(data.errors || {});
+        setFormError(data.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Couldn't reach Sciencethoughts. Please check your connection and try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} style={{ marginTop: "24px" }}>
+      <p style={{ ...p, color: "var(--text-primary)", fontWeight: 700, fontSize: "1.1rem", marginBottom: "4px" }}>Step 1: Your business details</p>
+      <p style={{ ...p, fontSize: "0.92rem" }}>These go on your invoices and are the details your agreement with us is made under.</p>
+      {FIELDS.map((f) => (
+        <div key={f.key}>
+          <label style={label} htmlFor={f.key}>{f.label}{f.required ? " *" : ""}</label>
+          {f.multiline ? (
+            <textarea id={f.key} rows={3} style={input} value={details[f.key] || ""} onChange={set(f.key)} required={f.required} placeholder={f.placeholder} />
+          ) : (
+            <input id={f.key} type={f.type || "text"} style={input} value={details[f.key] || ""} onChange={set(f.key)} required={f.required} placeholder={f.placeholder} />
+          )}
+          {errors[f.key] && <div style={fieldError}>{errors[f.key]}</div>}
+        </div>
+      ))}
+      <label style={label} htmlFor="tds">Will you deduct TDS from our invoices? *</label>
+      <select id="tds" style={input} value={details.tds} onChange={set("tds")} required>
+        <option value="" disabled>Choose one</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+        <option value="unsure">Not sure yet</option>
+      </select>
+      {errors.tds && <div style={fieldError}>{errors.tds}</div>}
+
+      <p style={{ ...p, color: "var(--text-primary)", fontWeight: 700, fontSize: "1.1rem", margin: "28px 0 8px" }}>Step 2: Our terms</p>
+      <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
+        <li style={li}>Free 7-day trial on your own number. Nothing is paid until it ends.</li>
+        <li style={li}>Then ₹9,999 one-time setup and ₹4,999 a month (one property).</li>
+        <li style={li}><strong>Minimum term: 6 months</strong> from the day after your trial, then one month&rsquo;s notice to cancel.</li>
+        <li style={li}>Setup fee refunded in full if you cancel before then.</li>
+      </ul>
+      <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", color: "var(--text-primary)", lineHeight: 1.6, cursor: "pointer" }}>
+        <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: "5px", width: "18px", height: "18px" }} />
+        <span>
+          I have read and accept the{" "}
+          <a href="/client-terms" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-teal)" }}>Client Service Terms</a>{" "}
+          (version {CLIENT_TERMS.version}), including the 6-month minimum term, and I am authorised to accept them for this business.
+        </span>
+      </label>
+      {formError && <div style={box("#ff5c5c")}>{formError}</div>}
+      <button type="submit" style={{ ...primaryButton, opacity: saving || !agree ? 0.6 : 1, marginTop: "18px" }} disabled={saving || !agree}>
+        {saving ? "Saving…" : "Accept and continue"}
+      </button>
+    </form>
+  );
+}
+
 export default function WhatsAppOnboarding() {
   const [link, setLink] = useState(null);
   const [status, setStatus] = useState("checking"); // checking|invalid|ready|connecting|finishing|done|cancelled|error
   const [message, setMessage] = useState("");
   const [result, setResult] = useState(null);
   const [sdkReady, setSdkReady] = useState(false);
+  const [terms, setTerms] = useState(null); // null = loading; { accepted, acceptedAt, legalName }
   const sessionInfo = useRef(null);
   const finished = useRef(false);
 
@@ -52,6 +158,10 @@ export default function WhatsAppOnboarding() {
         if (d.valid) {
           setLink(l);
           setStatus("ready");
+          fetch(`/api/onboarding/accept-terms?${new URLSearchParams(l)}`)
+            .then((r) => r.json())
+            .then((t) => setTerms({ accepted: Boolean(t.accepted), acceptedAt: t.acceptedAt, legalName: t.details?.legalName }))
+            .catch(() => setTerms({ accepted: false }));
         } else {
           setStatus("invalid");
           setMessage(
@@ -191,8 +301,21 @@ export default function WhatsAppOnboarding() {
           </>
         )}
 
-        {link && (status === "ready" || status === "cancelled" || status === "connecting") && (
+        {link && status !== "invalid" && terms && !terms.accepted && (
+          <TermsStep link={link} onAccepted={(t) => setTerms({ accepted: true, ...t })} />
+        )}
+
+        {link && terms?.accepted && (
+          <div style={box("var(--accent-green)")}>
+            Client Service Terms (version {CLIENT_TERMS.version}) accepted
+            {terms.legalName ? ` for ${terms.legalName}` : ""}
+            {terms.acceptedAt ? ` on ${new Date(terms.acceptedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}` : ""}.
+          </div>
+        )}
+
+        {link && terms?.accepted && (status === "ready" || status === "cancelled" || status === "connecting") && (
           <>
+            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 700, fontSize: "1.1rem", margin: "28px 0 4px" }}>Step 3: Connect your WhatsApp number</p>
             {!CONFIG_ID ? (
               <div style={box("var(--accent-yellow)")}>Setup isn&rsquo;t switched on yet on our side. Please contact Sciencethoughts.</div>
             ) : (

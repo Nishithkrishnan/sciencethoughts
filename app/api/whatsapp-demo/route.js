@@ -3,6 +3,8 @@ import { NextResponse, after } from 'next/server';
 import { createZohoLead } from '../../../lib/zoho';
 import { decrypt } from '../../../lib/crypto';
 import { getTenantAvailability, formatAvailabilityForPrompt } from '../../../lib/ical';
+import { recordOwnerReplies, isHandoffActive, handleAccountUpdate } from '../../../lib/coexistence';
+import { BUSINESS } from '../../../lib/business-info';
 
 const VERIFY_TOKEN = (process.env.WHATSAPP_VERIFY_TOKEN || "sciencethoughts_secure_token").trim();
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -436,6 +438,24 @@ export async function POST(req) {
 
     // Validate that this is a WhatsApp API event
     if (body.object === 'whatsapp_business_account') {
+      // Coexistence events (client number also on the WhatsApp Business app), see lib/coexistence.js.
+      // Checked across every change in the batch; the message handling below stays as it was.
+      for (const e of body.entry || []) {
+        for (const c of e.changes || []) {
+          try {
+            if (c.field === 'smb_message_echoes') await recordOwnerReplies(c.value);
+            else if (c.field === 'account_update') {
+              await handleAccountUpdate(c.value, e.id, {
+                makeWebhookUrl: MAKE_DIGEST_WEBHOOK_URL,
+                alertEmail: (process.env.ALERT_EMAIL || BUSINESS.email || '').trim(),
+              });
+            }
+          } catch (err) {
+            console.error(`[DEMO ROUTE] Failed handling ${c.field} webhook (non-fatal):`, err);
+          }
+        }
+      }
+
       const entry = body.entry?.[0];
       const changes = entry?.changes?.[0];
       const value = changes?.value;
@@ -472,6 +492,18 @@ export async function POST(req) {
             } catch (e) {
               console.error("[DEMO ROUTE] Failed to resolve company ID from phone_number_id:", e);
             }
+          }
+
+          // Coexistence: the owner replied to this guest from the WhatsApp Business app within the
+          // last 12 hours, so a person is handling the chat. Stay quiet rather than talk over them,
+          // but keep the guest's message in the transcript.
+          if (!isPermanentNumber && await isHandoffActive(phone_number_id, from)) {
+            console.log(`[DEMO ROUTE] Owner is handling ${from} on ${phone_number_id} (tenant ${session.companyId}); bot staying quiet`);
+            if (Array.isArray(session.transcript)) {
+              session.transcript.push({ role: 'user', content: text });
+              await saveSession(from, session);
+            }
+            return new NextResponse('OK', { status: 200 });
           }
 
           const lowerText = trimmedText.toLowerCase();

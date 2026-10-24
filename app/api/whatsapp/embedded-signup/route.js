@@ -16,6 +16,12 @@ import { hasAcceptedCurrentTerms } from '../../../../lib/client-terms-store';
 //   3. subscribe our app to their WABA's webhooks (without this, inbound messages never arrive)
 //   4. register their phone number for Cloud API (without this it stays "Pending")
 //
+// Coexistence: if the client connected a number they already use on the WhatsApp Business app,
+// Meta keeps it registered, so we must NOT call /register (or set a PIN). We detect this from the
+// phone number's is_on_biz_app field (and the FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING event).
+// We deliberately do not call smb_app_data (old chat/contact sync): we don't need the history,
+// and holding less guest data is better under the DPDP Act. See lib/coexistence.js.
+//
 // Still manual afterwards: the tenant's knowledge base (scripts/onboard-tenant.mjs, leave the
 // WhatsApp prompts blank) and the companiesMap line in app/api/whatsapp-demo/route.js.
 // Also NOT solved by this route: Meta will not deliver messages from the client's number until
@@ -99,7 +105,7 @@ export async function GET(req) {
 }
 
 // POST /api/whatsapp/embedded-signup
-// body: { tenant, exp, sig, code, waba_id?, phone_number_id?, business_id? }
+// body: { tenant, exp, sig, code, waba_id?, phone_number_id?, business_id?, finish_type? }
 export async function POST(req) {
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 }); }
@@ -152,8 +158,20 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: 'Meta did not tell us which WhatsApp account was connected', steps }, { status: 422 });
   }
 
+  // 2b. Is this number also on the WhatsApp Business app (coexistence)?
+  let coexistence = body.finish_type === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING';
+  if (phoneNumberId) {
+    try {
+      const info = await graph(phoneNumberId, { token, query: { fields: 'is_on_biz_app,platform_type' } });
+      if (info.is_on_biz_app === true) coexistence = true;
+      steps.platform = { ok: true, isOnBizApp: info.is_on_biz_app ?? null, platformType: info.platform_type ?? null };
+    } catch (e) {
+      steps.platform = stepError(e);
+    }
+  }
+
   // 3. Store the token right away, so it isn't lost if a later step fails.
-  const pin = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+  const pin = coexistence ? null : crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
   let replacedExisting = false;
   try {
     const existing = await kvCommand(['GET', `tenant:whatsapp:${tenant}`]);
@@ -163,8 +181,9 @@ export async function POST(req) {
       waba_id: wabaId,
       phone_number_id: phoneNumberId,
       business_id: businessId,
-      two_step_pin: encrypt(pin),
-      onboarding_method: 'embedded_signup',
+      two_step_pin: pin ? encrypt(pin) : null,
+      coexistence,
+      onboarding_method: coexistence ? 'embedded_signup_coexistence' : 'embedded_signup',
       onboarded_at: new Date().toISOString()
     })]);
     if (phoneNumberId) await kvCommand(['SET', `tenant:phone:${phoneNumberId}`, tenant]);
@@ -182,8 +201,10 @@ export async function POST(req) {
     steps.subscribe = stepError(e);
   }
 
-  // 5. Register the phone number for Cloud API.
-  if (phoneNumberId) {
+  // 5. Register the phone number for Cloud API (not for coexistence: it's already registered).
+  if (coexistence) {
+    steps.register = { ok: true, skipped: 'coexistence' };
+  } else if (phoneNumberId) {
     try {
       await graph(`${phoneNumberId}/register`, { method: 'POST', token, body: { messaging_product: 'whatsapp', pin } });
       steps.register = { ok: true };
@@ -204,7 +225,7 @@ export async function POST(req) {
 
   const ok = Boolean(steps.subscribe.ok && steps.register.ok);
   const record = {
-    tenant, ok, wabaId, phoneNumberId, businessId, replacedExisting,
+    tenant, ok, wabaId, phoneNumberId, businessId, replacedExisting, coexistence,
     displayPhoneNumber: phone?.display_phone_number || null,
     verifiedName: phone?.verified_name || null,
     nameStatus: phone?.name_status || null,

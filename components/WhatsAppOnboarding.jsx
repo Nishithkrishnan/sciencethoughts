@@ -230,7 +230,8 @@ export default function WhatsAppOnboarding() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...link, code,
-          waba_id: info.waba_id, phone_number_id: info.phone_number_id, business_id: info.business_id
+          waba_id: info.waba_id, phone_number_id: info.phone_number_id, business_id: info.business_id,
+          finish_type: info.finishType
         })
       });
       const data = await res.json();
@@ -287,10 +288,23 @@ export default function WhatsAppOnboarding() {
 
         {link && status !== "invalid" && (
           <>
-            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 600, marginTop: "20px" }}>Before you start, have ready:</p>
+            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 600, marginTop: "20px" }}>Which number will guests message?</p>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={li}>A phone number just for this, <strong>not</strong> currently used on the WhatsApp or WhatsApp Business app (its existing chats would no longer be accessible).</li>
-              <li style={li}>That phone nearby, to receive a verification code by SMS or call.</li>
+              <li style={li}>
+                <strong>Your current WhatsApp Business app number (recommended).</strong> You keep using the app as normal; your chats and contacts stay. Our assistant answers guests on the same number, and you see every reply in your app. When you reply to a guest yourself, the assistant stays quiet in that chat for 12 hours.
+                <ul style={{ paddingLeft: "18px", marginTop: "6px" }}>
+                  <li style={li}>Update the WhatsApp Business app first (version 2.24.17 or newer). The number should have been in use on the app for at least a week.</li>
+                  <li style={li}>Keep your phone in hand: you&rsquo;ll confirm the connection inside the app.</li>
+                  <li style={li}>WhatsApp Web / Desktop will be logged out once; just link it again afterwards. The WhatsApp app for Windows isn&rsquo;t supported for this.</li>
+                  <li style={li}>Open the WhatsApp Business app on your phone at least once every two weeks, or Meta disconnects the assistant.</li>
+                </ul>
+              </li>
+              <li style={li}>
+                <strong>Or a new number used only for the assistant</strong>, <strong>not</strong> on the WhatsApp or WhatsApp Business app, with that phone nearby for a verification code by SMS or call.
+              </li>
+            </ul>
+            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 600 }}>Also have ready:</p>
+            <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={li}>Your own established Facebook account (not a brand-new one).</li>
               <li style={li}>Your business name exactly as registered, your website, and your business details.</li>
             </ul>

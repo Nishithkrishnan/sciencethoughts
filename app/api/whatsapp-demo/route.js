@@ -546,6 +546,24 @@ export async function POST(req) {
               return new NextResponse('OK', { status: 200 });
             }
 
+            // Picking from the demo menu: right after /reset (companyId === null) the menu says
+            // "reply with a number or type the property name", so accept that without "join".
+            // Also accept a bare id number (e.g. "60") from the agency assistant. Free text in an
+            // ongoing agency chat is NOT matched, so a prospect saying "Goa" isn't hijacked.
+            if (session.companyId === null || (session.companyId === 'agency' && /^\d+$/.test(trimmedText))) {
+              const pickedId = matchTenantId(trimmedText);
+              if (pickedId && pickedId !== 'agency') {
+                session.companyId = pickedId;
+                session.history = [];
+                session.transcript = [];
+                await saveSession(from, session);
+                const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[pickedId]}*.\n\n` +
+                  `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
+                await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
+                return new NextResponse('OK', { status: 200 });
+              }
+            }
+
             // Ensure session has a valid default if it was null
             if (!session.companyId) {
               session.companyId = 'agency';

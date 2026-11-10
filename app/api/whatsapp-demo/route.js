@@ -57,10 +57,29 @@ export async function GET(req) {
 const KV_URL = (process.env.KV_REST_API_URL || process.env.REDIS_REST_API_URL || process.env.REDIS_REST_URL || "").trim();
 const KV_TOKEN = (process.env.KV_REST_API_TOKEN || process.env.REDIS_REST_API_TOKEN || process.env.REDIS_REST_TOKEN || "").trim();
 
-async function getSession(from) {
+// Keeps a guest's phone number out of the server logs: only the last 4 digits are printed.
+function maskPhone(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return digits.length > 4 ? `***${digits.slice(-4)}` : '***';
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// How long a chat session (recent history + transcript) is kept after the guest's LAST message.
+// 24 hours is WhatsApp's own customer-service window, i.e. one conversation. The Guest Data Notice
+// (/data-notice) says live-reply content is not kept beyond the conversation; this used to be 60
+// days, which contradicted it. Booking enquiries and escalations are stored separately.
+const SESSION_TTL_SECONDS = String(24 * 60 * 60);
+
+// A session belongs to ONE guest on ONE business number. sessionKey is
+// `${phone_number_id}:${guestPhone}`. It used to be the guest's phone alone, so a guest who
+// messaged two properties shared one history (and one tenant id) across both.
+async function getSession(sessionKey) {
   if (KV_URL && KV_TOKEN) {
     try {
-      const res = await fetch(`${KV_URL}/get/session:${from}`, {
+      const res = await fetch(`${KV_URL}/get/session:${sessionKey}`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` }
       });
       const data = await res.json();
@@ -72,13 +91,13 @@ async function getSession(from) {
     }
   }
 
-  if (!conversationMemory.has(from)) {
-    conversationMemory.set(from, { companyId: null, history: [], transcript: [] });
+  if (!conversationMemory.has(sessionKey)) {
+    conversationMemory.set(sessionKey, { companyId: null, history: [], transcript: [] });
   }
-  return conversationMemory.get(from);
+  return conversationMemory.get(sessionKey);
 }
 
-async function saveSession(from, session) {
+async function saveSession(sessionKey, session) {
   if (KV_URL && KV_TOKEN) {
     try {
       await fetch(KV_URL, {
@@ -87,14 +106,14 @@ async function saveSession(from, session) {
           Authorization: `Bearer ${KV_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(['SET', `session:${from}`, JSON.stringify(session), 'EX', '5184000']) // expire in 60 days (retention window)
+        body: JSON.stringify(['SET', `session:${sessionKey}`, JSON.stringify(session), 'EX', SESSION_TTL_SECONDS])
       });
       return;
     } catch (e) {
       console.error("[DEMO ROUTE] KV saveSession failed, falling back to memory:", e);
     }
   }
-  conversationMemory.set(from, session);
+  conversationMemory.set(sessionKey, session);
 }
 
 // Company ID to Name mapping — hospitality only. Real-estate builder personas (formerly
@@ -469,10 +488,12 @@ export async function POST(req) {
         const phone_number_id = value.metadata.phone_number_id;
 
         if (text) {
-          console.log(`[DEMO ROUTE] Received message from ${from}: ${text}`);
+          // Message text and full phone numbers are deliberately NOT logged (guest personal data).
+          console.log(`[DEMO ROUTE] Received message from ${maskPhone(from)} on ${phone_number_id} (${text.length} chars)`);
           
-          // 1. Retrieve conversation session
-          const session = await getSession(from);
+          // 1. Retrieve conversation session (one per guest per business number)
+          const sessionKey = `${phone_number_id}:${from}`;
+          const session = await getSession(sessionKey);
           const trimmedText = text.trim();
           
           // Route permanent number ID to ScienceThoughts AI agency assistant or dynamic sandbox
@@ -480,6 +501,12 @@ export async function POST(req) {
           const isPermanentNumber = PERMANENT_PHONE_NUMBER_ID && (phone_number_id === PERMANENT_PHONE_NUMBER_ID);
 
           // Resolve tenant ID mapping dynamically from phone_number_id (if not the permanent test sandbox number)
+          // dedicatedTenantId is set when this number belongs to exactly one client (tenant:phone:{id}
+          // in KV). On such a number the tenant is FIXED: the demo commands further down (/reset menu,
+          // switching by typing a property name) must never run, or an ordinary guest message such as
+          // "can your team call me?" gets answered as another brand.
+          let dedicatedTenantId = null;
+          let tenantLookupFailed = false;
           if (!isPermanentNumber && phone_number_id && KV_URL && KV_TOKEN) {
             try {
               const res = await fetch(`${KV_URL}/get/tenant:phone:${phone_number_id}`, {
@@ -487,21 +514,31 @@ export async function POST(req) {
               });
               const data = await res.json();
               if (data.result) {
-                session.companyId = data.result.trim().replace(/^"|"$/g, '');
+                dedicatedTenantId = data.result.trim().replace(/^"|"$/g, '');
+                session.companyId = dedicatedTenantId;
               }
             } catch (e) {
+              tenantLookupFailed = true;
               console.error("[DEMO ROUTE] Failed to resolve company ID from phone_number_id:", e);
             }
+          }
+          // If the lookup itself failed we cannot tell whether this is a client's number, so treat it
+          // as one (no demo commands). With no tenant known at all, stay silent rather than answer a
+          // client's guest as the ScienceThoughts sales assistant.
+          const isDedicatedNumber = Boolean(dedicatedTenantId) || tenantLookupFailed;
+          if (tenantLookupFailed && !session.companyId) {
+            console.error(`[DEMO ROUTE] No tenant known for ${phone_number_id} and the lookup failed; not replying`);
+            return new NextResponse('OK', { status: 200 });
           }
 
           // Coexistence: the owner replied to this guest from the WhatsApp Business app within the
           // last 12 hours, so a person is handling the chat. Stay quiet rather than talk over them,
           // but keep the guest's message in the transcript.
           if (!isPermanentNumber && await isHandoffActive(phone_number_id, from)) {
-            console.log(`[DEMO ROUTE] Owner is handling ${from} on ${phone_number_id} (tenant ${session.companyId}); bot staying quiet`);
+            console.log(`[DEMO ROUTE] Owner is handling ${maskPhone(from)} on ${phone_number_id} (tenant ${session.companyId}); bot staying quiet`);
             if (Array.isArray(session.transcript)) {
               session.transcript.push({ role: 'user', content: text });
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
             }
             return new NextResponse('OK', { status: 200 });
           }
@@ -517,7 +554,7 @@ export async function POST(req) {
               if (matchedId) {
                 session.companyId = matchedId;
                 session.history = [];
-                await saveSession(from, session);
+                await saveSession(sessionKey, session);
                 
                 const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[matchedId]}*.\n\n` +
                   `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
@@ -530,7 +567,7 @@ export async function POST(req) {
             } else if (lowerText === 'exit' || lowerText === '/exit') {
               session.companyId = 'agency';
               session.history = [];
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
               await sendWhatsAppMessage(phone_number_id, from, `Sandbox deactivated. ↩️ You are back in the ScienceThoughts Agency assistant. Type *join [number/name]* to test a specific client bot.`, session.companyId);
               return new NextResponse('OK', { status: 200 });
             } else if (lowerText === '/reset') {
@@ -541,7 +578,7 @@ export async function POST(req) {
               // guest question instead of showing the picker menu. Now it works here too.
               session.companyId = null;
               session.history = [];
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
               await sendWhatsAppMessage(phone_number_id, from, buildDemoHubMenu(), session.companyId);
               return new NextResponse('OK', { status: 200 });
             }
@@ -556,7 +593,7 @@ export async function POST(req) {
                 session.companyId = pickedId;
                 session.history = [];
                 session.transcript = [];
-                await saveSession(from, session);
+                await saveSession(sessionKey, session);
                 const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[pickedId]}*.\n\n` +
                   `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
                 await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
@@ -567,16 +604,24 @@ export async function POST(req) {
             // Ensure session has a valid default if it was null
             if (!session.companyId) {
               session.companyId = 'agency';
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
             }
           }
 
           // Handle reset command — dedicated tenant numbers only reach here (the permanent/shared
           // number now handles its own /reset above and returns before this point).
           if (trimmedText.toLowerCase() === '/reset' && !isPermanentNumber) {
+            if (isDedicatedNumber) {
+              // A client's own number: clear the chat, keep the tenant, never show the demo menu.
+              session.history = [];
+              session.transcript = [];
+              await saveSession(sessionKey, session);
+              await sendWhatsAppMessage(phone_number_id, from, 'Starting over. How can I help you today?', session.companyId);
+              return new NextResponse('OK', { status: 200 });
+            }
             session.companyId = null;
             session.history = [];
-            await saveSession(from, session);
+            await saveSession(sessionKey, session);
             await sendWhatsAppMessage(phone_number_id, from, buildDemoHubMenu(), session.companyId);
             return new NextResponse('OK', { status: 200 });
           }
@@ -585,13 +630,15 @@ export async function POST(req) {
             // Route by tenant id or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
             // — only relevant for a dedicated (non-shared) tenant number; the shared/permanent
             // number handles matching via matchTenantId() in the join/connect flow above instead.
-            const matchedId = isPermanentNumber ? null : matchTenantId(trimmedText);
+            // Never on a client's dedicated number (see isDedicatedNumber above): only an unmapped
+            // test number can still switch property by name.
+            const matchedId = (isPermanentNumber || isDedicatedNumber) ? null : matchTenantId(trimmedText);
 
             if (matchedId) {
               session.companyId = matchedId;
               session.history = [];
               session.transcript = [];
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
               
               // Every remaining tenant is hospitality except 'agency' itself (matchable by
               // typing its own name, e.g. "ScienceThoughts" or "agency").
@@ -609,7 +656,7 @@ export async function POST(req) {
               session.companyId = 'agency';
               session.history = [];
               session.transcript = [];
-              await saveSession(from, session);
+              await saveSession(sessionKey, session);
             }
             if (!Array.isArray(session.transcript)) {
               session.transcript = []; // backward-compat for sessions saved before this field existed
@@ -647,7 +694,7 @@ export async function POST(req) {
           // Append assistant response to history
           session.history.push({ role: 'assistant', content: aiResponseText });
           session.transcript.push({ role: 'assistant', content: aiResponseText });
-          await saveSession(from, session);
+          await saveSession(sessionKey, session);
 
           // 4. Send the AI response back to the user via WhatsApp
           await sendWhatsAppMessage(phone_number_id, from, aiResponseText, session.companyId);
@@ -669,8 +716,8 @@ export async function POST(req) {
           ].map((v) => (v == null ? '' : String(v).trim().toLowerCase()))) : null;
           if (leadKey && leadKey !== session.lastLeadKey) {
             session.lastLeadKey = leadKey;
-            await saveSession(from, session);
-            console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
+            await saveSession(sessionKey, session);
+            console.log(`[DEMO ROUTE] Lead qualified for tenant ${session.companyId}; pushing to CRM`);
             // The WhatsApp reply itself was already sent above (step 4) — this only affects how
             // long we hold the webhook ack open for Meta, not what the user sees. Push it in the
             // background the same way as the web widget, for consistency and a faster ack.
@@ -1937,7 +1984,7 @@ async function sendWhatsAppMessage(phone_number_id, to, messageText, companyId =
     if (result.error) {
       console.error("[DEMO ROUTE] Meta API Error:", result.error);
     } else {
-      console.log(`[DEMO ROUTE] Successfully replied to ${to} under tenant ${companyId}`);
+      console.log(`[DEMO ROUTE] Successfully replied to ${maskPhone(to)} under tenant ${companyId}`);
     }
   } catch (error) {
     console.error("[DEMO ROUTE] Failed to send WhatsApp message:", error);
@@ -2031,15 +2078,20 @@ async function notifyEscalation(companyId, companyName, question, contact) {
   try {
     const to = await getTenantNotifyEmail(companyId);
     if (!to) return;
-    const dashboardLink = SITE_BASE_URL && DASHBOARD_SECRET
+    // DASHBOARD_SECRET is the single admin key: it opens every tenant's escalations and signs
+    // onboarding links. So the dashboard link goes ONLY in alerts sent to our own address
+    // (DEFAULT_NOTIFY_EMAIL). A client's alert carries the question and the guest's contact and no
+    // link, until there is a per-tenant dashboard link that shows only that client's data.
+    const isInternalRecipient = Boolean(DEFAULT_NOTIFY_EMAIL) && to.trim().toLowerCase() === DEFAULT_NOTIFY_EMAIL.toLowerCase();
+    const dashboardLink = isInternalRecipient && SITE_BASE_URL && DASHBOARD_SECRET
       ? `${SITE_BASE_URL.replace(/\/$/, '')}/dashboard?key=${DASHBOARD_SECRET}`
       : null;
     const html = `
       <div style="font-family:sans-serif;color:#222;">
         <h2 style="margin-bottom:4px;">A guest question needs an answer</h2>
-        <p style="color:#555;margin-top:0;"><strong>${companyName}</strong></p>
-        <p style="font-size:16px;">"${question}"</p>
-        <p style="color:#555;">Guest contact: ${contact || 'not captured'}</p>
+        <p style="color:#555;margin-top:0;"><strong>${escapeHtml(companyName)}</strong></p>
+        <p style="font-size:16px;">"${escapeHtml(question)}"</p>
+        <p style="color:#555;">Guest contact: ${escapeHtml(contact || 'not captured')}</p>
         ${dashboardLink ? `<p style="margin-top:16px;"><a href="${dashboardLink}">Open the dashboard to answer &rarr;</a></p>` : ''}
       </div>`;
     await fetch(MAKE_DIGEST_WEBHOOK_URL, {

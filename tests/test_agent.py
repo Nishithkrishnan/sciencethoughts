@@ -4,16 +4,37 @@ from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric
 from deepeval.test_case import LLMTestCase
 
 RAG_CONTEXT_MAP = {
-    "9": [
-        "Mango Alibaug Villas offers premium private luxury beach homes in Alibaug.",
-        "Mango Beach House (Kihim Beach) is a 4-BHK private pool villa in a lush mango orchard.",
-        "Mango Beach House rates: 28,000 weekday / 35,000 weekend. Capacity sleeps 12. Extra bed 1,500.",
-        "Amenities: pool, lawn, pool table, AC, generator backup, private chef (1,500/adult/day). Pet friendly (1,000 cleaning fee)."
+    # The three built-in demo tenants are FICTIONAL businesses. Each list mirrors the knowledge
+    # base text in app/api/whatsapp-demo/route.js's getCompanyKnowledge(), so FaithfulnessMetric
+    # checks a reply against the same facts the agent was given. Change one, change the other.
+    "tamarind-cove": [
+        "Tamarind Cove Villas is a collection of two private pool villas in South Goa, India. It is a fictional demo business.",
+        "Villa Kokum: 4-bedroom private pool villa, sleeps up to 10. Rs 24,000/night Sunday to Thursday, Rs 30,000/night Friday and Saturday. Breakfast included.",
+        "Villa Jamun: 2-bedroom villa with a private plunge pool, sleeps up to 4. Rs 14,000/night Sunday to Thursday, Rs 18,000/night Friday and Saturday. Breakfast included.",
+        "Check-in 2:00 PM, check-out 11:00 AM. Minimum stay of 2 nights on weekends. Pets are not allowed. No loud music after 10:00 PM.",
+        "Breakfast is included. A private cook can be arranged at Rs 2,500 per day, groceries extra.",
+        "Amenities: private pool at each villa, air conditioning in all bedrooms, Wi-Fi, power backup, parking for 3 cars, caretaker on site.",
+        "Location: South Goa, 10 minutes' drive from the beach, about 45 minutes from Dabolim Airport.",
+        "Booking: 50% advance confirms, balance at check-in. Free cancellation up to 14 days before check-in; after that the advance is not refunded."
     ],
-    "40": [
-        "Royal Garden Villas offers luxury pool villas in Lonavala.",
-        "Royal Garden 4BHK Villa has a private swimming pool, kids splash pool, pool table, AC, generator backup, lawn, Wi-Fi. Rates: 20k weekday / 28k weekend. Capacity sleeps 12. Pets allowed (1k fee).",
-        "Royal Garden 6BHK Villa has a private pool, rooftop lounge deck, indoor games. Rates: 30k weekday / 42k weekend. Sleeps 18."
+    "northgate-dental": [
+        "Northgate Dental Clinic is a private dental practice in Leeds, United Kingdom. It is a fictional demo business.",
+        "Opening hours: Monday to Friday 8:30 AM to 6:00 PM, Saturday 9:00 AM to 1:00 PM, closed on Sunday.",
+        "Fees: new patient examination 55 pounds including X-rays if needed; hygienist visit (scale and polish) 65 pounds; white filling from 95 pounds; tooth whitening 295 pounds; emergency appointment 80 pounds; children under 12 check-up 25 pounds.",
+        "New patients are welcome. Same-day emergency appointments are usually available when the patient gets in touch before 11:00 AM.",
+        "24 hours' notice is needed to cancel or move an appointment. A missed appointment costs 25 pounds.",
+        "Card and cash accepted. Interest-free payment plans for treatment over 300 pounds. Private practice; no NHS treatment.",
+        "Location: Leeds city centre, 5 minutes' walk from the railway station. No on-site parking.",
+        "The assistant never gives a diagnosis or medical advice; for pain, swelling or bleeding it offers an emergency appointment."
+    ],
+    "copperline-plumbing": [
+        "Copperline Plumbing & Heating is a family-run plumbing and water-heater company serving Austin, Texas. It is a fictional demo business.",
+        "Services: leak repair, drain cleaning, water heater repair and replacement (tank and tankless), toilet and faucet installation, garbage disposal replacement.",
+        "Service area: Austin, Round Rock, Cedar Park and Pflugerville.",
+        "Hours: Monday to Saturday 7:00 AM to 7:00 PM. Emergency call-outs 24 hours a day, 7 days a week.",
+        "Pricing: standard call-out and diagnosis 89 dollars, credited toward the repair if the customer goes ahead; emergency or after-hours call-out 149 dollars; drain cleaning from 159 dollars; water heater replacement by free on-site quote; all other work quoted on site before it starts.",
+        "Licensed and insured. 1-year warranty on labor. Same-day visits are usually available for requests received before noon.",
+        "The assistant never promises an exact arrival time or a final repair price; the technician confirms both."
     ],
     "agency": [
         "ScienceThoughts is a premium B2B AI Automation Agency founded by Nishith Krishnan.",
@@ -32,75 +53,6 @@ RAG_CONTEXT_MAP = {
         "Pricing: every property starts with a free 7-day trial on its own WhatsApp number, no cost, no commitment.",
         "After the trial, pricing is one flat rate per single property, regardless of nightly rate: ₹9,999 one-time onboarding fee plus ₹4,999/month. Groups get custom pricing.",
         "Pilot offer: free 7-day trial connected live to the prospect's own WhatsApp number."
-    ],
-    "43": [
-        "Villa Rentals Goa offers a curated collection of luxury private pool villas in Goa.",
-        "Sunset Villa (Candolim) is a 4-BHK luxury private pool villa near the beach. Rates: 30,000 weekday / 38,000 weekend. Sleeps 12. Private chef available at 3,000/day. Pet friendly (1,000 cleaning fee).",
-        "Creek Villa (Baga) is a 3-BHK luxury pool villa overlooking the creek. Rates: 25,000 weekday / 32,000 weekend. Sleeps 9."
-    ],
-    "18": [
-        "The Machan offers luxury treehouse stays in Lonavala.",
-        "The Canopy Machan treehouse has private decks, open-air bathtubs, forest views, and runs on solar power.",
-        "Rates: 18,000 weekday / 26,000 weekend, including complimentary breakfast.",
-        "Pets are not allowed, to protect local wildlife."
-    ],
-    # Batch 3 (added 5 Sep) — mirrors the exact KB text in app/api/whatsapp-demo/route.js's
-    # getCompanyKnowledge() for each id, so FaithfulnessMetric is checking the agent's reply
-    # against the same ground truth it was actually given, not a generic placeholder.
-    "39": [
-        "Coco Shambhala is a collection of private luxury Bali-style villas in Nerul, North Goa, run by director Giles Knapton.",
-        "Standard Package (airport transfers, breakfast, welcome drinks): Rs 55,000/day low season (1 May-30 Sep), Rs 80,000/day standard season (1 Oct-30 Apr).",
-        "Premium Package (airport transfers, all meals, one spa treatment per adult): Rs 80,000/day low season, Rs 1,15,000/day standard season.",
-        "Peak season (15 Dec-7 Jan): rates on request. Minimum stay: 3 nights."
-    ],
-    "66": [
-        "Ramathra Fort is a heritage fort hotel in Karauli district, Rajasthan, personally run by the Raj Pal family (11th generation) - Ravi Raj Pal and Gitanjali Raj Pal.",
-        "Rates: approximately Rs 18,000-27,000/night depending on room category and season.",
-        "Activities: village walks, boating on the adjoining lake, pottery and craft demonstrations, birdwatching, jeep excursions, sunset views from the fort ramparts."
-    ],
-    "67": [
-        "Vanghat - The Wildlife Lodge is an off-grid eco lodge on the Ramganga river in the Corbett buffer zone, Uttarakhand, founded and personally run by Sumantha Ghosh since 1999.",
-        "Rates: approximately Rs 10,500-11,500 per person per night plus GST, fully inclusive of meals and most activities - a couple's night runs roughly Rs 21,000-23,000 combined.",
-        "Activities: guided walking safaris, birdwatching, wildlife photography, Mahseer angling, wellness/healing retreats."
-    ],
-    "68": [
-        "Fort Begu is an ancestral fort dating to 1430 in Chittorgarh district, Rajasthan, run by the Rawat family (23rd generation) - Kr. Ajay Raj Singh and his brothers.",
-        "5 suites total. Rates: Suites around Rs 15,000/night, Deluxe Rooms around Rs 10,000/night.",
-        "Amenities: AC, room service, pool, garden, on-site parking, airport transfer. Dining: Rajasthani, Indian, Chinese, Continental."
-    ],
-    "69": [
-        "Dera Amer is an ethical wilderness elephant camp near Amer, Jaipur, Rajasthan, run by Udaijit Singh.",
-        "Rates: approximately Rs 37,500/night.",
-        "Experience: ethical, non-riding elephant interactions - feeding, bathing, painting, and walks - positioned as a sanctuary, not a ride-based attraction."
-    ],
-    "70": [
-        "Shergarh Tented Camp is a tiny, owner-run luxury tented camp bordering Kanha Tiger Reserve, Madhya Pradesh, founded in 2004 by Jehan and Katie Bhujwala.",
-        "Just 8 tents. Rates: luxury tented doubles from around Rs 15,000/night including meals plus taxes. Jungle safaris booked separately at approximately Rs 5,800/couple for a shared jeep.",
-        "Open seasonally 15 October to 15 May only."
-    ],
-    "71": [
-        "Lchang Nang Retreat - The House of Trees is a boutique retreat in Nubra Valley, Ladakh, founded and run by Rigzin Wangtak Kalon.",
-        "17 individual cottages built in mud, stone, and poplar wood, each with a private garden and sit-out. A Tranquil Family Cottage option offers two interconnected units.",
-        "Activities: yoga and Ayurvedic wellness, stargazing and bonfire evenings, monastery visits, mountain biking, camel rides, spa services, Panamik Hot Springs (~17km).",
-        "No nightly rate is listed in the knowledge base for this property - it has not been re-verified yet."
-    ],
-    "72": [
-        "Tranquil Resort is a 400-acre, 126-year-old working coffee and spice plantation estate in Wayanad, Kerala, personally run by Ajay Issac Mathulla and his wife Nisha since 1991.",
-        "Five room categories: Serenetree Tree Villa, Tranquilitree Tree House (award-winning), Luxury Suite, Deluxe Suite, Garden Rooms.",
-        "Rates: approximately Rs 13,000-28,552/night depending on room category; the Planters Garden Room and above clear Rs 15,000/night.",
-        "Amenities: pool with jacuzzi, Ayurvedic spa, communal dining. Activities: ten marked walking trails, birdwatching (130+ species), canine trekking companions."
-    ],
-    "73": [
-        "The Rajbari Bawali is a 300-year-old restored heritage palace resort near Kolkata, personally restored by owner Ajay Rawla (2009-2016+, with INTACH and the Aga Khan Foundation).",
-        "Classic Heritage: ~270 sq.ft, from Rs 10,613/night (breakfast included).",
-        "Zamindari Room: ~500 sq.ft, from Rs 13,267/night (breakfast included).",
-        "Royal Suite: ~850 sq.ft, palace view, from Rs 17,512/night (breakfast included). Royal Suite Premium Package (full board): from Rs 36,508/night."
-    ],
-    "74": [
-        "Diphlu River Lodge is a riverside eco-lodge bordering Kaziranga National Park, Assam, founded in 2008 by Ashish and Jahnabi Phookan.",
-        "Jungle Plan (mid-Nov to April): approximately Rs 16,940/adult/night twin-share (Rs 21,940 solo), includes all meals and two daily jeep safaris.",
-        "Monsoon Special (May-Oct, park closed): approximately Rs 15,500/cottage/night twin-share, breakfast and dinner only, no safaris.",
-        "River-facing cottages carry a ~Rs 4,000/night supplement. Amenities: AC cottages, Wi-Fi, campfire, village visits, birdwatching, tea garden walks, optional Dolphin Boat Ride."
     ]
 }
 

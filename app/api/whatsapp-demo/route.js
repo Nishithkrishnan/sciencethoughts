@@ -116,81 +116,37 @@ async function saveSession(sessionKey, session) {
   conversationMemory.set(sessionKey, session);
 }
 
-// Company ID to Name mapping — hospitality only. Real-estate builder personas (formerly
-// ids 1-8, 10-17) and the non-hospitality gifting agency (formerly id 20) were removed in
-// this session as part of a full pivot to focus exclusively on luxury hospitality. Their
-// original knowledge-base content is preserved in git history if ever needed again.
+// Built-in tenants: ScienceThoughts' own assistant, three FICTIONAL demo businesses, and M3 Resorts
+// (our own test property; its knowledge base lives in KV). Every real client is created at
+// runtime through the tenant registry below (tenant:meta:{id} in KV), never added here.
+// This map used to hold about 55 real hospitality brands that were prospects, not clients, each
+// with a knowledge base written from public information. They were removed: a public demo that
+// answers in a real brand's name invites a trademark or misrepresentation complaint. The old
+// content is in git history.
 const companiesMap = {
-  '9': 'Mango Alibaug Villas',
-  '18': 'The Machan',
-  '22': 'Eko Stay',
-  '23': 'The Rentalgram',
-  '24': 'Melhor Stays',
-  '25': 'StayVista',
-  '26': 'SaffronStays',
-  '27': 'Lohono Stays',
-  '28': 'amã Stays & Trails',
-  '29': 'ELIVAAS',
-  '30': 'Barefoot at Havelock',
-  '31': 'Roamhome',
-  '32': 'Elite Havens India',
-  '33': 'Tripvillas',
-  '34': 'Sol de Goa',
-  '35': 'LuxUnlock',
-  '36': 'Abode Bombay',
-  '37': 'The Postcard Hotel',
-  '38': 'Seclude Hotels',
-  '39': 'Coco Shambhala',
-  '40': 'Royal Garden Villas',
-  '41': 'Ebony Stays',
-  '42': '29Bungalow',
-  '43': 'Villa Rentals Goa',
-  '44': 'Araiya Hotels',
-  '45': 'The Goa Villas',
-  '46': 'Stay Willas',
-  '47': 'The Khyber Himalayan Resort & Spa',
-  '48': 'Glenburn Tea Estate',
-  '49': 'Neemrana Hotels',
-  '50': 'CGH Earth',
-  '51': 'Rhythm Hospitality',
-  '52': 'Ahilya Fort',
-  '53': 'The Tree House Resort, Jaipur',
-  '54': 'Leisure Hotels Group',
-  '55': 'Jehan Numa Palace',
-  '56': 'The Bison, Kabini',
-  '57': 'Suján Jawai',
-  '58': 'Khem Villas',
-  '59': 'The Belgadia Palace',
-  '60': 'Jalakara',
-  '61': 'The Kumaon',
-  '62': 'Vivenda Dos Palhaços',
-  '63': 'Marari Villas',
-  '64': 'Alsisar Mahal',
-  '65': 'Windermere Estate',
-  '66': 'Ramathra Fort',
-  '67': 'Vanghat — The Wildlife Lodge',
-  '68': 'Fort Begu',
-  '69': 'Dera Amer',
-  '70': 'Shergarh Tented Camp',
-  '71': 'Lchang Nang Retreat',
-  '72': 'Tranquil Resort',
-  '73': 'Rajbari Bawali',
-  '74': 'Diphlu River Lodge',
+  'tamarind-cove': 'Tamarind Cove Villas',
+  'northgate-dental': 'Northgate Dental Clinic',
+  'copperline-plumbing': 'Copperline Plumbing & Heating',
   'agency': 'ScienceThoughts AI Agency',
   'm3resorts': 'M3 Resorts'
 };
 
-// Single source of truth for "is this tenant a hospitality property (villa/resort/stay)?"
-// Now that real-estate and gifting personas have been removed, every non-agency tenant in
-// companiesMap is hospitality by definition. This used to be redefined inconsistently in
-// three separate places in this file (a hardcoded array that silently stopped at '36', and
-// two different `>= 18` numeric cutoffs that both misclassified id '9' — Mango Alibaug
-// Villas — as real estate). That mismatch was live in production and affected Mango
-// Alibaug's actual booking-flow system prompt and its demo welcome message. Still derived
-// from companiesMap (rather than hardcoded true) so it can't silently drift again if a
-// non-hospitality tenant is ever reintroduced.
+// The demo picker (WhatsApp /reset menu). Order here is the number a tester types.
+const DEMO_MENU = [
+  { id: 'tamarind-cove', tagline: 'villa stay, India' },
+  { id: 'northgate-dental', tagline: 'dental clinic, UK' },
+  { id: 'copperline-plumbing', tagline: 'plumbing company, US' }
+];
+
+// Built-in tenants that are NOT stays. They get the general enquiry rules, not the stay-booking
+// rules (see the tenant registry below).
+const BUILT_IN_BUSINESS_IDS = new Set(['northgate-dental', 'copperline-plumbing']);
+
+// Single source of truth for "is this built-in tenant a stay (villa/resort/hotel)?". Derived
+// from companiesMap so it cannot drift from it. Tenants created at runtime carry their own type
+// in tenant:meta instead.
 const HOSPITALITY_IDS = new Set(
-  Object.keys(companiesMap).filter((id) => id !== 'agency')
+  Object.keys(companiesMap).filter((id) => id !== 'agency' && !BUILT_IN_BUSINESS_IDS.has(id))
 );
 
 // ---------------------------------------------------------------------------------------------
@@ -210,7 +166,7 @@ const tenantMetaCache = new Map();
 async function getTenantMeta(companyId) {
   const id = companyId || 'agency';
   if (id === 'agency') return { id, name: companiesMap.agency, type: 'agency', known: true };
-  if (companiesMap[id]) return { id, name: companiesMap[id], type: 'hospitality', known: true };
+  if (companiesMap[id]) return { id, name: companiesMap[id], type: HOSPITALITY_IDS.has(id) ? 'hospitality' : 'business', known: true };
 
   const cached = tenantMetaCache.get(id);
   if (cached && cached.expires > Date.now()) return cached.meta;
@@ -238,7 +194,7 @@ async function getTenantMeta(companyId) {
   return meta;
 }
 
-// Resolves a free-typed WhatsApp message (e.g. "join Villa Rentals Goa", "43", "ELIVAAS") to a
+// Resolves a free-typed WhatsApp message (e.g. "join Tamarind Cove", "2", "northgate") to a
 // companiesMap id. Used both by the shared-sandbox "join"/"connect" flow and by the direct-name
 // routing block below. Three passes, each preferring the MOST SPECIFIC match rather than the
 // first one encountered in companiesMap's id order:
@@ -256,8 +212,10 @@ function matchTenantId(rawQuery) {
   const query = (rawQuery || '').trim();
   if (!query) return null;
 
-  if (/^\d+$/.test(query) && companiesMap[query]) {
-    return query;
+  // A bare number is a position in the demo menu ("2" = the second demo), not a tenant id.
+  if (/^\d+$/.test(query)) {
+    const picked = DEMO_MENU[Number(query) - 1];
+    return picked ? picked.id : null;
   }
 
   const searchLower = query.toLowerCase();
@@ -269,7 +227,7 @@ function matchTenantId(rawQuery) {
   // the keyword fallback below then collided with "Ahilya Fort" (both share the generic "fort"
   // keyword; insertion order decided the tie) — confirmed via a full self-match regression test
   // across every tenant name, id, and lowercased name in companiesMap.
-  const cleanNameFor = (name) => name.toLowerCase().replace(/&/g, "").replace(/\bat\b/g, "").trim();
+  const cleanNameFor = (name) => name.toLowerCase().replace(/&/g, "").replace(/\bat\b/g, "").replace(/\s+/g, " ").trim();
 
   let bestFullNameMatch = null;
   for (const [id, name] of Object.entries(companiesMap)) {
@@ -314,63 +272,10 @@ function matchTenantId(rawQuery) {
 // dedicated tenant number. Pulled out to a function (rather than left inline) so it's defined
 // exactly once instead of drifting between two copies.
 function buildDemoHubMenu() {
-  return `Demo Hub Reset! 🔄 Please select which AI Concierge you would like to test:\n\n` +
-    `9. *Mango Alibaug Villas* (Alibaug Stay)\n` +
-    `18. *The Machan* (Lonavala Treehouses)\n` +
-    `22. *Eko Stay* (Lonavala/Goa Villas)\n` +
-    `23. *The Rentalgram* (Family Villas)\n` +
-    `24. *Melhor Stays* (Goa Beach Villas)\n` +
-    `25. *StayVista* (Premium Villa Chain)\n` +
-    `26. *SaffronStays* (Premium Villa Network)\n` +
-    `27. *Lohono Stays* (Premium Luxury Villas)\n` +
-    `28. *amã Stays & Trails* (Taj Group Homestays)\n` +
-    `29. *ELIVAAS* (Luxury Villa Rentals)\n` +
-    `30. *Barefoot at Havelock* (Andaman Resort)\n` +
-    `31. *Roamhome* (Curated Holiday Homes)\n` +
-    `32. *Elite Havens India* (Ultra-Luxury Retreats)\n` +
-    `33. *Tripvillas* (Beachfront Vacation Homes)\n` +
-    `34. *Sol de Goa* (Nerul Boutique Stay)\n` +
-    `35. *LuxUnlock* (Restored Heritage Villas)\n` +
-    `36. *Abode Bombay* (Colaba Boutique Hotel)\n` +
-    `37. *The Postcard Hotel* (Boutique Resorts)\n` +
-    `38. *Seclude Hotels* (Experiential Stays)\n` +
-    `39. *Coco Shambhala* (Ultra-Luxury Villas)\n` +
-    `40. *Royal Garden Villas* (Lonavala Pool Villas)\n` +
-    `41. *Ebony Stays* (Private Pool Villas)\n` +
-    `42. *29Bungalow* (Infinity Pool Villas)\n` +
-    `43. *Villa Rentals Goa* (Luxury Villa Aggregates)\n` +
-    `44. *Araiya Hotels* (Boutique Resort Group)\n` +
-    `45. *The Goa Villas* (Luxury Villa Collection)\n` +
-    `46. *Stay Willas* (Lonavala/Karjat Villas)\n` +
-    `47. *The Khyber Himalayan Resort & Spa* (Gulmarg Ski Resort)\n` +
-    `48. *Glenburn Tea Estate* (Darjeeling Tea Estate Stay)\n` +
-    `49. *Neemrana Hotels* (Heritage Fort-Palaces)\n` +
-    `50. *CGH Earth* (Kerala Eco-Luxury Resorts)\n` +
-    `51. *Rhythm Hospitality* (Lonavala/Kumarakom Resorts)\n` +
-    `52. *Ahilya Fort* (Maheshwar Royal Heritage)\n` +
-    `53. *The Tree House Resort, Jaipur* (Eco-Luxury Treehouses)\n` +
-    `54. *Leisure Hotels Group* (Uttarakhand Boutique Resorts)\n` +
-    `55. *Jehan Numa Palace* (Bhopal Heritage Palace)\n` +
-    `56. *The Bison, Kabini* (Kabini Wildlife Lodge)\n` +
-    `57. *Suján Jawai* (Rajasthan Leopard Camp)\n` +
-    `58. *Khem Villas* (Ranthambore Eco-Lodge)\n` +
-    `59. *The Belgadia Palace* (Odisha Royal Heritage)\n` +
-    `60. *Jalakara* (Andaman Islands Villa)\n` +
-    `61. *The Kumaon* (Himalayan Boutique Lodge)\n` +
-    `62. *Vivenda Dos Palhaços* (Goa Heritage Guesthouse)\n` +
-    `63. *Marari Villas* (Kerala Beach Villas)\n` +
-    `64. *Alsisar Mahal* (Shekhawati Heritage Palace)\n` +
-    `65. *Windermere Estate* (Munnar Plantation Bungalow)\n` +
-    `66. *Ramathra Fort* (Rajasthan Heritage Fort)\n` +
-    `67. *Vanghat* (Corbett Wildlife Lodge)\n` +
-    `68. *Fort Begu* (Rajasthan Ancestral Fort)\n` +
-    `69. *Dera Amer* (Jaipur Elephant Camp)\n` +
-    `70. *Shergarh Tented Camp* (Kanha Luxury Camp)\n` +
-    `71. *Lchang Nang Retreat* (Ladakh Boutique Retreat)\n` +
-    `72. *Tranquil Resort* (Wayanad Plantation Estate)\n` +
-    `73. *Rajbari Bawali* (Kolkata Heritage Palace)\n` +
-    `74. *Diphlu River Lodge* (Kaziranga Eco-Lodge)\n\n` +
-    `Reply with a number from the list above, or type the property name, to start the simulation!`;
+  const lines = DEMO_MENU.map((d, i) => `${i + 1}. *${companiesMap[d.id]}* (${d.tagline})`).join('\n');
+  return `Demo Hub 🔄 Pick an assistant to test. These are fictional businesses, built to show what the assistant does:\n\n` +
+    `${lines}\n\n` +
+    `Reply with a number from the list above, or type the business name.`;
 }
 
 // Very small, best-effort daily rate limit for the public web-chat demo endpoint only.
@@ -601,8 +506,8 @@ export async function POST(req) {
                 session.history = [];
                 await saveSession(sessionKey, session);
                 
-                const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[matchedId]}*.\n\n` +
-                  `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
+                const welcome = `Sandbox activated! 🔄 You are now chatting with the demo assistant for *${companiesMap[matchedId]}*.\n\n` +
+                  `Ask me anything a customer would ask. Type *exit* to return to the ScienceThoughts menu.`;
                 await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
                 return new NextResponse('OK', { status: 200 });
               } else {
@@ -639,8 +544,8 @@ export async function POST(req) {
                 session.history = [];
                 session.transcript = [];
                 await saveSession(sessionKey, session);
-                const welcome = `Sandbox activated! 🔄 You are now chatting with the custom AI concierge for *${companiesMap[pickedId]}*.\n\n` +
-                  `Ask me anything about our amenities, rates, or booking rules. Type *exit* to return to the ScienceThoughts menu.`;
+                const welcome = `Sandbox activated! 🔄 You are now chatting with the demo assistant for *${companiesMap[pickedId]}*.\n\n` +
+                  `Ask me anything a customer would ask. Type *exit* to return to the ScienceThoughts menu.`;
                 await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
                 return new NextResponse('OK', { status: 200 });
               }
@@ -672,7 +577,7 @@ export async function POST(req) {
           }
 
             // UNCONDITIONAL DIRECT ROUTING:
-            // Route by tenant id or by typing the business name (e.g. "Lohono Stays", "ELIVAAS")
+            // Route by tenant id or by typing the business name (e.g. "Tamarind Cove")
             // — only relevant for a dedicated (non-shared) tenant number; the shared/permanent
             // number handles matching via matchTenantId() in the join/connect flow above instead.
             // Never on a client's dedicated number (see isDedicatedNumber above): only an unmapped
@@ -689,7 +594,7 @@ export async function POST(req) {
               // typing its own name, e.g. "ScienceThoughts" or "agency").
               const welcome = matchedId === 'agency'
                 ? `Welcome to *${companiesMap[matchedId]}*! How can I assist you today — questions about the AI concierge, pricing, or booking a demo call?`
-                : `Welcome to *${companiesMap[matchedId]}*! How can I assist you with your luxury stay bookings, villa availability, or amenities today?`;
+                : `Welcome to *${companiesMap[matchedId]}*! How can I help you today?`;
 
               await sendWhatsAppMessage(phone_number_id, from, welcome, session.companyId);
               return new NextResponse('OK', { status: 200 });
@@ -817,733 +722,69 @@ async function getCompanyKnowledge(requestedCompanyId) {
 
   let prompt = "";
 
-  if (companyId === '9') {
-    prompt = `You are the autonomous AI Booking Assistant for Mango Alibaug Villas, a collection of premium, private luxury beach homes in Alibaug.
+  if (companyId === 'tamarind-cove') {
+    prompt = `You are the AI booking assistant for Tamarind Cove Villas, a small collection of two private pool villas in South Goa, India. Tamarind Cove Villas is a fictional demo business created by ScienceThoughts to show what this assistant does; if anyone asks whether it is a real property, say it is a demo.
 === PROPERTY KNOWLEDGE BASE ===
-1. **Mango Beach House (Kihim Beach)**
-   - Location: Kihim, Alibaug (3 mins walk from beach, 20 mins from Mandwa Jetty).
-   - Type: Luxury 4-BHK private pool villa in a lush mango orchard.
-   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend - Fri/Sat). Entire villa booking only.
-   - Capacity: Sleeps up to 12 guests. Extra bed ₹1,500/night.
-   - Amenities: Private pool, lawn, pool table, AC, generator backup, private chef available (meals packages: ₹1,500/adult/day).
-   - House Rules: Pet-friendly (₹1,000 cleaning fee), check-in 1:00 PM, check-out 10:00 AM, quiet hours from 10:00 PM.
-2. **Mango Villa Bougainvillea (Zirad)**
-   - Location: Zirad, Alibaug (15 mins from Mandwa Jetty).
-   - Type: Mediterranean-style 5-BHK private villa.
-   - Rates: ₹32,000/night (weekday) / ₹42,000/night (weekend).
-   - Capacity: Sleeps up to 15 guests. Private pool, cycles, private chef kitchen.`;
-  } else if (companyId === '18') {
-    prompt = `You are the autonomous AI Booking Assistant for The Machan, an exclusive eco-resort in Lonavala featuring luxury treehouses.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Canopy Machan & Starlight Machan**
-   - Location: Atvan, Lonavala (30 mins from Lonavala station).
-   - Type: Luxury eco-friendly treehouses suspended 30 to 45 feet above the forest canopy.
-   - Rates: ₹18,000/night (weekday) / ₹26,000/night (weekend - Fri/Sat). Includes breakfast.
-   - Capacity: Sleeps up to 3 adults.
-   - Amenities: Private valley decks, outdoor bathtubs, solar-powered. No pets allowed.`;
-  } else if (companyId === '22') {
-    prompt = `You are the autonomous AI Booking Assistant for Eko Stay, a premier brand managing luxury private pool villas in Lonavala and Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Oasis (Lonavala)**
-   - Location: Gold Valley, Lonavala.
-   - Type: 4 BHK Private Pool Villa with mountain views.
-   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend).
-   - Amenities: Private pool, lawn, pool table, carrom, kitchen, BBQ setup. Sleeps up to 12.
-   - Meals & Chef: Private chef can be arranged (₹2,500/day for cooking, groceries extra).
-   - Pets: Pet-friendly (₹1,000 cleaning fee per stay).
-2. **Villa Sol (Candolim, Goa)**
-   - Location: Candolim, North Goa (5 mins drive to beach).
-   - Type: 3 BHK Portuguese-style luxury villa.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps up to 8.
-   - Amenities: Private swimming pool, high-speed Wi-Fi, fully equipped kitchen.
-   - Meals & Chef: Chef service on request (₹2,500/day).
-   - Pets: Pet-friendly (₹1,000 cleaning fee).`;
-  } else if (companyId === '23') {
-    prompt = `You are the autonomous AI Booking Assistant for The Rentalgram, offering premium curated family villas.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Sage (Alibaug)**
-   - Location: Mandwa Road, Alibaug (10 mins from jetty).
-   - Type: Ultra-luxury 5 BHK Villa.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend).
-   - Amenities: Large private swimming pool, landscaped gardens, private bar, AC, caretaker on-site. Sleeps 15.
-   - Meals & Chef: In-villa kitchen with private chef on request (₹3,000/day).
-   - Pets: Pet-friendly (no extra charge).
-2. **Bonheur Villa (Lonavala)**
-   - Location: Khandala, Lonavala.
-   - Type: 4 BHK Premium Family Villa with pool, kids play area, indoor games.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
-   - Amenities: Swimming pool, play area, indoor games.
-   - Meals & Chef: Private chef can be hired (₹3,000/day).
-   - Pets: Pet-friendly (no extra charge).`;
-  } else if (companyId === '24') {
-    prompt = `You are the autonomous AI Booking Assistant for Melhor Stays, managing high-end private villas in Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Casa de Sol (Anjuna, Goa)**
-   - Location: Anjuna, Goa (close to Purple Martini).
-   - Type: Luxury beachfront 4 BHK villa with beach access.
-   - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 10.
-   - Amenities: Private plunge pool, high-speed Wi-Fi, beach access.
-   - Meals & Chef: Chef on call available (₹3,500/day, specializes in Goan seafood).
-   - Pets: Pet-friendly (₹1,500 one-time fee).
-2. **Villa Bela Vista (Calangute, Goa)**
-   - Location: Calangute, Goa.
-   - Type: 3 BHK Luxury Villa with private garden, housekeeping, fully equipped kitchen.
-   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 8.
-   - Amenities: Private swimming pool, garden, caretakers.
-   - Meals & Chef: Chef on request (₹3,500/day).
-   - Pets: Pet-friendly (₹1,500 fee).`;
-  } else if (companyId === '25') {
-    prompt = `You are the autonomous AI Booking Assistant for StayVista, India's largest luxury villa network.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Vista Grande (Ooty)**
-   - Location: Lovedale, Ooty.
-   - Type: 5 BHK Heritage Colonial Bungalow set in a tea estate.
-   - Rates: ₹45,000/night (weekday) / ₹55,000/night (weekend). Sleeps 15.
-   - Amenities: Fireplace, private lawn, pool table, premium linen, Wi-Fi. (Note: No swimming pool due to cold weather).
-   - Meals & Chef: In-villa cook serves premium home-cooked meals (₹1,800/adult/day for all meals).
-   - Pets: Pet-friendly (must notify in advance, ₹1,000/day).
-2. **Vista Cliffhanger (Kasauli)**
-   - Location: Kasauli, Himachal.
-   - Type: 4 BHK luxury villa with mountain views.
-   - Rates: ₹35,000/night (weekday) / ₹42,000/night (weekend). Sleeps 10.
-   - Amenities: Private outdoor jacuzzi, BBQ, bonfire area.
-   - Meals & Chef: In-house cook prepares all meals (₹1,800/adult/day).
-   - Pets: Pet-friendly (₹1,000/day).`;
-  } else if (companyId === '26') {
-    prompt = `You are the autonomous AI Booking Assistant for SaffronStays, a network of premium private villas in India.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **SaffronStays L'Attitude (Lake Vaitarna)**
-   - Location: Khardi, Maharashtra (Lake Vaitarna waterfront).
-   - Type: 3 BHK eco-friendly lakefront villa with organic dining.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 10.
-   - Amenities: Lake views, board games, quiet location, private lawn. (Note: No swimming pool, waterfront access).
-   - Meals & Chef: Home-cooked organic meals prepared by in-villa cook (all meals package: ₹1,500/person/day).
-   - Pets: Pet-friendly (free of charge).
-2. **SaffronStays Salt Rim (Alibaug)**
-   - Location: Korlai, Alibaug (beachfront).
-   - Type: 2 BHK vintage villa overlooking the sea.
-   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Sleeps 6.
-   - Amenities: Direct beach access, sea views, lawn.
-   - Meals & Chef: In-villa cook specializes in Konkani seafood (all meals package: ₹1,500/person/day).
-   - Pets: Pet-friendly (free of charge).`;
-  } else if (companyId === '27') {
-    prompt = `You are the autonomous AI Booking Assistant for Lohono Stays, offering premium luxury villa rentals.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Verde (Goa)**
-   - Location: North Goa (Assagao).
-   - Type: 4 BHK Luxury Private Pool Villa.
-   - Rates: ₹45,000/night (weekday) / ₹55,000/night (weekend). Sleeps 12.
-   - Amenities: Private pool, lounge deck, high-speed Wi-Fi, housekeeping.
-   - Meals & Chef: Private chef on request (₹3,500/day, groceries extra).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
-2. **Mansion House (Alibaug)**
-   - Location: Mandwa, Alibaug.
-   - Type: 6 BHK Ultra-Luxury Estate.
-   - Rates: ₹70,000/night (weekday) / ₹85,000/night (weekend). Sleeps 18.
-   - Amenities: Large pool, bar lounge, massive gardens.
-   - Meals & Chef: Gourmet chef service included (groceries charged at cost).
-   - Pets: Pet-friendly (one-time ₹2,000 cleaning fee).`;
-  } else if (companyId === '28') {
-    prompt = `You are the autonomous AI Booking Assistant for amã Stays & Trails by Taj (IHCL).
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Cardamom Hills Bungalow (Munnar)**
-   - Location: Munnar, Kerala.
-   - Type: 3 BHK Heritage Tea Plantation Bungalow.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 8.
-   - Amenities: Plantation walks, mountain views, fireplace.
-   - Meals & Chef: Authentic local meals by in-villa cook (all meals package: ₹1,500/adult/day, breakfast included).
-   - Pets: Pet-friendly (free of charge, wide lawns).
-2. **Beach House (Varkala)**
-   - Location: Varkala, Kerala.
-   - Type: 4 BHK Seaside Villa with beach access.
-   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend). Sleeps 10.
-   - Amenities: Sea-facing deck, direct beach access.
-   - Meals & Chef: Fresh seafood meals by in-villa cook (all meals package: ₹1,800/adult/day).
-   - Pets: Pet-friendly (free of charge).`;
-  } else if (companyId === '29') {
-    prompt = `You are the autonomous AI Booking Assistant for ELIVAAS luxury holiday villas.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Amara (Goa)**
-   - Location: Assagao, North Goa.
-   - Type: 4 BHK Luxury Private Pool Villa.
-   - Rates: ₹32,000/night (weekday) / ₹40,000/night (weekend). Sleeps 12.
-   - Amenities: Private swimming pool, concierge desk, high-speed Wi-Fi.
-   - Meals & Chef: Dedicated cook service included (groceries charged at cost).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
-2. **Pine Crest (Kasauli)**
-   - Location: Kasauli, Himachal.
-   - Type: 3 BHK Mountain Chalet.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 8.
-   - Amenities: Private outdoor jacuzzi, bonfire pit, BBQ deck.
-   - Meals & Chef: In-house cook prepares all meals (₹1,500/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).`;
-  } else if (companyId === '30') {
-    prompt = `You are the autonomous AI Booking Assistant for Barefoot at Havelock, Swaraj Dweep (Andamans).
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Tented Cottage**
-   - Location: Havelock Island (Swaraj Dweep), Andaman Islands.
-   - Type: Premium air-conditioned tented cottages surrounded by rainforest near Beach No. 7 (Radhanagar Beach).
-   - Rates: ₹14,500/night (weekday) / ₹17,500/night (weekend). Sleeps 3.
-   - Amenities: Private beachfront access, room service, ceiling fan, writing desk, safety locker.
-   - Meals & Chef: Buffet breakfast included; buffet lunch/dinner available at the in-house beach restaurant (meal packages: ₹1,800/adult/day).
-   - Pets: Pets are not allowed due to local wildlife and environmental regulations.
-2. **Nicobari Cottage**
-   - Location: Havelock Island (Swaraj Dweep), Andaman Islands.
-   - Type: Luxury thatched-roof cottages built using local materials.
-   - Rates: ₹18,000/night (weekday) / ₹22,000/night (weekend). Sleeps 3.
-   - Amenities: En-suite bathroom, luxury bedding, private sit-out deck, direct rainforest path access.
-   - Meals & Chef: Gourmet dining at our restaurant.
-   - Pets: Pets are not allowed.`;
-  } else if (companyId === '31') {
-    prompt = `You are the autonomous AI Booking Assistant for Roamhome holiday homes.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Glasshouse (Kasauli)**
-   - Location: Kasauli, Himachal.
-   - Type: 3 BHK Modern Glass Villa with mountain views.
-   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 8.
-   - Amenities: Fireplace, BBQ deck, panoramic mountain views.
-   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,200/adult/day).
-   - Pets: Pet-friendly (free of charge).
-2. **River Retreat (Manali)**
-   - Location: Manali, Himachal.
-   - Type: 4 BHK Riverside Cabin.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 10.
-   - Amenities: Riverside deck, private garden, bonfire area.
-   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,200/adult/day).
-   - Pets: Pet-friendly (free of charge).`;
-  } else if (companyId === '32') {
-    prompt = `You are the autonomous AI Booking Assistant for Elite Havens India, offering ultra-luxury villa retreats.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Lonavala (Lonavala)**
-   - Location: Khandala, Lonavala.
-   - Type: 5 BHK Ultra-Luxury Villa.
-   - Rates: ₹60,000/night (weekday) / ₹75,000/night (weekend). Sleeps 15.
-   - Amenities: Private swimming pool, home theater, fully staffed.
-   - Meals & Chef: Gourmet chef included (groceries charged at cost).
-   - Pets: Pet-friendly (must notify in advance, ₹1,500 cleaning fee).
-2. **Villa Candolim (Goa)**
-   - Location: Candolim beachfront, Goa.
-   - Type: 4 BHK Beachfront Luxury Villa.
-   - Rates: ₹50,000/night (weekday) / ₹65,000/night (weekend). Sleeps 12.
-   - Amenities: Beach access, private pool, estate manager.
-   - Meals & Chef: Dedicated private chef included (groceries charged at cost).
-   - Pets: Pet-friendly (must notify in advance, ₹1,500 cleaning fee).`;
-  } else if (companyId === '33') {
-    prompt = `You are the autonomous AI Booking Assistant for Tripvillas vacation homes.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Sunset Beach Villa (Goa)**
-   - Location: Candolim, Goa.
-   - Type: 3 BHK Beachfront Villa.
-   - Rates: ₹20,000/night (weekday) / ₹26,000/night (weekend). Sleeps 9.
-   - Amenities: Swimming pool, direct beachfront, high-speed Wi-Fi.
-   - Meals & Chef: Caretaker cooks breakfast (included); chef can be hired for other meals (₹2,500/day).
-   - Pets: Pet-friendly (one-time ₹1,000 fee).
-2. **Valley View Chalet (Mahabaleshwar)**
-   - Location: Mahabaleshwar, Maharashtra.
-   - Type: 4 BHK Luxury Valley-facing Retreat.
-   - Rates: ₹18,000/night (weekday) / ₹24,000/night (weekend). Sleeps 12.
-   - Amenities: Private pool, gardens, caretaker.
-   - Meals & Chef: Cook service available on request (₹2,500/day).
-   - Pets: Pet-friendly (one-time ₹1,000 fee).`;
-  } else if (companyId === '34') {
-    prompt = `You are the autonomous AI Booking Assistant for Sol de Goa, Nerul.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Sol de Goa Boutique Hotel**
-   - Location: Nerul, North Goa (overlooking the river).
-   - Type: Luxury Boutique River-facing Hotel.
-   - Rates: ₹8,000/room/night (weekday) / ₹11,000/room/night (weekend). Sleeps 2 per room.
-   - Amenities: Two swimming pools, Sol Bar & Bistro, live music nights, spa.
-   - Meals & Chef: In-house award-winning restaurant. Breakfast included, all-day dining available.
-   - Pets: Pets are not allowed (hotel policy, guide dogs permitted).
-2. **The Suite (Sol de Goa)**
-   - Location: Nerul, Goa.
-   - Type: 1 BHK Luxury Suite with private riverfront balcony.
-   - Rates: ₹15,000/night (weekday) / ₹20,000/night (weekend). Sleeps 3.
-   - Amenities: Private balcony, deep soaking tub, access to premium lounge.
-   - Meals & Chef: In-suite dining menu available.
-   - Pets: Pets are not allowed.`;
-  } else if (companyId === '35') {
-    prompt = `You are the autonomous AI Booking Assistant for LuxUnlock, offering restored heritage vacation stays.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Casa de Goa (Goa)**
-   - Location: North Goa (restored Portuguese quarters).
-   - Type: Restored 4 BHK Portuguese Heritage Villa.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
-   - Amenities: Restored vintage pool, housekeeper, high-speed Wi-Fi.
-   - Meals & Chef: Traditional Goan meals prepared by private cook (meal packages: ₹1,500/adult/day).
-   - Pets: Pet-friendly (free of charge).
-2. **Planter's Bungalow (Ooty)**
-   - Location: Lovedale, Ooty.
-   - Type: 3 BHK Colonial Tea Estate Bungalow.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 8.
-   - Amenities: Fireplace, colonial interiors, tea estate tours.
-   - Meals & Chef: Home-cooked meals prepared by estate cook (all meals package: ₹1,500/adult/day).
-   - Pets: Pet-friendly (free of charge).`;
-  } else if (companyId === '36') {
-    prompt = `You are the autonomous AI Booking Assistant for Abode Bombay, Colaba.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Vintage Room**
-   - Location: Colaba, Mumbai (near Gateway of India).
-   - Type: Premium Boutique Hotel Room.
-   - Rates: ₹9,000/room/night (weekday) / ₹12,000/room/night (weekend). Sleeps 2.
-   - Amenities: High ceilings, reclaimed teak wood furniture, vintage decor, spa.
-   - Meals & Chef: Organic cafe on-site (breakfast included, cafe menu items charged extra).
-   - Pets: Pets are not allowed.
-2. **Luxury Room**
-   - Location: Colaba, Mumbai.
-   - Type: Spacious Suite.
-   - Rates: ₹14,000/room/night (weekday) / ₹18,000/room/night (weekend). Sleeps 3.
-   - Amenities: Roll-top freestanding bath, writing desk, premium bedding.
-   - Meals & Chef: Cafe orders served in-room.
-   - Pets: Pets are not allowed.`;
-  } else if (companyId === '37') {
-    prompt = `You are the autonomous AI Booking Assistant for The Postcard Hotel, a luxury resort brand.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Postcard Dewa (Thimphu)**
-   - Location: Thimphu, Bhutan.
-   - Type: Luxury Boutique Mountain Resort Rooms.
-   - Rates: ₹28,000/room/night. Sleeps 2.
-   - Amenities: Spa, indoor heated pool, plantation walks, mountain views.
-   - Meals & Chef: Gourmet dining included (anytime, anywhere dining concept).
-   - Pets: Pets are not allowed.
-2. **The Postcard Velha (Goa)**
-   - Location: Old Goa, Goa.
-   - Type: Luxury Estate Room in a historic plantation.
-   - Rates: ₹25,000/room/night. Sleeps 2.
-   - Amenities: Large swimming pool, Ayurvedic spa, gardens.
-   - Meals & Chef: In-house chef serves authentic Goan cuisine.`;
-  } else if (companyId === '38') {
-    prompt = `You are the autonomous AI Booking Assistant for Seclude Hotels, offering boutique homestays.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Seclude Ramgarh (Nainital)**
-   - Location: Ramgarh, Uttarakhand.
-   - Type: 4 BHK Heritage Cottage set in an orchard.
-   - Rates: ₹15,000/room/night. Sleeps 2 per room.
-   - Amenities: Outdoor deck, fireplaces, Himalayan views, library.
-   - Meals & Chef: Local home-cooked meals by in-house cook (all-meals package: ₹1,200/adult/day).
-   - Pets: Pet-friendly (₹1,000 one-time cleaning fee).
-2. **Seclude Tarika (Kasauli)**
-   - Location: Kasauli, Himachal.
-   - Type: 3 BHK Cozy Mountain Cabin.
-   - Rates: ₹18,000/room/night. Sleeps 2 per room.
-   - Amenities: Fireplace, private lawn, veranda.
-   - Meals & Chef: Cook prepares hot meals (all-meals package: ₹1,200/adult/day).`;
-  } else if (companyId === '39') {
-    prompt = `You are the autonomous AI Booking Assistant for Coco Shambhala, a collection of private luxury Bali-style villas in Nerul, Goa, run by director Giles Knapton.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Rates & Packages**
-   - Standard Package (airport transfers, breakfast, welcome drinks): Rs 55,000/day in low season (1 May-30 Sep), Rs 80,000/day in standard season (1 Oct-30 Apr).
-   - Premium Package (airport transfers, all meals, one spa treatment per adult): Rs 80,000/day in low season, Rs 1,15,000/day in standard season.
-   - Peak season (15 Dec-7 Jan): rates on request.
-   - Minimum stay: 3 nights.
-   - Location: Nerul, North Goa. Private Bali-style villa design.
-   - Ownership: Run by director Giles Knapton.`;
-  } else if (companyId === '40') {
-    prompt = `You are the autonomous AI Booking Assistant for Royal Garden Villas, offering luxury pool villas in Lonavala.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Royal Garden 4BHK Villa**
-   - Location: Lonavala, Maharashtra (near city center).
-   - Type: Luxury 4-BHK private pool villa with garden.
-   - Rates: ₹20,000/night (weekday) / ₹28,000/night (weekend). Sleeps 12.
-   - Amenities: Private swimming pool, kids splash pool, pool table, AC, generator backup, lawn, Wi-Fi.
-   - Meals & Chef: Cook service available on-request (meals package: ₹1,500/adult/day for all meals).
-   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
-2. **Royal Garden 6BHK Villa**
-   - Location: Lonavala, Maharashtra.
-   - Type: Spacious 6-BHK luxury pool villa.
-   - Rates: ₹30,000/night (weekday) / ₹42,000/night (weekend). Sleeps 18.
-   - Amenities: Private pool, rooftop lounge deck, indoor games room.`;
-  } else if (companyId === '41') {
-    prompt = `You are the autonomous AI Booking Assistant for Ebony Stays, luxury pool villas.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Ebony Vista (Goa)**
-   - Location: Vagator beachfront, Goa.
-   - Type: 4 BHK Luxury Private Pool Villa.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
-   - Amenities: Infinity pool, direct beach access, rooftop lounge.
-   - Meals & Chef: In-house cook prepares all meals (all meals package: ₹1,500/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
-2. **Ebony Oasis (Alibaug)**
-   - Location: Kihim, Alibaug.
-   - Type: 3 BHK Modern Pool Villa.
-   - Rates: ₹28,000/night (weekday) / ₹35,000/night (weekend). Sleeps 9.
-   - Amenities: Private pool, large lawn, generator backup.`;
-  } else if (companyId === '42') {
-    prompt = `You are the autonomous AI Booking Assistant for 29Bungalow vacation properties.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Oasis (Lonavala)**
-   - Location: Khandala, Lonavala.
-   - Type: 4 BHK Premium Private Pool Villa.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 12.
-   - Amenities: Swimming pool, karaoke system, private lawn, games area.
-   - Meals & Chef: Caretaker cooks breakfast (included); meals package available for lunch/dinner (₹1,500/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
-2. **Villa Riviera (Goa)**
-   - Location: Candolim, Goa.
-   - Type: 3 BHK Luxury Pool Villa.
-   - Rates: ₹22,000/night (weekday) / ₹28,000/night (weekend). Sleeps 9.
-   - Amenities: Swimming pool, high-speed Wi-Fi, housekeeping.`;
-  } else if (companyId === '43') {
-    prompt = `You are the autonomous AI Booking Assistant for Villa Rentals Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Sunset Villa (Candolim)**
-   - Location: Candolim, Goa.
-   - Type: 4 BHK Luxury Private Pool Villa near beach.
-   - Rates: ₹30,000/night (weekday) / ₹38,000/night (weekend). Sleeps 12.
-   - Amenities: Private pool, beachfront lounge deck, generator backup.
-   - Meals & Chef: Caretaker cooks breakfast; private chef can be hired (₹3,000/day).
-   - Pets: Pet-friendly (one-time ₹1,000 cleaning fee).
-2. **Creek Villa (Baga)**
-   - Location: Baga, Goa.
-   - Type: 3 BHK Luxury Pool Villa.
-   - Rates: ₹25,000/night (weekday) / ₹32,000/night (weekend). Sleeps 9.
-   - Amenities: Private pool, overlooking the creek.`;
-  } else if (companyId === '44') {
-    prompt = `You are the autonomous AI Booking Assistant for Araiya Hotels, a luxury boutique hotel and resort brand.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Araiya Palampur (Himachal)**
-   - Location: Palampur, Himachal Pradesh (Kangra Valley).
-   - Type: Luxury Boutique Resort rooms & suites.
-   - Rates: ₹12,000/room/night. Sleeps 2.
-   - Amenities: Spa, fitness center, mountain view deck, bar & restaurant.
-   - Meals & Chef: All-day dining at the in-house restaurant (breakfast included).
-   - Pets: Pets are not allowed.
-2. **Araiya Athirappilly (Kerala)**
-   - Location: Athirappilly, Kerala (near waterfalls).
-   - Type: Luxury jungle-themed suites.
-   - Rates: ₹16,000/room/night. Sleeps 2.
-   - Amenities: Infinity pool overlooking the forest, spa, yoga deck.`;
-  } else if (companyId === '45') {
-    prompt = `You are the autonomous AI Booking Assistant for The Goa Villas, a curated portfolio of luxury private pool villas in Goa.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Villa Simplex (Baga)**
-   - Location: Baga beachfront, Goa.
-   - Type: Luxury 4-BHK private pool villa.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 12.
-   - Amenities: Private pool, direct beach path access, lounge terrace, AC, Wi-Fi.
-   - Meals & Chef: Gourmet chef included (groceries charged at cost).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
-2. **Villa Duplex (Candolim)**
-   - Location: Candolim, Goa.
-   - Type: 5-BHK luxury pool estate.
-   - Rates: ₹40,000/night (weekday) / ₹50,000/night (weekend). Sleeps 15.`;
-  } else if (companyId === '46') {
-    prompt = `You are the autonomous AI Booking Assistant for Stay Willas vacation rentals.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Willas Khandala (Khandala)**
-   - Location: Khandala, Lonavala.
-   - Type: 5 BHK Premium Private Pool Estate.
-   - Rates: ₹35,000/night (weekday) / ₹45,000/night (weekend). Sleeps 15.
-   - Amenities: Private swimming pool, gazebo, indoor games room, kids splash area.
-   - Meals & Chef: Dedicated cook prepares Konkani and North Indian meals (all meals package: ₹1,500/adult/day).
-   - Pets: Pet-friendly (one-time ₹1,500 cleaning fee).
-2. **Willas Karjat (Karjat)**
-   - Location: Karjat, Maharashtra.
-   - Type: 4 BHK Farm-style Pool Villa.
-   - Rates: ₹28,000/night (weekday) / ₹36,000/night (weekend). Sleeps 12.
-   - Amenities: Farm views, large private pool, bonfire pit.`;
-  } else if (companyId === '47') {
-    prompt = `You are the autonomous AI Booking Assistant for The Khyber Himalayan Resort & Spa, a luxury five-star ski resort in Gulmarg, Kashmir.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Khyber Himalayan Resort & Spa**
-   - Location: Gulmarg, Jammu & Kashmir (8,825 ft elevation) — India's premier ski destination.
-   - Rooms: 80+ rooms and 5 cottages across 7 categories — Premier Room, Premier Plus Room, Luxury Balcony (Gulmarg View), Luxury Balcony (Himalayan View), One Bedroom Cottage, Two Bedroom Cottage, and the Presidential Cottage (two-level suite with private plunge pool and jacuzzi).
-   - Dining: Six-plus venues including Chaikash, Calabash, Cloves, Brava, Nouf, and Niku.
-   - Wellness: The Khyber Spa by L'Occitane, all-season temperature-controlled indoor pool, mountain-view gymnasium.
-   - Events: 10,000+ sq ft indoor/outdoor banquet space for weddings.
-   - Rates (from the property's own booking engine, Bed & Breakfast, exclusive of tax — current as of mid-August 2026, subject to change by season and exact dates so always frame as indicative): Premier Room from approx. ₹25,800/night; Premier Plus Room from approx. ₹29,400/night. If asked for other room categories or exact current pricing, confirm those with the property team rather than guessing.
-   - Recognition: Condé Nast Traveller Luxury Boutique Resort (8 of the last 10 years), Best Ski Resort in India (Travel+Leisure India).
-   - Policies (from the property's own published FAQs and Terms & Conditions): Check-in 14:00, check-out 12:00 (late check-out after 12:00 is chargeable on a sliding scale, up to 100% of the room rate after 18:00). Pets are not allowed on the property. Wheelchair access is available to most areas and restaurants (not every corner) and a specially-abled room is offered. Max occupancy is 3 guests/room; a third occupant over 10 years old is chargeable even without an extra bed (no rollaway beds — the in-room sofa converts to a bed instead). Kids up to 8 stay free (incl. breakfast); ages 8-15 are ₹4,500/night; above 15 are billed at ₹10,000/night (all incl. taxes and breakfast). Smoking is only permitted on Luxury Balcony room balconies and designated areas — not sold or served: liquor is not sold on the premises. Front desk and concierge operate 24/7. A photo ID is required at check-in (Aadhar/PAN/Driving License/Voter ID/Passport for Indian nationals; passport + visa for foreign nationals). Cancellations made 40+ days before arrival get a full refund; cancellations closer to arrival (per their stated policy, within 45 days) incur full retention, as do no-shows and early departures for the remaining nights. These are the property's own published terms — always cite them as current policy, but note exact figures should be reconfirmed with the team for anything the guest is relying on to finalize a booking.`;
-  } else if (companyId === '48') {
-    prompt = `You are the autonomous AI Booking Assistant for Glenburn Tea Estate, a working colonial-era tea estate stay in Darjeeling.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Glenburn Tea Estate**
-   - Location: Darjeeling District, West Bengal, on the Rangeet River — a working tea estate since 1859, run by the Prakash family for four generations.
-   - Rooms: 8 suites across two colonial bungalows — Burra Bungalow (original 1859 planter's residence: Planter's Suite, Rose Suite, Kanchenjunga Suite, Simbong Butterfly Room) and Water Lily Bungalow (Camelia, Rung Dung, Rangeet, and Singalila Suite with Kanchenjunga views).
-   - Dining: All-inclusive, organic garden-to-table meals — Indian, Nepali, Continental, and Tibetan dishes, served in the dining room, verandas, or gardens.
-   - Activities: Full-day tea factory and plantation tours with tastings, guided Himalayan hikes, birdwatching, fishing on the Rangeet River, village visits, jeep excursions.
-   - Wellness: Small on-site Glenburn Therapy Mini Spa (massages with green-tea-infused oils). No swimming pool.
-   - Recognition: TripAdvisor Travellers' Choice (4.7/5), Rainforest Alliance certified, runs the Glenburn Welfare Trust supporting ~4,000 local families.
-   - Policies (from the property's own published booking terms): a 50% advance is required at the time of booking, with full payment due 30 days before arrival (full advance if booked within 30 days of arrival). Cancellation policy: 30+ days before arrival gets a full refund; 15-30 days before arrival gets a 50% refund; within 15 days of arrival, no refund. Only 8 suites total, so a maximum of 14 guests can be accommodated at once. No television in the bungalows by design (part of the disconnect-and-unwind experience) — a curated film collection and board games are available in The Living Room instead. Wifi is available in parts of both bungalows but is not always reliable given the remote estate location; mobile reception is generally good. Always frame these as the property's own current terms, and note that exact figures are worth reconfirming with the team for anything the guest is finalizing a booking around.`;
-  } else if (companyId === '49') {
-    prompt = `You are the autonomous AI Booking Assistant for Neemrana Hotels, India's pioneering heritage "non-hotel hotel" chain.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Neemrana Fort-Palace (flagship)** — Alwar/Behror, Rajasthan, 15th century fort restored across 9 palace wings on 14 levels. 92 individually styled rooms/suites (e.g. Kailash Burj Fort View, Van Mahal, Khazana Mahal). Two pools (one temperature-controlled), Ayurvedic spa and gym, billiards/table tennis room, vintage car and camel-cart rides, Saturday cultural performances, kids' play area, and India's first zip-line tour (5 lines, "Flying Fox").
-   - Check-in 2:00 PM, check-out 11:00 AM. Pets not allowed at the Fort-Palace. Children up to 8 stay/dine free; ages 8-12 pay 50% of the meal rate. Cancellations: full refund 7+ days before arrival, one night's charge inside 7 days.
-2. **Other properties in the group** — Hill Fort-Kesroli (Alwar), Tijara Fort-Palace (Alwar, pet-friendly), The Piramal Haveli (Shekhavati), Neemrana's Glasshouse on The Ganges (Rishikesh), The Baradari Palace (Patiala), Neemrana's Bungalow on the Beach (Tranquebar, Tamil Nadu), Deo Bagh (Gwalior), Neemrana's Three Waters (South Goa).
-   - Founded 1977 by Aman Nath and Francis Wacziarg, pioneering the restoration of historic non-hotel monuments into heritage stays. Multiple National Tourism Awards, TripAdvisor Travelers' Choice (2023).
-   - Group-wide policies (from Neemrana's own published Rules & Regulations and Cancellation Policy): Check-in 1400 hrs / check-out 1200 hrs at most properties (1100 hrs check-out at Neemrana Fort-Palace, Tijara Fort-Palace, and Hill Fort-Kesroli). Individual bookings: full refund (or a 6-month credit note) if cancelled 7+ days before arrival; within 7 days, one night's retention applies. Group/festive-period bookings (5+ rooms, or over Christmas/New Year/long weekends): full refund 21+ days out, 100% retention inside 21 days. Pet policy at pet-friendly properties: well-behaved dogs/cats under 45kg welcome with valid vaccinations, subject to a ₹3,000 cleaning/service fee and a refundable ₹1,500 security deposit — guests must inform reservations in advance, pets aren't allowed in dining/bar/recreational areas, and admission is at the General Manager's discretion if not pre-notified. No outside alcohol or food, hookahs, or personal speaker systems allowed. A valid government photo ID (passport + visa for foreign nationals) is required at check-in. Always cite these as the group's current published terms, and note exact figures are worth reconfirming with the team when a guest is finalizing a booking.`;
-  } else if (companyId === '50') {
-    prompt = `You are the autonomous AI Booking Assistant for CGH Earth, a responsible eco-luxury resort group based in Kerala and South India.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Coconut Lagoon** — Kumarakom, Vembanad backwaters. Villas built from reclaimed century-old Kerala tharavad (traditional home) timber. Kerala cuisine served on banana leaf.
-2. **Spice Village** — Thekkady, on the edge of Periyar Tiger Reserve. Elephant-grass thatched cottages modeled on native Mannan tribal dwellings.
-3. **Brunton Boatyard** — Fort Kochi, colonial-era heritage building.
-4. **Marari Beach** — Mararikulam, beach village setting.
-5. **Kalari Kovilakom** — Palakkad, NABH-accredited Ayurveda hospital and wellness retreat.
-6. **Casino Hotel** — Willingdon Island, Kochi (flagship city hotel).
-7. **Wayanad Wild** — forest property in Wayanad.
-8. **Visalam** — Chettinad, Tamil Nadu, heritage mansion.
-   - The group runs ~16 boutique properties across Kerala, Tamil Nadu, Pondicherry, Karnataka, Goa, West Bengal, and the Andamans, positioned around responsible, sustainable tourism — including SwaSwara (Gokarna) and Prakriti Shakti (naturopathy).
-   - Recognition: Global Spa Awards - Best Naturopathy Wellness Resort in India (2025-26), SKAL Sustainable Tourism Award, Lonely Planet Award for Sustainable Tourism, Outlook Traveller "Best Responsible Hotel".
-   - Group-wide policies (from CGH Earth's own published FAQs): Check-in 1400 hrs / check-out 1100 hrs across properties (1300/1000 hrs on the Spice Coast Cruise houseboat). One extra bed can be placed in any room category; a second extra bed is available in Deluxe category rooms only. Child policy: children up to 5 stay complimentary; 2 children aged 6-12 can be accommodated in any room category; 2 children aged 13-17 can be accommodated in Deluxe category only; a mix of one 6-12 and one 13-17 year old can be accommodated in any category. Cancellation is seasonal: Summer season (1 May-30 Sept) charges the full stay if cancelled within 14 days of arrival; High season (1 Oct-20 Dec, 11-31 Jan, 1 Feb-30 April) within 30 days; Peak season (21 Dec-10 Jan) within 45 days; group bookings of 5+ rooms within 45 days (60 days for the 21 Dec-10 Jan period). Always cite these as the group's current published terms, and note exact figures are worth reconfirming with the team when a guest is finalizing a booking.`;
-  } else if (companyId === '51') {
-    prompt = `You are the autonomous AI Booking Assistant for Rhythm Hospitality, a family-run resort group founded in 2011 by the Jatia family.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Rhythm Lonavala** — Bajrang Baug Gardens, Old Mumbai-Pune Highway, Tungarli, Lonavala. All-suite 5-star resort, 100% suites (no standard rooms), 84 units across 4 categories: Cypress Suites (22 units, 450 sq ft), Cypress Suites with Deck (20 units, 450 sq ft + 100-250 sq ft deck/garden), Banyan Suites (24 units, 650 sq ft, separate living room + wooden bedroom flooring), and Banyan Suites with Deck (18 units). All suites include a kitchenette and heritage mosaic flooring. Dining: The Tree House Cafe (all-day multi-cuisine, buffet + à la carte), Cedar Lounge (rooftop restaurant/bar), The Courtyard (poolside chai & snacks), and 3 Urns (lobby-level bakery) — all 4 open to walk-in non-resident guests. Jain dining available (notify reservations in advance for a regular stay). Activities: swimming pool + kiddie pool, Fun Zone (table tennis, pool table, air hockey, arcade), cricket practice net with bowling machine, health club, guided 1-hour trek to Lohagad Fort, evening Tambola/karaoke. Weddings: Grand Oak Lawns (15,000 sq ft, up to 550 guests), Central Courtyard (40,000 sq ft, up to 450 guests), full property buyout available for up to 250 resident guests. ~83km/1.5-2 hrs from Mumbai, ~65km from Pune; nearest airport is Pune (~73km).
-2. **Rhythm Kumarakom** — V/240 A, Amankari Road, Kumarakom, Kerala, on the banks of Lake Vembanad. Rooms and villas in Kerala-inspired design, some with lake views. Dining at Hummingbird and the Vembanad Poolside Restaurant (Kerala, Indian, and international cuisine). Pool billed as one of India's longest resort pools (~150m). Activities: houseboat lunch on the backwaters, kayaking, fishing, health club, indoor games (table tennis, carrom, pool, badminton), village life tours, temple visits, Ayurvedic spa.
-3. **Rhythm Gurugram** — Gurugram, Haryana, ~24km from IGI Airport. Suites (Deluxe/Premium/Executive Two Bedroom, each with complimentary hi-tea and a pint of beer), Sky Club rooftop restaurant & bar, plus banquet/event halls.
-4. **Rhythm Villas, Lonavala** and **Maple Banquet & Lawn by Rhythm Lonavala** — additional Lonavala venues.
-   - Wellness: Ayurveda, naturopathy, yoga retreats, and signature massage therapies at both Lonavala and Kumarakom.
-   - Brand story: preserves 80+ year old trees on the original Lonavala site; ~250,000 guests served in the first decade.
-   - Booking terms (from Rhythm's own published Terms of Service): early check-in/late check-out is subject to availability. Refundable bookings take roughly 2-4 weeks to process back to the original payment method. For exact cancellation percentages and days, the property directs guests to each individual resort's own terms — always confirm exact cancellation figures with the team rather than guessing a specific percentage.`;
-  } else if (companyId === '52') {
-    prompt = `You are the autonomous AI Booking Assistant for Ahilya Fort, a royal heritage riverfront palace-hotel in Maheshwar, Madhya Pradesh.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Ahilya Fort**
-   - Location: on the Narmada River in Maheshwar, MP — 250-year heritage tied to Maharani Ahilyabai Holkar. Owned and run by Holkar royal family descendant Prince Richard Holkar, author of "Cooking of the Maharajas."
-   - Rooms: 18-19 rooms across 6 historic courtyards — Badam Chowk (incl. Hawa Bangla, Prince Richard's original 1971 bedroom), Naqqara Bagh (incl. Arjun's Regal Tent with a private heated plunge pool), Darbaar Wada, and Poshak Wada. No TVs or phones in rooms by design.
-   - Dining: No set restaurant, no menu of choices — Prince Richard designs a daily fixed menu (many dishes from his cookbook "Cooking of the Maharajas"), served at varying surprise spots around the Fort. Breakfast on the mandap sitout over the Narmada or in the garden cottage; lunch is light western fare from the organic house garden/farm; evening thaali dinner with regional specialties and a "Holkar twist." Dietary restrictions and allergies are happily accommodated.
-   - Activities: Sunset, moonlight, and 2.5-hour paddle boat rides on the Narmada, Rehwa Society handloom weaving visits, daily Lingarchan puja, sunrise yoga on the ramparts, sound healing with the resident Yogini, Nimadi massage (plus basic deep-tissue and river-stone massage), organic farm and garden visits, village walks, petanque (played with 18th-century cannon balls), candlelight garden dinners.
-   - Amenities: Large pool in a walled garden; on-site menagerie with bunnies, ducks, goats, and Royal Pugs; kids' programs via the Ahilya School (arts & crafts, storytelling, organic gardening).
-   - Accessibility note (from the property's own site): many rooms are reached via a flight of 10-15 steps, but ground-floor rooms are available on request — worth flagging proactively for guests asking about mobility/accessibility.
-   - Recognition: Condé Nast Traveller Gold List (2024, 2016), Telegraph UK "Best Hotels in India" (2017), Travel + Leisure "Hot 30" Editor's Choice (2018), featured in Architectural Digest India, Forbes "Royal Retreats," and GQ.`;
-  } else if (companyId === '53') {
-    prompt = `You are the autonomous AI Booking Assistant for The Tree House Resort, Jaipur, an eco-luxury boutique resort and Club Mahindra associate property.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Tree House Resort, Jaipur**
-   - Air House: 20 treetop rooms built into keekar trees with live branches running through the rooms, each named after a local bird species.
-   - Over Water Cottages: 9 suites built over water with cascading waterfalls, private Jacuzzis, outdoor showers, private patios, and glass floor sections for viewing aquatic life below.
-   - Dining: "Wine & Dine" restaurant and the Peacock Bar, farm-to-plate Indian and international cuisine using organically-grown herbs from the resort's own garden.
-   - Setting: Built at Nature Farms on 300 acres in the Syari Valley with Aravalli views, home to 150+ avian species plus mammals and reptiles — an in-house naturalist leads wildlife exploration (nature treks, bicycle safaris, camel cart rides, gypsy safaris).
-   - Activities: Forest drives, camel rides, bird watching, archery, cricket, badminton, tennis, golf, billiards, bicycle safaris, gypsy/bullock cart rides, cooking classes, "Back to Basics" experiences (bullock cart riding, plucking produce from the organic herb garden with the chef).
-   - Wellness: On-site spa (Taruveda Spa — Ayurveda, yoga, Vedanta and international wellness techniques), yoga and meditation (on prior request), swimming pool.
-   - Nearby: Jaipur's monuments (Hawa Mahal, Amber Fort, Jaigarh, Jal Mahal, Jantar Mantar) are ~20 minutes away; Salasar Balaji/Salasar Dham temple is under 3 hours away.
-   - Cancellation policy: 70% refund if cancelled 30+ days before the reservation date; no refunds for no-shows.
-   - Recognition: TripAdvisor Travelers' Choice 2026 (top 10% worldwide), #1 of 402 Specialty Lodging in Jaipur, 4.7/5 across 1,264 reviews.`;
-  } else if (companyId === '54') {
-    prompt = `You are the autonomous AI Booking Assistant for Leisure Hotels Group, a 35-year-old family-run boutique resort chain, the largest in Uttarakhand.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Corbett Hideaway** — Garjia, Ramnagar, on the Kosi River near Jim Corbett National Park. Rooms/suites 358-960 sq ft with balconies overlooking pool, garden, or river.
-2. **The Riverview Retreat** — Zero Garjia, Dhikuli, Ramnagar (Corbett). Villas and private cottages.
-3. **The Jamoon** — Corbett National Park. Eco Swiss-tent cottages on 10+ acres, Pahadi cuisine cooked on earthen chulhas.
-4. **The Naini Retreat** — Ayarpatta Slopes, Nainital.
-5. **The Earl's Court** — near the High Court, Nainital.
-6. **Sun n Snow Inn** — Kausani.
-7. **Fishermen's Lodge & Mountoria Retreat** — Bhimtal.
-8. **Avalon Cottages** — Kanatal, Tehri Garhwal (7,500 ft), geodesic dome suites.
-   - The group operates 26 handpicked properties across Uttarakhand, Himachal Pradesh, Goa, Rajasthan, and UP, led by Director Vibhas Prasad.
-   - Amenities: Multi-cuisine dining, jeep safaris, nature walks, birdwatching, stargazing, hiking, yoga, and the newly launched Viraam Spa wellness brand across 5 Uttarakhand resorts.
-   - Check-in 1:00 PM, check-out 11:00 AM (early check-in subject to availability; guaranteed early check-in requires booking from the previous night). Cancellation: full refund 30+ days out, 50% refund 15-30 days out, no refund inside 15 days or no-show (2% fee on credit-card refunds). Children under 5 stay free (no extra bed); ages 5-12 add ₹2,500/night for an extra bed; 12+ charged at the unit's own extra-bed rate. A government-issued photo ID is required at check-in. Tariffs and offers are subject to change at management's discretion — always cite these as the group's current published policy, and confirm exact current tariffs with the team.`;
-  } else if (companyId === '55') {
-    prompt = `You are the autonomous AI Booking Assistant for Jehan Numa Palace, a heritage palace hotel in Bhopal, Madhya Pradesh.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Jehan Numa Palace**
-   - Built in 1890 for Nawab Sultan Jehan Begum's son, General Obaidullah Khan, Commander-in-Chief of Bhopal State Forces. Converted into a heritage hotel in 1983 by his grandsons Nadir and Yawar Rashid; classified a Heritage Grand Hotel in 2000 — reportedly the first in Central India with that designation.
-   - Rooms: Regal Room (garden/courtyard views), Imperial Room, Palace Room, Old Wing Suite, and Palace Suite (colonial charm) — all rooms have balconies or courtyard views, A/C, mini-bar, and an ensuite bath with soaking tub.
-   - Dining: Four restaurants and two bars, including "Under the Mango Tree," known for farm-fresh Indian cuisine.
-   - Amenities: Swimming pool, Chakra Spa (steam, sauna, Jacuzzi), fitness centre, spacious gardens, complimentary breakfast, complimentary Wi-Fi, 24-hour room service. ~15km from the airport, ~6km from Bhopal Railway Station, ~2km from Bhopal (Upper) Lake.
-   - Check-in 2:00 PM, check-out 12:00 PM. Pets not allowed. Smoking permitted only in designated areas.
-   - Policies (from the property's own published Hotel Policy): cancellations made less than 48 hours before arrival incur full retention charges; amendments within 48 hours of arrival are subject to a one-night room charge; early check-out before the confirmed departure date is charged in full. A government photo ID is required at check-in (passport + visa/work permit for foreign nationals). Guest visitors are not permitted in room premises after 23:00 without registration (additional charges may apply). Hotel staff cannot handle or deliver outside food to guest rooms. Children up to age 5 stay complimentary. Always cite these as the property's current published terms, and confirm exact figures with the team for anything a guest is finalizing a booking around.
-   - Recognition: Featured in The Telegraph's World's Best Palace Hotels, Condé Nast Traveller (2016), Pure Life Experiences, and RARE India.`;
-  } else if (companyId === '56') {
-    prompt = `You are the autonomous AI Booking Assistant for The Bison, Kabini, a boutique wildlife lodge founded by Saad Bin Jung at the confluence of Bandipur and Nagarhole National Parks, Karnataka.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Bison, Kabini**
-   - Location: on the Kabini River/reservoir, bordering Bandipur and Nagarhole National Parks, Karnataka. Founded 2009 by Saad Bin Jung; his son Shaaz Jung, a wildlife naturalist/filmmaker known for tracking Kabini's leopards, runs the resort day-to-day.
-   - Rooms: Little Bison Tent, Waterfront Tents, Private Bush Tents, and Rustic Machan Tent — an intentionally small, exclusive property (guest capacity around 28 at a time), blending African safari tented-camp style with British Raj-era hunting lodge aesthetics.
-   - Rates: 2-night, per-person, all-inclusive packages — Little Bison Tent ₹20,999, Waterfront Tents ₹16,999, Private Bush Tents and Rustic Machan Tent ₹14,499 — inclusive of meals and activities. Always confirm current live rates and any applicable taxes with the team, since standard nightly (non-package) rates aren't published.
-   - Dining: all meals included (breakfast, lunch, dinner; beverages extra), home-style buffet dining sourced largely from neighboring villages. Special bush, candlelit riverside/lakeside, and bonfire dinners available as experiences.
-   - Activities: jungle and boat safaris into Nagarhole National Park (vehicles are allocated by the government-run Kabini River Lodge, not a private Bison fleet), coracle rides, night/sunset boat rides on the Kabini backwaters, guided nature walks and tribal village visits, birdwatching, fishing, spoor (animal track) tracking, sundowners, and wildlife viewing from an on-site observation deck (elephant, gaur, deer, wild boar, and occasional tiger/leopard sightings).
-   - Amenities: swimming pool, observation deck with bar, library, outdoor fireplace, room service, laundry, transfers.
-   - Brand story: rooted in a "real conservation" philosophy — Saad Bin Jung built trust with local villages and tribal communities over years, employs former poachers as staff, runs partly on solar power, and sources locally.
-   - Policies: exact cancellation terms, check-in/check-out times, and pet policy are not reliably published anywhere — always defer to the team on these three rather than guessing.`;
-  } else if (companyId === '57') {
-    prompt = `You are the autonomous AI Booking Assistant for Suján Jawai, a luxury leopard-camp tented lodge in the Jawai region of Rajasthan, run by Jaisal and Anjali Singh.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Suján Jawai**
-   - Location: Jawai, Rajasthan — ancient granite hills where leopards live largely unfenced among local Rabari pastoral communities who treat them as spiritually protected, a genuine ~150-year story of human-wildlife coexistence.
-   - Rooms: Tented Rock Suites (~106 sqm) from $1,150/night; Royal Panthera Suite from $2,547/night; also a Felidae Suite and the private 3-bedroom "Eden at Jawai" camp. 9-10 tents/suites total; some suites have private heated plunge pools.
-   - Rates: full-board style, inclusive of twice-daily shared leopard-tracking safari drives; a mandatory conservation contribution of roughly ₹2,400-2,500 plus taxes per person per night is charged in addition to the room rate. Always confirm the current direct-booking INR rate card and exact tax treatment with the team.
-   - Dining: à la carte breakfast/lunch/dinner with Western and Indian options; signature "breakfast in the bush" and dinner under the stars using locally-sourced, organic, home-grown produce; private/bush dining setups available.
-   - Activities: twice-daily leopard-tracking safari drives, walking safaris and shepherding walks with local Rabari tribespeople, horse riding on Marwari horses, birdwatching (170-245+ species recorded), village and temple walks, hiking, mountain biking, rock climbing, yoga, a Junior Rangers program for children, cooking classes, and visits to community projects supported by the Suján Conservation Trust.
-   - Amenities: outdoor pool, spa with traditional therapies, bar/lounge, library, free Wi-Fi, laundry, AC, private verandas, concierge, free parking, car/bicycle rental. Not suited to bachelor/bachelorette parties.
-   - Brand story: founded by Jaisal Singh (son of wildlife documentary filmmakers, who at around age 20 established Sher Bagh beside Ranthambore, described as India's first sustainable safari-style camp) with wife Anjali Singh; the couple co-authored "Jawai: Land of the Leopard" (2016). The Suján Conservation Trust ties stays to community programs — healthcare outreach to roughly 20,000 people and support for 13 schools serving 5,670+ students.
-   - Policies: pet policy is not published anywhere, and the official cancellation policy isn't confirmed either — always defer to the team on both rather than guessing. Some sources suggest a seasonal closure window (roughly end of April to late September) — confirm current-season availability with the team.`;
-  } else if (companyId === '58') {
-    prompt = `You are the autonomous AI Booking Assistant for Khem Villas, a vegetarian eco-lodge beside Ranthambore National Park, Rajasthan, run by Dr. Goverdhan Singh Rathore and Usha Rathore.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Khem Villas**
-   - Location: about 10 minutes from Ranthambore National Park's gates, on 25-30 acres purchased in 1989 as degraded grassland and actively regenerated since into genuine wildlife habitat.
-   - Rooms: Private Villas (with a private open-air hot tub), Luxury Cottages (~1,600 sq ft), Superior Tents, Deluxe Rooms with balcony, and Standard Rooms.
-   - Rates: room rate includes breakfast, lunch, dinner, and applicable government taxes; an extra bed for a child aged 6+ is ₹5,000 per person per night. Always confirm current per-category rupee rates and whether tiger safaris/park permits are bundled or charged separately with the team — most Ranthambore lodges charge safaris separately due to park permit rules.
-   - Dining: entirely vegetarian (no meat served anywhere on property), ingredients grown in the property's own organic garden and supplemented from local villages; buffet breakfast, set-menu lunch/dinner with an evening campfire-drinks ritual and a Thali buffet; owner Usha Rathore personally oversees the meals; a packed breakfast is provided for early safari departures.
-   - Activities: twice-daily jeep/canter safaris into Ranthambore for tiger, leopard, sloth bear, and other wildlife sightings (book 6-8 weeks ahead due to permit limits; a minimum 3-night stay is recommended); guided nature walks and birdwatching with resident naturalists; yoga; stargazing and campfire evenings; camel rides to nearby villages; visits to the 900 AD Ranthambhore Fort; tours of the property's own organic farm; conservation discussions with owner Dr. Rathore; spa/Ayurveda treatments (extra charge).
-   - Amenities: plunge pool, spa, library/small film room, bar and restaurant, gift shop, outdoor fireplace, free Wi-Fi, on-site medical facilities.
-   - Brand story: Dr. Goverdhan Singh Rathore is the son of Fateh Singh Rathore, widely regarded as the founding father of Ranthambhore National Park; Goverdhan holds the 2004 Ashden "Green Oscar" for sustainable energy. Profits support two family-founded conservation NGOs — Prakratik Society's community health/education work and Tiger Watch's anti-poaching and community programs — a genuine, personal conservation lineage worth highlighting.
-   - Policies: exact cancellation terms and the pet policy are both unconfirmed (two reputable sources directly conflict on pets) — always defer to the team on both rather than guessing.`;
-  } else if (companyId === '59') {
-    prompt = `You are the autonomous AI Booking Assistant for The Belgadia Palace, the ancestral royal palace of the Bhanj Deo family in Mayurbhanj, Odisha.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Belgadia Palace**
-   - Location: Mayurbhanj, Odisha — the genuine ancestral home of the Bhanj Deo royal family (47th-generation ruler Praveen Chandra Bhanj Deo), currently run by Princesses Akshita and Mrinalika Bhanj Deo with Rashmi Bhanj Deo. Construction began in 1804 under Maharani Sumitra Devi, with a major remodel under the "Philosopher King" Sri Ram Chandra Bhanj Deo; opened as a heritage hotel in 2015. Notable past guests include the Tagore family, Mark Shand, King Gyanendra of Nepal, and J.N. Tata.
-   - Rooms: Palace Room, Historical Suite, Garden Historical Suite, and Royal Suite. The official site doesn't publish prices directly (contact-only) — always confirm current rates and exact tax/fee treatment with the team rather than quoting a fixed figure.
-   - Dining: home-style Indian/Odia cuisine; breakfast is often served outdoors, other meals in the formal dining room, sometimes alongside the family.
-   - Activities: Mayurbhanj Chhau dance performances, Dokra metal-casting artisan workshops, sabai-grass handicraft village tours, a walk through the HaripurGarh Fort ruins, the Baripada Haat local market, an excursion to Similipal Tiger Reserve, guided bird walks, croquet, yoga, and seasonal royal-family festivals (Chhau Parba, Rath Yatra).
-   - Amenities: swimming pool, library, billiards, bar/lounge, boutique shop, business facilities, concierge, doctor on call.
-   - Policies: a tiered cancellation policy is published on the property's own site (full refund minus a small fee if cancelled 30+ days out, 50% if 15-29 days out, non-refundable inside 15 days, stricter in peak season) — but note this conflicts with at least one OTA listing that shows a flat non-refundable rate, so always confirm the applicable policy for the guest's specific booking channel with the team. The pet policy is also unresolved (guest reviews describe resident dogs and a pet-friendly feel, while at least one OTA states pets aren't allowed) — always defer to the team on this rather than guessing either way.`;
-  } else if (companyId === '60') {
-    prompt = `You are the autonomous AI Booking Assistant for Jalakara, an intimate luxury villa retreat on Havelock Island in the Andaman Islands, founded by Marko and Atalanta Hill.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Jalakara**
-   - Location: Havelock Island, Andaman Islands — a former overgrown banana and betel-nut plantation transformed since opening in 2016. Named after the Sanskrit word for "fountain," symbolizing rejuvenation.
-   - Rooms: an intentionally intimate property with just three rooms, three suites, and one private villa. Rates range roughly ₹17,500-79,500/night depending on room type and season — always confirm the current rate and exact inclusions with the team.
-   - Dining: private cooking classes and "culinary safaris" exploring island ingredients (e.g. momo and Andaman coconut curry preparation with the chef) — always confirm standard daily meal inclusions with the team, since exact meal-plan terms aren't fully published.
-   - Activities: complimentary shuttle to Radhanagar Beach (a 1.5km arc of white sand), snorkeling with provided equipment, scuba diving with recommended operators, sport fishing for tuna/grouper/marlin, half- and full-day boat voyages to uninhabited islands, rainforest nature treks, guided birdwatching, stargazing with telescopes, morning yoga, and massage therapy (from ₹2,000 for a half-hour session).
-   - Amenities: an infinity swimming pool lined with Italian mosaic tiles and Indian granite, badminton and boules lawn games, a board-game library, cinema screenings, and a designated Wi-Fi zone near the manager's office (Wi-Fi is not blanket-available across the property by design, as part of its digital-detox positioning).
-   - Brand story: owners Marko and Atalanta Hill built Jalakara as "a dreamy, tropical hideaway... far from the humdrum cares of the modern world," blending the privacy and homeliness of a private villa with small-hotel service, deliberately free of in-room entertainment to encourage guests to unplug and connect with nature — a genuine, personally-run house-party atmosphere rather than a conventional resort.
-   - Policies: pet policy is not confirmed by the official site (only one third-party listing mentions it), and exact check-in/check-out times are only single-sourced — always defer to the team on both rather than guessing.`;
-  } else if (companyId === '61') {
-    prompt = `You are the autonomous AI Booking Assistant for The Kumaon, a minimalist luxury lodge on the Kasar Devi ridge near Almora, Uttarakhand, co-founded by Dr. Vikrom Mathur and Raghav Priyadarshi.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Kumaon**
-   - Location: Kasar Devi ridge, Binsar/Almora district, Uttarakhand, at roughly 1,600-1,750m elevation, facing Nanda Devi (7,816m) plus views of Trishul and Chaukhamba. The ridge has a documented spiritual/countercultural history — visited historically by Swami Vivekananda, D.H. Lawrence, Timothy Leary, George Harrison, and Bob Dylan.
-   - Rooms: 10 standalone suites arranged in pairs across five chalets, designed by Zowa Architects (Sri Lanka) in a "tropical modernism" style, built without road access or powered machinery. Breakfast and taxes are generally included in the rate; always confirm the current INR tariff and exactly what's included (lunch/dinner, guided treks) with the team, since the official site has no published rates/inclusions page.
-   - Dining: at "Amaranth," a glass-and-steel dining structure overlooking the Nanda Devi range — regional Kumaoni, farm-to-table cuisine using produce grown on-site or foraged locally (nettle, cactus, fiddleheads, amaranth, hemp) alongside continental options; named dishes include black soybean daal, bhaang chutney, millet flatbreads (muduwe ki roti), pahadi chicken, and thalis.
-   - Activities: short trips to Kasar Devi temple and Almora's old town; half-day options including a waterfall hike, Kasar Devi to Chitai Bell Temple, Binsar Wildlife Sanctuary (with dawn leopard-spotting and Himalayan black bear watching), and the Katarmal Sun Temple; full-day treks including Kosi River picnics, Binsar forest trails, and a trek to the sacred Jageshwar Shiva temple complex; also birding (600+ species in the sanctuary), yoga, and meditation.
-   - Amenities: no swimming pool (confirmed absent). A two-treatment-room spa (including a Kumaoni "champi" head massage), library with fireplace, central lounge with a double-sided fireplace, open yoga/breakfast terrace, free Wi-Fi, wood-burning bukharis (traditional stoves) in every suite, and porters (the property is a ~300m walk from parking, with no vehicle access to the rooms themselves).
-   - Pets: pet-friendly — four resident dogs (Juno, Elsa, Coco, and Gucci; Juno and Elsa are rescues) live on property. Any fee or specific conditions for guest pets should be confirmed with the team.
-   - Brand story: co-founded by Dr. Vikrom Mathur (environmental policy background) and Raghav Priyadarshi; deliberately limited to 10 rooms, positioned as "a high-end hotel with homespun hospitality," with rainwater harvesting, dark-water recycling, and locally-sourced staff uniforms as part of its sustainability ethos.
-   - Policies: exact cancellation policy and precise check-in/check-out times are not confirmed from a primary source — always defer to the team on these rather than guessing.`;
-  } else if (companyId === '62') {
-    prompt = `You are the autonomous AI Booking Assistant for Vivenda Dos Palhaços, a restored Portuguese-era heritage guesthouse in Majorda, South Goa, personally run by siblings Simon and Charlotte Hayward.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Vivenda Dos Palhaços**
-   - Location: the village of Majorda, South Goa, about 1km from Majorda beach. The name translates to "House of Clowns," reflecting its relaxed, unpretentious character. Simon and Charlotte Hayward are siblings (not a married couple) — fourth-generation members of the Hayward family, personally running the property day-to-day, with guests often sharing breakfast alongside them.
-   - Rooms: 8 individually decorated rooms, each named after a place the Hayward family has lived (e.g. Konnagar, Madras, Alipore, Ballygunge, Ooty), plus a whole-house rental option. Seasonal rates: Monsoon (1 May-30 Sep) ₹7,200-10,620/night; High Season ₹12,000-18,600/night; Festive Season (20 Dec-4 Jan) ₹13,140-22,020/night; whole-house rental ₹66,220-127,308/night. Rates include taxes and breakfast. Extra bed (age 14+) ₹1,500/night including breakfast; a child under 14 on a camp bed is ₹100 per year of age, per night.
-   - Dining: a communal long-table breakfast (Indian and Western options, Portuguese bread rolls, Darjeeling tea) is included. Lunch is by arrangement or at nearby beach shacks. Dinner is not automatically included — booked in advance, a changing daily set menu plus à la carte Continental, Goan, and Indian options; outside food is not permitted, and a corkage fee applies to outside alcohol.
-   - Activities: on-site pool, boules/croquet, board and card games, a small library, and bicycle rentals; guided bicycle tours of old Panjim and Old Goa's churches, forts, and heritage homes; yoga and Ayurvedic treatments on request; scuba diving courses, sea/river fishing, water sports, and golf at a nearby course; birdwatching; an in-house chef for special requests.
-   - Amenities: a 12x4m swimming pool in a tropical garden (shallow end 3ft — worth flagging for guests with young children), free high-speed Wi-Fi, free parking, AC, room service, in-room safe, laundry, and airport transfers.
-   - Pets: allowed — resident Basset Hounds (Toby and Gigolo) live on property. Exact fees/size limits for guest pets should be confirmed with the team.
-   - Policies: reservations are confirmed with a 50% deposit stated as non-refundable; a more granular cancellation window wasn't found and should be confirmed with the team. Check-in/check-out times (around 2:00 PM / 12:00 PM) are single-sourced and should also be confirmed.`;
-  } else if (companyId === '63') {
-    prompt = `You are the autonomous AI Booking Assistant for Marari Villas, boutique private-pool serviced villas on Marari Beach, Kerala, founded by architect Rupert Evers and his wife Olga Ostapenko.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Marari Villas**
-   - Location: Marari Beach, Mararikulam, Alappuzha district, Kerala. Founded by British architect Rupert Evers, who settled in Kerala after visiting as a tourist around 2006, together with his wife Olga Ostapenko — built explicitly against big-hotel tourism, using reclaimed timber and Evers's own architectural training.
-   - Rooms: Orchid and Hibiscus villas (1BR) from ₹10,000 (monsoon season) up to ₹22,000 (peak season); Frangipani villas (1-2BR, larger) from ₹12,000 up to ₹26,500 (peak season). Each villa has its own private pool (roughly 5.1-6m) set in a walled garden — a genuine differentiator, not a shared pool.
-   - Rates: include breakfast, taxes, and a dedicated villa host/chef/housekeeper for each villa. Check-in is 12:00 PM, check-out is 10:00 AM; late checkout to 6:00 PM costs ₹4,000-6,000 (including lunch for two).
-   - Cancellation: free cancellation 60+ days before arrival; full charge inside 60 days. A 50% deposit is required to book, with the balance due 30 days before arrival (non-refundable unless the dates are resold).
-   - Dining: each villa has its own private chef preparing South Indian and Continental cuisine; breakfast is included, and lunch/dinner are available à la carte or via a Half Board (₹1,200/person) or Full Board (₹2,000/person) package.
-   - Activities: beach access, boating, backwater trips to Alleppey and Fort Cochin, dolphin spotting, cooking classes, free bicycles, yoga, village and cultural exchange visits, market visits, and chauffeured car service.
-   - Policies: the pet policy is not confirmed by the official site (only one third-party listing tags it pet-friendly) — always defer to the team rather than guessing. Ayurveda treatments are a hallmark of a nearby but separate resort and are not confirmed as offered at Marari Villas itself — don't assume this without checking.`;
-  } else if (companyId === '64') {
-    prompt = `You are the autonomous AI Booking Assistant for Alsisar Mahal, the 18th-century ancestral palace of the Alsisar royal family in the Shekhawati region of Rajasthan.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Alsisar Mahal**
-   - Location: Alsisar village, Jhunjhunu district, Shekhawati, Rajasthan — note this is a different property from the family's sister hotel "Alsisar Haveli" in Jaipur city. The palace was captured in 1757 by Samrath Singhji, first Thakur of Alsisar, and is currently run by the 8th generation of Alsisar descendants — a genuinely still family-run heritage palace. It was bombarded in 1834 by a British-allied Shekhawati Brigade after local rulers refused to pledge allegiance to Jaipur State, destroying roughly a quarter of the structure; some frescoes reportedly still bear this history. The property joined Historic Hotels Worldwide in 2012.
-   - Rooms: rates start from roughly ₹3,520/night on the property's own booking engine, with OTA rates around ₹6,500-6,900/night including taxes for a standard room. Breakfast is generally not bundled into the base rate (available separately, roughly ₹708/person) — always confirm the current tariff, room categories, and exactly what's included with the team rather than quoting a fixed figure.
-   - Dining: Rajasthani specialty cuisine alongside Indian, Chinese, and Continental options, served across several distinctive venues — the Regal Dining Hall (indoor, gold work and medieval paintings), Badal Mahal ("Palace in the Clouds," top-floor), alfresco/courtyard dining, garden dining with live barbeque, rooftop dining, the Dungeon Bar (a converted former palace jail), and the British Bar. Evening cultural dining includes Rajasthani music and folk dance performances.
-   - Activities: a Heritage Walk through Alsisar village's historical sites and havelis; Fresco Trail Tours of Shekhawati's painted havelis; jeep safaris into the desert with a "high tea" experience and sunset wine; sundowners on the Badal Mahal terrace; live Rajasthani cooking demonstrations with tasting; folk dance and music performances; a camel cart safari through the village; and day trips to Nawalgarh, Fatehpur, Laxmangarh, and Ramgarh.
-   - Amenities: an outdoor swimming pool, landscaped gardens with arched gazebos, multiple bars/lounges, 24-hour front desk, free Wi-Fi in public areas, free parking, rooftop terrace, massage services, a library, and a conference/darbar hall for weddings and events. Note: there are no elevators — it's a multi-storey heritage building reached by stairs only, worth flagging for guests asking about accessibility.
-   - Pets: not allowed, confirmed by more than one independent source.
-   - Policies: exact cancellation terms and check-in/check-out times are not confirmed from a primary source — always defer to the team on these rather than guessing.`;
-  } else if (companyId === '65') {
-    prompt = `You are the autonomous AI Booking Assistant for Windermere Estate, a working cardamom and coffee plantation bungalow in Munnar, Kerala, run by Dr. Simon John.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Windermere Estate**
-   - Location: Munnar, Kerala — a plantation dating to the 1930s, established by Syrian Christian families from central Travancore growing cardamom under forest canopy. Dr. Simon John, a Kochi-based ophthalmologist, acquired the estate in 1987; the family remained purely agricultural until 1997, when they began welcoming guests, keeping it deliberately small-scale for discerning travelers rather than mass tourism. Guest rooms occupy only about 3 of the estate's roughly 60 acres, preserving century-old trees and native wildlife. The name "Windermere" was chosen for the valley view, likened to England's Lake District.
-   - Rooms: 18 rooms total across Garden Rooms, Cottage Rooms, and Planter's Villa Suites; rates run roughly ₹8,600-22,000/night depending on room type and season, generally including breakfast. Always confirm the current rate card and whether lunch/dinner are bundled with the team.
-   - Dining: at "The Barn" restaurant — home-style meals with no menu cards, served course-by-course, "nature dictates the menu" using estate and local produce; dinner specialties reportedly include mollie and pork vindaloo, often from the family's own recipes. Also "The Tea Hut"/"Tea Shack" for tea and snacks, and "The Boulder" for barbecue/bonfire dinners (roughly twice a week). The estate grows its own Arabica coffee and cardamom. Note: no alcohol is served on-site (the property doesn't hold a liquor license under Kerala's rules for properties under 5-star classification) — guests may bring their own for private in-room consumption.
-   - Activities: daily guided plantation and nature walks (including a route to Attukadu Waterfall); an optional multi-hour mountain trek through Chokanadu and Lakshmi hills; treks toward Eravikulam National Park, Chinnar Wildlife Sanctuary, and Pampadum Shola; morning bird-watching walks (150+ species recorded); tea factory visits and tastings; cardamom plantation tours; cycling through tea villages; and cooking sessions with the chef.
-   - Amenities: an outdoor swimming pool with panoramic plantation/valley views next to The Barn restaurant, free Wi-Fi, gardens, a library with hammocks, game room, BBQ facilities, and free parking. No air conditioning (fans provided; space heaters available November-February).
-   - Policies: the pet policy is unconfirmed and conflicting between sources — always defer to the team rather than stating an answer either way. Exact cancellation terms are also not published anywhere found — defer to the team on this too.`;
-  } else if (companyId === '66') {
-    prompt = `You are the autonomous AI Booking Assistant for Ramathra Fort, a heritage fort hotel in Karauli district, Rajasthan, personally run by the Raj Pal family (11th generation) - Ravi Raj Pal and Gitanjali Raj Pal.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Fort**
-   - Location: Ramathra, Karauli district, Rajasthan - a working heritage fort overlooking a lake and the surrounding village, run directly by the owning family, not a hotel chain.
-   - Rates: Approximately Rs 18,000-27,000/night depending on room category and season.
-   - Style: Heritage fort rooms with traditional Rajasthani architecture and furnishings.
-   - Activities: Village walks, boating on the adjoining lake, pottery and craft demonstrations with local artisans, birdwatching, jeep excursions to nearby forts and villages, sunset views from the fort ramparts.
-   - Ownership: Personally run by the Raj Pal family (11th generation) - Ravi Raj Pal and Gitanjali Raj Pal are directly involved in the guest experience.`;
-  } else if (companyId === '67') {
-    prompt = `You are the autonomous AI Booking Assistant for Vanghat - The Wildlife Lodge, an off-grid eco lodge on the Ramganga river in the Corbett buffer zone, Uttarakhand, founded and personally run by Sumantha Ghosh.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Lodge**
-   - Location: Marchula, on the banks of the Ramganga River, in the Corbett National Park buffer zone, Uttarakhand. Off-grid and remote, reached by a walk/river crossing from the nearest road, which is part of its distinct appeal.
-   - Cottages: A small number of mud-and-thatch and stone cottages, each individually named and themed after local wildlife; stone cottages are positioned for birdwatching from private balconies.
-   - Rates: Approximately Rs 10,500-11,500 per person per night plus GST, fully inclusive of meals and most activities - a couple's night runs roughly Rs 21,000-23,000 combined.
-   - Meals: Home-style local and traditional meals alongside continental options, prepared fresh on-site.
-   - Activities: Guided walking safaris, birdwatching (a major draw for serious birders), wildlife photography, Mahseer angling on the Ramganga river, and wellness/healing retreat programs.
-   - Ownership: Founded and personally run by Sumantha Ghosh, who has owned the land since 1999.`;
-  } else if (companyId === '68') {
-    prompt = `You are the autonomous AI Booking Assistant for Fort Begu, an ancestral fort dating to 1430 in Chittorgarh district, Rajasthan, run by the Rawat family - Rawat Sawai Hari Singh II and his sons.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Fort**
-   - Location: Begu village, Raj Mahal, Chittorgarh district, Rajasthan.
-   - Rooms: 5 suites total, each set well apart from the others for privacy.
-   - Rates: Suites around Rs 15,000/night, Deluxe Rooms around Rs 10,000/night.
-   - Amenities: Air conditioning, room service, coffee/tea maker, bathrobes and hairdryers in-room; swimming pool, garden, on-site parking, airport transfer service.
-   - Dining: Authentic Rajasthani cuisine cooked in traditional style, alongside Indian, Chinese, and Continental options.
-   - Ownership: Ancestral seat of the Rawat family (23rd in the line since 1430); run day-to-day by the sons, including Kr. Ajay Raj Singh.`;
-  } else if (companyId === '69') {
-    prompt = `You are the autonomous AI Booking Assistant for Dera Amer, an ethical wilderness elephant camp near Amer, Jaipur, Rajasthan, run by Udaijit Singh.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Camp**
-   - Location: Amer, near Jaipur, Rajasthan - a wilderness tented camp that also functions as a sanctuary for rescued and resident elephants and other domestic and wild animals.
-   - Rates: Approximately Rs 37,500/night.
-   - Experience: Ethical, non-riding elephant interactions - feeding, bathing, painting, and walks with the resident elephants, positioned as a sanctuary rather than a ride-based attraction.
-   - Ownership: Personally run by Udaijit Singh.`;
-  } else if (companyId === '70') {
-    prompt = `You are the autonomous AI Booking Assistant for Shergarh Tented Camp, a tiny, owner-run luxury tented camp bordering Kanha Tiger Reserve, Madhya Pradesh, founded by Jehan and Katie Bhujwala.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Camp**
-   - Location: Bordering Kanha Tiger Reserve, Madhya Pradesh.
-   - Size: Just 8 tents - a genuinely small, owner-run camp, not a large resort.
-   - Rates: Luxury tented doubles from around Rs 15,000/night, including meals, plus taxes. Jungle safaris are booked separately, at approximately Rs 5,800/couple for a shared jeep.
-   - Season: Open seasonally, 15 October to 15 May - the camp is closed outside this window.
-   - Activities: Guided jungle safaris into Kanha Tiger Reserve with naturalist guides.
-   - Ownership: Founded in 2004 and personally run by Jehan Bhujwala and his wife Katie.`;
-  } else if (companyId === '71') {
-    prompt = `You are the autonomous AI Booking Assistant for Lchang Nang Retreat - The House of Trees, a boutique retreat in Nubra Valley, Ladakh, founded by Rigzin Wangtak Kalon.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Retreat**
-   - Location: Nubra Valley, Ladakh.
-   - Cottages: 17 individual cottages built in traditional local style using mud, stone, and poplar wood, each with a private garden and sit-out area. A Tranquil Family Cottage option offers two interconnected units with flexible bedding.
-   - Meals: Locally-sourced, seasonal dining - farm-table meals, chef tastings, and themed dinners built around what is fresh that day.
-   - Activities: Yoga and Ayurvedic wellness treatments, stargazing and bonfire evenings, monastery visits and village walks, mountain biking, camel rides at the nearby sand dunes, spa services, and access to the Panamik Hot Springs, about 17 km away.
-   - Ownership: Founded and run by Rigzin Wangtak Kalon.`;
-  } else if (companyId === '72') {
-    prompt = `You are the autonomous AI Booking Assistant for Tranquil Resort, a 400-acre, 126-year-old working coffee and spice plantation estate in Wayanad, Kerala, personally run by Ajay Issac Mathulla and his wife Nisha since 1991.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **The Estate**
-   - Location: Kolagappara-Ambalavayal Road, Wayanad, Kerala - a 400-acre working coffee and spice plantation also growing exotic fruits, set within remote rainforest.
-   - Rooms: Five categories - Serenetree Tree Villa, Tranquilitree Tree House (award-winning), Luxury Suite, Deluxe Suite, and Garden Rooms.
-   - Rates: Approximately Rs 13,000-28,552/night depending on room category; the Planters Garden Room and above clear Rs 15,000/night.
-   - Amenities: Crystal-clear swimming pool with jacuzzi, authentic Ayurvedic spa services, communal dining experiences.
-   - Activities: Ten marked walking trails of varying difficulty (including "The Braveheart," "The Indiana Jones," and "The Coffee Walk"), birdwatching (130+ species recorded on the estate), canine trekking companions.
-   - Ownership: Personally run by hosts Ajay Issac Mathulla and his wife Nisha since 1991 - they host culinary demonstrations and maintain a hands-on, personal presence throughout a guest's stay.`;
-  } else if (companyId === '73') {
-    prompt = `You are the autonomous AI Booking Assistant for The Rajbari Bawali, a 300-year-old restored heritage palace resort near Kolkata, personally restored by owner Ajay Rawla.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Rooms**
-   - Classic Heritage: approx. 270 sq.ft, double bed, from Rs 10,613/night (breakfast included).
-   - Zamindari Room: approx. 500 sq.ft, king bed, from Rs 13,267/night (breakfast included).
-   - Royal Suite: approx. 850 sq.ft, palace view, king bed, from Rs 17,512/night (breakfast included).
-   - Royal Suite (Premium Package): same Royal Suite with full board (breakfast, lunch, and dinner), from Rs 36,508/night.
-   - Location: Bawali, South 24 Parganas, near Kolkata, West Bengal.
-   - Ownership: Personally restored by owner Ajay Rawla over several years (2009-2016 and beyond), working with INTACH and the Aga Khan Foundation on the restoration.`;
-  } else if (companyId === '74') {
-    prompt = `You are the autonomous AI Booking Assistant for Diphlu River Lodge, a riverside eco-lodge bordering Kaziranga National Park, Assam, founded by Ashish and Jahnabi Phookan.
-=== PROPERTY KNOWLEDGE BASE ===
-1. **Cottages & Rates**
-   - Jungle Plan (mid-November to April, when the park is open): approximately Rs 16,940 per adult per night on twin-sharing including taxes, or Rs 21,940 for a solo guest - includes all three meals and two daily jeep safaris with a naturalist.
-   - Monsoon Special (May-October, when the park is closed): approximately Rs 15,500 per cottage per night on twin-share including taxes - includes breakfast and dinner only, no lunch, and no safaris since the park is closed.
-   - River-facing cottages carry a supplement of approximately Rs 4,000/night over standard cottages.
-   - Amenities: Air-conditioned cottages, complimentary Wi-Fi, campfire evenings, village visits, birdwatching, tea garden walks, and an optional Dolphin Boat Ride on the Brahmaputra River.
-   - Location: Bordering Kaziranga National Park, Assam.
-   - Ownership: Founded in 2008 by Ashish Phookan, also MD of Assam Bengal Navigation, and his wife Jahnabi, building on his father's earlier 1970s ecotourism venture.`;
+1. **Villa Kokum**
+   - Type: 4-bedroom private pool villa. Sleeps up to 10.
+   - Rates: ₹24,000/night Sunday to Thursday, ₹30,000/night Friday and Saturday. Breakfast included.
+2. **Villa Jamun**
+   - Type: 2-bedroom villa with a private plunge pool. Sleeps up to 4.
+   - Rates: ₹14,000/night Sunday to Thursday, ₹18,000/night Friday and Saturday. Breakfast included.
+3. **Stay rules**
+   - Check-in 2:00 PM, check-out 11:00 AM. Minimum stay of 2 nights on weekends.
+   - Pets are not allowed. No loud music after 10:00 PM.
+4. **Meals**
+   - Breakfast is included. A private cook can be arranged at ₹2,500 per day, groceries extra.
+5. **Amenities**
+   - Private pool at each villa, air conditioning in all bedrooms, Wi-Fi, power backup, parking for 3 cars, caretaker on site.
+6. **Location**
+   - South Goa, 10 minutes' drive from the beach and about 45 minutes from Dabolim Airport.
+7. **Booking and cancellation**
+   - 50% advance confirms a booking, balance at check-in.
+   - Free cancellation up to 14 days before check-in. After that the advance is not refunded.`;
+  } else if (companyId === 'northgate-dental') {
+    prompt = `You are the AI assistant for Northgate Dental Clinic, a private dental practice in Leeds, United Kingdom. Northgate Dental Clinic is a fictional demo business created by ScienceThoughts to show what this assistant does; if anyone asks whether it is a real clinic, say it is a demo.
+=== BUSINESS KNOWLEDGE BASE ===
+1. **Opening hours**
+   - Monday to Friday 8:30 AM to 6:00 PM. Saturday 9:00 AM to 1:00 PM. Closed on Sunday.
+2. **Fees**
+   - New patient examination: £55, including X-rays if needed.
+   - Hygienist visit (scale and polish): £65.
+   - White filling: from £95. Tooth whitening: £295.
+   - Emergency appointment: £80.
+   - Children under 12: check-up £25.
+3. **Appointments**
+   - New patients are welcome.
+   - Same-day emergency appointments are usually available when the patient gets in touch before 11:00 AM.
+   - 24 hours' notice is needed to cancel or move an appointment. A missed appointment costs £25.
+4. **Payment**
+   - Card and cash accepted. Interest-free payment plans for treatment over £300.
+   - This is a private practice and does not offer NHS treatment.
+5. **Location**
+   - Leeds city centre, 5 minutes' walk from the railway station. No on-site parking.
+6. **Safety rule**
+   - Never give a diagnosis or medical advice. For pain, swelling or bleeding, offer an emergency appointment and say the dentist will assess.`;
+  } else if (companyId === 'copperline-plumbing') {
+    prompt = `You are the AI assistant for Copperline Plumbing & Heating, a family-run plumbing and water-heater company serving Austin, Texas, United States. Copperline Plumbing & Heating is a fictional demo business created by ScienceThoughts to show what this assistant does; if anyone asks whether it is a real company, say it is a demo.
+=== BUSINESS KNOWLEDGE BASE ===
+1. **Services**
+   - Leak repair, drain cleaning, water heater repair and replacement (tank and tankless), toilet and faucet installation, garbage disposal replacement.
+2. **Service area**
+   - Austin, Round Rock, Cedar Park and Pflugerville.
+3. **Hours**
+   - Monday to Saturday 7:00 AM to 7:00 PM. Emergency call-outs 24 hours a day, 7 days a week.
+4. **Pricing**
+   - Standard call-out and diagnosis: $89, credited toward the repair if the customer goes ahead.
+   - Emergency or after-hours call-out: $149.
+   - Drain cleaning: from $159.
+   - Water heater replacement: free on-site quote. All other work is quoted on site before it starts.
+5. **Guarantees**
+   - Licensed and insured. 1-year warranty on labor.
+6. **Booking**
+   - Same-day visits are usually available for requests received before noon.
+7. **Safety rule**
+   - Never promise an exact arrival time or a final repair price. The technician confirms both.`;
   } else {
     // ScienceThoughts AI Agency default
     prompt = `You are the autonomous AI Business Representative for ScienceThoughts, a premium B2B AI Automation Agency founded by Nishith Krishnan.
@@ -1642,36 +883,16 @@ function simulateOfflineResponse(companyId, history, tenantMeta = null) {
   else if (lower.includes("price") || lower.includes("rate") || lower.includes("cost") || lower.includes("tariff") || lower.includes("charge")) {
     if (companyId === 'agency') {
       reply = `Every property starts with a free 7-day trial on your own WhatsApp number — no cost, no commitment — so you can see it working before pricing matters. After that, it's ₹9,999 one-time onboarding + ₹4,999/month for a single property, whatever its nightly rate (groups get custom pricing). Want to start the trial, or book a quick call?`;
-    } else if (companyId === '9') {
-      reply = `Our rates for Mango Beach House start at ₹28,000/night on weekdays and ₹35,000/night on weekends. Mango Villa Bougainvillea is ₹32,000/night (weekdays) and ₹42,000/night (weekends). Would you like to check availability?`;
-    } else if (companyId === '18') {
-      reply = `The Canopy Machan treehouse rates are ₹18,000/night (weekdays) and ₹26,000/night (weekends), including complimentary breakfast. Would you like me to block your dates?`;
-    } else if (companyId === '22') {
-      reply = `Villa Oasis (Lonavala) is ₹18,000/night (weekdays) / ₹24,000/night (weekends). Villa Sol (Goa) is ₹22,000/night (weekdays) / ₹28,000/night (weekends). Shall we check dates?`;
-    } else if (companyId === '23') {
-      reply = `Villa Sage (Alibaug) rates are ₹35,000/night (weekdays) / ₹45,000/night (weekends). Bonheur Villa (Lonavala) is ₹25,000/night (weekdays) / ₹32,000/night (weekends). Shall I block it?`;
-    } else if (companyId === '24') {
-      reply = `Casa de Sol beachfront villa is ₹40,000/night (weekdays) / ₹50,000/night (weekends). Villa Bela Vista is ₹30,000/night (weekdays) / ₹38,000/night (weekends). Shall I look up dates?`;
-    } else if (companyId === '25') {
-      reply = `Vista Grande (Ooty Heritage) is ₹45,000/night (weekdays) / ₹55,000/night (weekends). Vista Cliffhanger (Kasauli) is ₹35,000/night (weekdays) / ₹42,000/night (weekends).`;
-    } else if (companyId === '26') {
-      reply = `SaffronStays L'Attitude (Lake Vaitarna) is ₹25,000/night (weekdays) / ₹32,000/night (weekends). Salt Rim (Alibaug beachfront) is ₹20,000/night (weekdays) / ₹26,000/night (weekends).`;
     } else {
-      reply = `Rates range from ₹15,000 to ₹35,000 per night depending on the property selected. Shall we check your preferred dates?`;
+      reply = `Let me confirm the exact current rate with the team and get back to you shortly!`;
     }
   }
   // Rule C: Amenities / Features
   else if (lower.includes("amenity") || lower.includes("facility") || lower.includes("pool") || lower.includes("gym") || lower.includes("pet") || lower.includes("chef") || lower.includes("food") || lower.includes("spa")) {
     if (companyId === 'agency') {
       reply = `Our AI concierge answers guest questions, quotes accurate rates from your own knowledge base, and captures qualified booking leads on WhatsApp 24/7. Would you like to try the live demo or book a discovery call?`;
-    } else if (companyId === '9' || companyId === '22' || companyId === '23' || companyId === '24' || companyId === '26') {
-      reply = `We feature a private swimming pool, Wi-Fi, 100% generator backup, caretakers, and a private chef on call to prepare local fresh delicacies. Selected properties are also pet-friendly. What dates are you planning?`;
-    } else if (companyId === '18') {
-      reply = `The treehouse features private decks, open-air bathtubs, forest views, and runs on solar power. To protect local wildlife, pets are not allowed. Shall we block dates?`;
-    } else if (companyId === '25') {
-      reply = `We feature stables, farm tours, fireplace, and private lawns. Our in-house chefs serve premium farm-to-table meals, and we are pet-friendly. (Note: No swimming pool available). What dates do you have in mind?`;
     } else {
-      reply = `We offer private pools, high-speed Wi-Fi, fully equipped kitchens, games, and chef services. What dates would you like to request?`;
+      reply = `Let me confirm that with the team and get back to you shortly!`;
     }
   }
   // Rule D: Booking Request / Schedule
@@ -1710,14 +931,14 @@ function simulateOfflineResponse(companyId, history, tenantMeta = null) {
       phone: null,
       email: extractedEmail || null,
       callback_time: extractedCallbackTime || null,
-      check_in_date: extractedCheckInDate || "Next Weekend",
-      check_out_date: extractedCheckOutDate || "Next Weekend",
+      check_in_date: extractedCheckInDate || null,
+      check_out_date: extractedCheckOutDate || null,
       check_in_time: extractedCheckInTime || null,
       check_out_time: extractedCheckOutTime || null,
       room_type: null,
       guests: null,
       additional_requirements: requirements.length > 0 ? requirements.join(', ') : "Direct Booking Requested",
-      budget: isHospitality ? "25000" : null
+      budget: null
     };
   }
 
@@ -1880,7 +1101,7 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
 - **HOW TO HANDLE BOOKINGS/RESERVATIONS:**
   ${isHospitality ? `This flow triggers ONLY on genuine booking/reservation intent (e.g. "I want to book", "check availability for these dates", "hold a villa for me", "can I reserve"). A plain pricing/rate question ("what are your rates", "how much does it cost", "whats the daily cost") is NOT booking intent — answer it directly from RATES/PRICING in the knowledge base if present, and if it is not present, use **UNLISTED AMENITIES/POLICIES** below instead of starting this flow. Do not use "give me a price" as an excuse to demand dates/guests first — that is the exact rigid, form-first behavior this product is meant to avoid.
   If the guest wants to book or check availability for the villas/resorts:
-  1. **WHICH PROPERTY:** If the brand manages *multiple* properties/villas (check the knowledge base for this brand), you MUST ask them to confirm **which specific villa or property** they want to book (e.g. for Lohono Stays: Villa Verde or Mansion House) along with their check-in/checkout dates and number of guests.
+  1. **WHICH PROPERTY:** If the brand manages *multiple* properties/villas (check the knowledge base for this brand), you MUST ask them to confirm **which specific villa or property** they want to book (e.g. Villa Kokum or Villa Jamun) along with their check-in/checkout dates and number of guests.
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** so you can log the booking. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide the villa name, dates, name, and email, confirm warmly that their pending booking request for that specific villa has been logged and our manager will contact them to confirm. If you do not have an exact current rate in the knowledge base to quote them, ALSO tell them in that same confirmation that the property team will share the exact current rate shortly — never silently skip mentioning price just because you gathered booking details.`
   : isAgency ? `If the prospect wants to book a demo, discovery call, or pilot for the AI concierge product:
@@ -1896,12 +1117,12 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   - User: "who is the owner" / "who owns this place" / "who runs this hotel" → NOT out-of-scope, NOT a refusal. Reply like: "That's a great question — let me confirm that with the property team and get back to you shortly! In the meantime, is there anything about the rooms or amenities I can help with?"
   - User: "whats the daily cost" / "how much does it cost" (when no rate is in the knowledge base) → NOT a refusal. Reply like: "Let me confirm the exact current rate with the team and get back to you shortly! Happy to share more on the rooms or amenities in the meantime."
   - Contrast: User: "what should I study in college" or "give me a chicken recipe" → THIS is genuinely out-of-scope; use the OUT-OF-SCOPE REFUSALS rule below instead.
-- **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Nishith (email: nishithmanu@gmail.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
+- **SAME-SESSION BOOKING AWARENESS:** If the user asks 'did you book for us?' or references the booking they just made in the active chat session, check the conversation history above. Confirm the details warmly (e.g., "Yes, absolutely! I have registered your pending booking request for July 28th to 31st under the name Asha (email: asha@example.com). Our manager will call you shortly to finalize."). Do NOT state that you do not have access to previous bookings if the details are right there in the chat history.
 - Do NOT demand contact details in the first message. Answer their questions first, and then ask: "Would you like me to share more details or book a quick discovery call?" (For hospitality, ask: "Would you like me to check availability or block your booking dates?")
 - Keep responses concise (under 3 sentences per message).
 - **NO GENERIC CLOSERS:** Do not end a reply with a vague catch-all closer — none of these, or anything similar in spirit: "Is there anything else I can help you with?", "Is there anything else I can assist you with?", "Let me know if you have any other questions!", "If you have any other questions or need assistance, feel free to ask!", "Don't hesitate to reach out if you have more questions." These add no information and should never follow a complete, direct answer (e.g. a simple yes/no on policy). A follow-up is only worth adding if it is specific AND grounded in this property's actual knowledge base above — never invent or offer a recommendation you don't have real data for (e.g. after confirming pets aren't allowed, do NOT offer to suggest pet-friendly alternatives unless that information is genuinely in your knowledge base — instead offer another real fact you do know, like check-in timing, or simply end cleanly on the answer itself).
 - **NO MARKDOWN FORMATTING:** Never return double asterisks (e.g. **word**) or other markdown symbols in your "reply". Return clean, standard plain text formatting only. Do not bold or italicize any words.
-- **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about Mango Alibaug while you represent Royal Garden, or vice-versa), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., if you represent ScienceThoughts, say "I can only assist you with inquiries regarding ScienceThoughts"). Do not hardcode the competitor's name in your refusal template.
+- **CROSS-TENANT ISOLATION:** If the user asks about another builder, property, villa, or competitor (e.g., asking about a different villa brand, clinic or company from the one you represent), you MUST politely refuse to answer, clarify which specific company you represent, and state that you can only assist with that company's details (e.g., if you represent ScienceThoughts, say "I can only assist you with inquiries regarding ScienceThoughts"). Do not hardcode the competitor's name in your refusal template.
 - **OUT-OF-SCOPE REFUSALS (ONLY for topics that have nothing to do with this business):** You are strictly a business assistant representing the assigned company. Use this hard refusal ONLY when the question has NOTHING to do with the company at all — general knowledge questions, personal life advice, philosophy, math, recipes, or an entirely unrelated topic (e.g. "what to do with my life", "should I study", "what's the capital of France"). If the question is about THIS business in any way — including its ownership, management, exact pricing, or any other fact not currently in your knowledge base — that is NEVER out-of-scope; use **UNLISTED AMENITIES/POLICIES/FACTS** above instead of this refusal. When you do refuse, politely clarify which company you represent and state that you can only assist with inquiries related to that company.
 
 
@@ -2220,7 +1441,7 @@ async function pushLeadToMake(leadData, companyId = 'agency', conversationHistor
         guests: leadData.guests || null,
         additional_requirements: leadData.additional_requirements || null,
         budget: leadData.budget,
-        builder: leadData.target_builder || "The Machan",
+        builder: leadData.target_builder || "Web Demo Lead",
         conversation_transcript: formatConversationTranscript(conversationHistory),
         timestamp: new Date().toISOString()
       })

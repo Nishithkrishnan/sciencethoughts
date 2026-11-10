@@ -99,7 +99,7 @@ def test_hubspot_token_refresh(adapter):
 def test_crm_tenant_routing():
     tenants = {
         "9": {"name": "Mango Alibaug", "crm": "zoho"},
-        "18": {"name": "The Machan", "crm": "hubspot"},
+        "18": {"name": "Tamarind Cove Villas", "crm": "hubspot"},
         "21": {"name": "Destiny Farmstay", "crm": "leadsquared"}
     }
     

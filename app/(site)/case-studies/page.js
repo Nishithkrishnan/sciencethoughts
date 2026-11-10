@@ -15,17 +15,17 @@ export default function CaseStudies() {
           </div>
 
           <h1 style={{ fontSize: "3.8rem", fontWeight: "900", fontFamily: "var(--font-display)", letterSpacing: "-0.03em", lineHeight: "1.1", marginBottom: "25px" }}>
-            Luxury Hospitality <span className="gradient-text">Case Studies</span>
+            Live <span className="gradient-text">Demos</span>
           </h1>
 
           <p style={{ fontSize: "1.2rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400" }}>
-            How premium resorts and boutique villa networks use brand-safe AI agents to bypass OTA commissions and capture direct bookings 24/7.
+            Three fictional businesses, each with its own assistant. Ask what a customer would ask and see how it answers, when it defers to the team, and how it records an enquiry.
           </p>
         </div>
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px)", backgroundSize: "40px 40px", maskImage: "radial-gradient(circle at 50% 50%, black, transparent 80%)", pointerEvents: "none" }}></div>
       </section>
 
-      {/* Featured Proof of Concept: The Machan */}
+      {/* Featured demo: Tamarind Cove Villas, a fictional business. Not a client. */}
       <section className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
           <div className="glass" style={{ padding: "50px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", background: "rgba(10, 10, 12, 0.6)" }}>
@@ -34,18 +34,18 @@ export default function CaseStudies() {
               <div style={{ flex: "1 1 500px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
                   <Briefcase size={28} color="var(--accent-teal)" />
-                  <h2 style={{ fontSize: "2.2rem", fontWeight: "800", fontFamily: "var(--font-display)", margin: 0 }}>The Machan</h2>
+                  <h2 style={{ fontSize: "2.2rem", fontWeight: "800", fontFamily: "var(--font-display)", margin: 0 }}>Tamarind Cove Villas</h2>
                 </div>
-                <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", marginBottom: "30px", fontWeight: "500", textTransform: "uppercase", letterSpacing: "0.05em" }}>Luxury Treehouse Resort Proof-of-Concept</p>
+                <p style={{ fontSize: "1.1rem", color: "var(--text-muted)", marginBottom: "30px", fontWeight: "500", textTransform: "uppercase", letterSpacing: "0.05em" }}>Fictional demo business: villa stay</p>
                 
-                <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>The Bottleneck</h3>
+                <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>The situation</h3>
                 <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "25px" }}>
-                  Guests looking to book treehouse cabins late at night had detailed questions about specific property rules, pet policies, and dining arrangements. Because inquiries were handled manually the following morning, high-intent travelers dropped off or booked on platforms charging a 15-20% commission.
+                  Guests ask about rates, house rules and meals at all hours. When those questions wait until the owner is free the next morning, some of those guests have already booked somewhere else.
                 </p>
 
-                <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>The Autonomous Solution</h3>
+                <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>What the assistant does</h3>
                 <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "30px" }}>
-                  We deployed a 24/7 AI guest concierge grounded in verified resort rules and tariffs. The agent answers forest deck amenity queries, explains wild animals/pet protection rules, up-sells dining packages, and processes reservation requests instantly.
+                  It answers from the villa&apos;s own facts: rates, check-in times, pet policy and meals. When it does not know, it says so and passes the question to the team. When a guest wants to book, it records their dates, guest count and contact details for the owner to confirm.
                 </p>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "40px" }}>
@@ -55,7 +55,7 @@ export default function CaseStudies() {
                   </div>
                   <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-color)", padding: "20px", borderRadius: "16px" }}>
                     <div style={{ color: "var(--accent-violet)", fontSize: "1.3rem", fontWeight: "800", marginBottom: "5px" }}>Grounded</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Answers sourced from The Machan's own data</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Answers come only from the business&apos;s own facts</div>
                   </div>
                 </div>
 
@@ -95,7 +95,7 @@ export default function CaseStudies() {
               <span style={{ color: "#25D366" }}>📱</span> Test WhatsApp Cloud Integration
             </h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "30px" }}>
-              Experience the response speed, multilingual accuracy, and conversion-flow triggers directly on your phone. Chat with our active sandbox agent representing our boutique stays and resort templates.
+              Experience the response speed, multilingual accuracy, and conversion-flow triggers directly on your phone. Chat with the same demo assistants on WhatsApp.
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", alignItems: "center" }}>
               <a 
@@ -120,7 +120,7 @@ export default function CaseStudies() {
               </a>
             </div>
             <div style={{ marginTop: "20px", fontSize: "0.85rem", color: "var(--text-muted)" }}>
-              *Type <strong>/reset</strong> inside the chat to select a business code at any time.
+              *Type <strong>/reset</strong> inside the chat to pick a different demo at any time.
             </div>
           </div>
         </div>

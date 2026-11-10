@@ -1,36 +1,17 @@
 """
-Regression guard for a real bug found and fixed in this session: whether a given tenant
-ID is treated as "hospitality" (villa/resort/stay booking flow) vs. "real estate"
-(site-visit/unit-pricing flow) used to be decided by THREE separately-maintained,
-inconsistent definitions inside app/api/whatsapp-demo/route.js:
+Regression guard for how built-in tenants are classified in app/api/whatsapp-demo/route.js.
 
-  1. A hardcoded array in simulateOfflineResponse() that stopped at id '36' — so ids
-     37-46 (which includes Royal Garden Villas '40' and Villa Rentals Goa '43', two of
-     the three live prospect conversations) silently fell through to real-estate-style
-     offline-fallback replies whenever both OpenAI and Gemini were unavailable.
-  2. `parseInt(companyId) >= 18` used for the demo's WhatsApp welcome message — which
-     excluded id '9' (Mango Alibaug Villas), so the very first message a Mango Alibaug
-     demo user saw described "residential projects, site visits, or unit pricing"
-     instead of villa stays.
-  3. The SAME `>= 18` cutoff reused inside getOpenAIStructuredResponse() — this one is
-     the most serious, because it feeds the actual system-prompt instructions sent to
-     OpenAI/Gemini for every live conversation. Mango Alibaug (id '9') was being told to
-     run the real-estate booking flow ("we do not offer villa stays... offer a site
-     visit") on every single message, in production, for one of the three active leads.
+History: "is this tenant a stay?" was once defined three different ways in that file, and the
+copies drifted apart, which sent one tenant's guests down the wrong conversation flow in
+production. There is now one definition (HOSPITALITY_IDS, derived from companiesMap), and this
+test keeps it that way.
 
-All three now derive from one HOSPITALITY_IDS set built off companiesMap, fixed earlier in
-this session. Later in the same session, the real-estate (ids 1-8, 10-17) and gifting
-(id 20) personas were removed entirely as a deliberate full pivot to hospitality-only —
-at which point HOSPITALITY_IDS simplified to "every tenant except 'agency'", since there's
-no longer a non-hospitality tenant left to distinguish. This test's ground truth reflects
-that post-removal state; if real-estate ids ever reappear in companiesMap, update the
-ground truth deliberately rather than letting this test go stale and rubber-stamp it.
+It also guards a later decision: the built-in tenants are ScienceThoughts' own assistant, three
+FICTIONAL demo businesses, and M3 Resorts (our own test property). The roughly 55 real brands
+that used to be built in as prospect demos were removed and must not come back. Real clients are
+created at runtime (tenant:meta:{id} in KV), never added to companiesMap.
 
-This test doesn't need Node, a network call, or an API key — it parses the route.js source
-directly, so it runs in milliseconds and will fail loudly the moment someone reintroduces a
-second, drifted hospitality-classification definition (e.g. copy-pasting a numeric cutoff
-instead of extending the shared set), or accidentally reintroduces a real-estate/gifting id
-without updating this test's ground truth to match.
+This test needs no Node, network call or API key: it parses the route.js source directly.
 """
 import re
 from pathlib import Path
@@ -39,21 +20,17 @@ import pytest
 
 ROUTE_JS = Path(__file__).parent.parent / "app" / "api" / "whatsapp-demo" / "route.js"
 
-# Ground truth, independent of the source file: which tenant ids should exist and which of
-# those are hospitality properties, based on business reality (not the code's own logic —
-# re-deriving the expected answer from the code under test would defeat the point).
-# Real-estate (formerly 1-8, 10-17) and gifting (formerly 20) were fully removed — this is
-# now a hospitality-only product, so both sets are intentionally empty.
-EXPECTED_REAL_ESTATE_IDS = set()
-EXPECTED_NON_HOSPITALITY_OTHER_IDS = set()
-# Updated 6-7 Sep: ids 19 and 21 ("Lost Traveller" and "Destiny Farmstay") were removed from
-# companiesMap entirely — two fabricated demo personas with invented villa/pricing details and
-# no real client relationship, pulled per the same integrity pass that removed the fabricated
-# Mango Alibaug case-study numbers (see claude/weekend-legitimacy-plan.md, Part 2). Ids 47-74
-# were added across Batch 2/3 outreach (see claude/all-tenants-routing-test-5-sep.md) and were
-# never added here, which is exactly the "ground truth going stale" failure mode this test's own
-# docstring warns about — caught when the full suite actually ran again after those changes.
-EXPECTED_HOSPITALITY_IDS = {"9", "18"} | {str(i) for i in range(22, 75)}
+# Ground truth, independent of the source file (re-deriving it from the code under test would
+# defeat the point). Update these on purpose when a built-in tenant is added or removed.
+EXPECTED_HOSPITALITY_IDS = {"tamarind-cove", "m3resorts"}
+EXPECTED_BUSINESS_IDS = {"northgate-dental", "copperline-plumbing"}
+EXPECTED_ALL_IDS = EXPECTED_HOSPITALITY_IDS | EXPECTED_BUSINESS_IDS | {"agency"}
+
+# A sample of the retired real brands. None may appear as a built-in tenant name again.
+RETIRED_REAL_BRANDS = [
+    "Mango Alibaug", "The Machan", "StayVista", "SaffronStays", "Lohono", "ELIVAAS",
+    "Royal Garden Villas", "Neemrana", "CGH Earth", "Glenburn", "Diphlu", "Ramathra",
+]
 
 
 def _read_source():
@@ -65,80 +42,63 @@ def _read_source():
 def _extract_companies_map(source):
     match = re.search(r"const companiesMap = \{(.*?)\n\};", source, re.DOTALL)
     assert match, "Could not find companiesMap in route.js — has it been renamed/restructured?"
-    body = match.group(1)
-    return dict(re.findall(r"'([^']+)':\s*'([^']*)'", body))
+    return dict(re.findall(r"'([^']+)':\s*'([^']*)'", match.group(1)))
 
 
-class TestHospitalityClassificationConsistency:
+def _extract_business_ids(source):
+    match = re.search(r"const BUILT_IN_BUSINESS_IDS = new Set\(\[(.*?)\]\);", source, re.DOTALL)
+    assert match, "Could not find BUILT_IN_BUSINESS_IDS in route.js — did its shape change?"
+    return set(re.findall(r"'([^']+)'", match.group(1)))
+
+
+class TestBuiltInTenantClassification:
     def test_companies_map_covers_expected_ids(self):
-        """Sanity check the ground-truth lists above still match the live companiesMap —
-        catches the test itself going stale if a new tenant is ever added."""
-        source = _read_source()
-        companies = _extract_companies_map(source)
-        all_expected = EXPECTED_REAL_ESTATE_IDS | EXPECTED_NON_HOSPITALITY_OTHER_IDS | EXPECTED_HOSPITALITY_IDS | {"agency"}
-        assert set(companies.keys()) == all_expected, (
-            f"companiesMap ids changed and this test's ground truth wasn't updated. "
-            f"New/removed ids: {set(companies.keys()) ^ all_expected}"
+        companies = _extract_companies_map(_read_source())
+        assert set(companies.keys()) == EXPECTED_ALL_IDS, (
+            "Built-in tenant ids changed and this test's ground truth wasn't updated. "
+            f"New/removed ids: {set(companies.keys()) ^ EXPECTED_ALL_IDS}"
         )
 
-    def test_single_shared_hospitality_set_exists(self):
-        """There should be exactly one definition of what counts as 'hospitality',
-        not one per call site."""
+    def test_business_ids_match_and_exist(self):
         source = _read_source()
-        assert "HOSPITALITY_IDS" in source, (
-            "No shared HOSPITALITY_IDS constant found. If this is intentional, make sure "
-            "every classification site was updated together — see the bug this test guards against."
-        )
-        # Guard against a second, competing definition being reintroduced later.
-        suspicious_patterns = [
-            r"parseInt\([^)]*\)\s*>=\s*18(?!\s*&&\s*.*HOSPITALITY)",  # a raw >=18 cutoff outside the shared set's own definition
-        ]
-        for pattern in suspicious_patterns:
-            matches = re.findall(pattern, source)
-            assert len(matches) <= 1, (
-                f"Found {len(matches)} raw numeric hospitality cutoffs ('{pattern}') outside "
-                f"the HOSPITALITY_IDS definition — this is exactly the drift bug that shipped "
-                f"to production. Route every classification through HOSPITALITY_IDS instead."
-            )
+        business = _extract_business_ids(source)
+        assert business == EXPECTED_BUSINESS_IDS, f"Unexpected non-stay built-ins: {business ^ EXPECTED_BUSINESS_IDS}"
+        assert business <= set(_extract_companies_map(source)), "A business id is not in companiesMap"
 
-    def test_no_stale_hardcoded_id_array_for_offline_fallback(self):
-        """The old bug: a literal array of ids that stopped at '36', silently excluding
-        ids 37-46 (Royal Garden Villas, Villa Rentals Goa, and 5 others) from hospitality
-        treatment in the offline rule-based fallback."""
+    def test_single_shared_hospitality_set_is_derived_from_companies_map(self):
+        """One definition of 'stay', derived from companiesMap minus the agency and the built-in
+        businesses — not a hardcoded id list or a numeric cutoff that can go stale."""
         source = _read_source()
-        hardcoded_array = re.search(r'\["9",\s*"18",\s*"19",\s*"21".*?\]\.includes\(companyId\)', source)
-        assert hardcoded_array is None, (
-            "Found a hardcoded tenant-id array driving isHospitality again — this previously "
-            "went stale and misclassified ids 37-46. Use HOSPITALITY_IDS.has(companyId) instead."
+        assert len(re.findall(r"const HOSPITALITY_IDS\s*=", source)) == 1, "HOSPITALITY_IDS must be defined exactly once"
+        match = re.search(
+            r"const HOSPITALITY_IDS = new Set\(\s*Object\.keys\(companiesMap\)\.filter\(\((\w+)\)\s*=>\s*(.*?)\)\s*\);",
+            source, re.DOTALL,
         )
+        assert match, "HOSPITALITY_IDS is no longer derived from companiesMap — did its shape change?"
+        body = match.group(2)
+        assert "'agency'" in body and "BUILT_IN_BUSINESS_IDS" in body, (
+            "HOSPITALITY_IDS must exclude both the agency and BUILT_IN_BUSINESS_IDS"
+        )
+        derived = set(_extract_companies_map(source)) - {"agency"} - _extract_business_ids(source)
+        assert derived == EXPECTED_HOSPITALITY_IDS, f"Derived stay set is wrong: {derived ^ EXPECTED_HOSPITALITY_IDS}"
 
-    def test_mango_alibaug_and_royal_garden_are_reachable_via_shared_set(self):
-        """Concrete regression check for the two real, live-lead ids that were actually
-        broken: id '9' (Mango Alibaug Villas) and id '40' (Royal Garden Villas)."""
+    def test_no_raw_numeric_or_hardcoded_classification(self):
         source = _read_source()
-        match = re.search(r"const HOSPITALITY_IDS = new Set\(\s*Object\.keys\(companiesMap\)\.filter\(\((\w+)\)\s*=>\s*(.*?)\)\s*\);", source, re.DOTALL)
-        assert match, "Could not find the HOSPITALITY_IDS derivation to verify — did its shape change?"
-        var_name, filter_body = match.group(1), match.group(2)
-
-        companies = _extract_companies_map(source)
-        # Re-evaluate the filter body's logic in Python terms rather than eval'ing JS directly.
-        derived = set()
-        for cid in companies:
-            id_ = cid
-            is_hosp = (
-                id_ != "agency"
-                and id_ != "20"
-                and id_.lstrip("-").isdigit()
-                and int(id_) >= 9
-                and (id_ == "9" or int(id_) >= 18)
-            )
-            if is_hosp:
-                derived.add(id_)
-
-        assert derived == EXPECTED_HOSPITALITY_IDS, (
-            f"Derived hospitality set doesn't match expected. Missing: "
-            f"{EXPECTED_HOSPITALITY_IDS - derived}, Extra: {derived - EXPECTED_HOSPITALITY_IDS}"
+        assert not re.search(r"parseInt\([^)]*\)\s*>=\s*\d+", source), (
+            "Found a raw numeric tenant-id cutoff — classify through HOSPITALITY_IDS / tenant type instead."
         )
-        assert "9" in derived, "Mango Alibaug Villas (id 9) must classify as hospitality"
-        assert "40" in derived, "Royal Garden Villas (id 40) must classify as hospitality"
-        assert "43" in derived, "Villa Rentals Goa (id 43) must classify as hospitality"
+        assert not re.search(r'\[[^\]]*\]\.includes\(companyId\)', source), (
+            "Found a hardcoded tenant-id array driving behaviour — this previously went stale."
+        )
+
+    def test_no_real_brand_is_a_built_in_tenant(self):
+        names = " | ".join(_extract_companies_map(_read_source()).values())
+        leaked = [b for b in RETIRED_REAL_BRANDS if b.lower() in names.lower()]
+        assert not leaked, f"Real brands are built-in tenants again: {leaked}. Demo tenants must be fictional."
+
+    def test_runtime_tenants_are_supported(self):
+        """Real clients come from KV (tenant:meta:{id}), so onboarding needs no deploy."""
+        source = _read_source()
+        assert "async function getTenantMeta" in source and "tenant:meta:" in source, (
+            "The runtime tenant registry is missing — every new client would need a code change again."
+        )

@@ -8,71 +8,21 @@ import { MessageSquare, Send, Bot, User, RefreshCw, CheckCircle2, Sparkles } fro
 // URL-param effect below list it as a dependency honestly (satisfying exhaustive-deps) without
 // re-running on every render — a literal defined inside the component body is a new object each
 // render, which would make that same dependency fire the effect (and its setState calls) in a loop.
+// Fictional demo businesses only. Ids match the built-in tenants in
+// app/api/whatsapp-demo/route.js (companiesMap).
 const companies = {
-    "18": "The Machan (Lonavala Resort)",
-    "9": "Mango Alibaug Villas (Alibaug Stay)",
-    "22": "Eko Stay (Lonavala/Goa Villas)",
-    "23": "The Rentalgram (Family Villas)",
-    "24": "Melhor Stays (Goa Beach Villas)",
-    "25": "StayVista (Premium Villa Chain)",
-    "26": "SaffronStays (Premium Villa Network)",
-    "27": "Lohono Stays (Premium Villas)",
-    "28": "amã Stays & Trails (Taj Group)",
-    "29": "ELIVAAS (Luxury Homestays)",
-    "30": "Barefoot at Havelock (Andaman Resort)",
-    "31": "Roamhome (Holiday Homes)",
-    "32": "Elite Havens (Ultra-Luxury)",
-    "33": "Tripvillas (Beachfront Stays)",
-    "34": "Sol de Goa (Boutique Stay)",
-    "35": "LuxUnlock (Heritage Villas)",
-    "36": "Abode Bombay (Boutique Hotel)",
-    "37": "The Postcard Hotel (Boutique Resorts)",
-    "38": "Seclude Hotels (Experiential Rentals)",
-    "39": "Coco Shambhala (Goa Villas)",
-    "40": "Royal Garden Villas (Pool Villas)",
-    "41": "Ebony Stays (Private Villas)",
-    "42": "29Bungalow (Infinity Villas)",
-    "43": "Villa Rentals Goa (Pool Stays)",
-    "44": "Araiya Hotels (Boutique Hotels)",
-    "45": "The Goa Villas (Luxury Villa Collection)",
-    "46": "Stay Willas (Lonavala Villas)",
-    "47": "The Khyber Himalayan Resort & Spa (Gulmarg Ski Resort)",
-    "48": "Glenburn Tea Estate (Darjeeling Tea Estate)",
-    "49": "Neemrana Hotels (Heritage Fort-Palaces)",
-    "50": "CGH Earth (Kerala Eco-Luxury Resorts)",
-    "51": "Rhythm Hospitality (Lonavala/Kumarakom Resorts)",
-    "52": "Ahilya Fort (Maheshwar Royal Heritage)",
-    "53": "The Tree House Resort, Jaipur (Eco-Luxury Treehouses)",
-    "54": "Leisure Hotels Group (Uttarakhand Boutique Resorts)",
-    "55": "Jehan Numa Palace (Bhopal Heritage Palace)",
-    "56": "The Bison, Kabini (Kabini Wildlife Lodge)",
-    "57": "Suján Jawai (Rajasthan Leopard Camp)",
-    "58": "Khem Villas (Ranthambore Eco-Lodge)",
-    "59": "The Belgadia Palace (Odisha Royal Heritage)",
-    "60": "Jalakara (Andaman Islands Villa)",
-    "61": "The Kumaon (Himalayan Boutique Lodge)",
-    "62": "Vivenda Dos Palhaços (Goa Heritage Guesthouse)",
-    "63": "Marari Villas (Kerala Beach Villas)",
-    "64": "Alsisar Mahal (Shekhawati Heritage Palace)",
-    "65": "Windermere Estate (Munnar Plantation Bungalow)",
-    "66": "Ramathra Fort (Rajasthan Heritage Fort)",
-    "67": "Vanghat — The Wildlife Lodge (Corbett Wildlife Lodge)",
-    "68": "Fort Begu (Rajasthan Ancestral Fort)",
-    "69": "Dera Amer (Jaipur Elephant Camp)",
-    "70": "Shergarh Tented Camp (Kanha Luxury Camp)",
-    "71": "Lchang Nang Retreat (Ladakh Boutique Retreat)",
-    "72": "Tranquil Resort (Wayanad Plantation Estate)",
-    "73": "Rajbari Bawali (Kolkata Heritage Palace)",
-    "74": "Diphlu River Lodge (Kaziranga Eco-Lodge)"
+    "tamarind-cove": "Tamarind Cove Villas (villa stay, India)",
+    "northgate-dental": "Northgate Dental Clinic (dental clinic, UK)",
+    "copperline-plumbing": "Copperline Plumbing & Heating (plumbing company, US)"
 };
 
 export default function InteractiveWebDemo() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Welcome to The Machan! How can I assist you with checking cabin availability, rates, or forest treehouse amenities today?" }
+    { role: "assistant", content: "Welcome to Tamarind Cove Villas! How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [companyId, setCompanyId] = useState("18"); // Default to The Machan (18)
+  const [companyId, setCompanyId] = useState("tamarind-cove"); // Default demo
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -96,7 +46,7 @@ export default function InteractiveWebDemo() {
         const companyName = companies[urlCompanyId].split(" (")[0];
         const isHospitality = true; // All curated selections are hospitality
 
-        let welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
+        let welcomeMsg = `Welcome to ${companyName}! How can I help you today?`;
 
         setMessages([
           { role: "assistant", content: welcomeMsg }
@@ -109,7 +59,7 @@ export default function InteractiveWebDemo() {
     const newId = e.target.value;
     setCompanyId(newId);
     const companyName = companies[newId].split(" (")[0];
-    const welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
+    const welcomeMsg = `Welcome to ${companyName}! How can I help you today?`;
 
     setMessages([
       { role: "assistant", content: welcomeMsg }
@@ -155,7 +105,7 @@ export default function InteractiveWebDemo() {
 
   const handleReset = () => {
     const companyName = companies[companyId].split(" (")[0];
-    const welcomeMsg = `Welcome to ${companyName}! How can I help you with checking villa availability, rates, or booking your stay today?`;
+    const welcomeMsg = `Welcome to ${companyName}! How can I help you today?`;
 
     setMessages([
       { role: "assistant", content: welcomeMsg }
@@ -175,7 +125,7 @@ export default function InteractiveWebDemo() {
               Live AI Concierge Interactive Demo
               <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>KB-GROUNDED</span>
             </h3>
-            <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Select a resort or villa brand to test availability queries</p>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Pick a demo business and ask what a customer would ask. All three are fictional.</p>
           </div>
         </div>
 
@@ -249,7 +199,7 @@ export default function InteractiveWebDemo() {
       <form onSubmit={handleSend} style={{ padding: "15px 20px", borderTop: "1px solid var(--border-color)", background: "rgba(10, 12, 18, 0.9)", display: "flex", gap: "12px" }}>
         <input 
           type="text" 
-          placeholder="Ask about treehouse availability, weekday rates, wildlife policies, or request a booking..." 
+          placeholder="Ask about prices, opening hours, policies, or make a booking request..." 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           style={{ flexGrow: 1, background: "#060810", color: "#fff", border: "1px solid var(--border-color)", padding: "12px 18px", borderRadius: "12px", fontSize: "0.92rem", outline: "none" }}

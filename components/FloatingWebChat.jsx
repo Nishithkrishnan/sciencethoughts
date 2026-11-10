@@ -129,7 +129,7 @@ export default function FloatingWebChat() {
               />
               <div>
                 <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: "700", color: "#ffffff", letterSpacing: "0.02em" }}>
-                  {companyId === "agency" ? "ScienceThoughts AI" : companyId === "9" ? "Mango Alibaug AI" : `Property ${companyId} AI`}
+                  {companyId === "agency" ? "ScienceThoughts AI" : `Demo ${companyId} AI`}
                 </h4>
                 <span style={{ fontSize: "0.75rem", color: "#707080" }}>
                   {companyId === "agency" ? "Online Concierge" : "Guest Concierge"}

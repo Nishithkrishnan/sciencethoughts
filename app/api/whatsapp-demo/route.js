@@ -193,6 +193,51 @@ const HOSPITALITY_IDS = new Set(
   Object.keys(companiesMap).filter((id) => id !== 'agency')
 );
 
+// ---------------------------------------------------------------------------------------------
+// Tenant registry. A tenant is EITHER built in (companiesMap above: our own assistant and the demo
+// tenants) OR created at runtime by scripts/onboard-tenant.mjs, which writes
+// tenant:meta:{id} = {"name": "...", "type": "hospitality" | "business"} to KV. A new client
+// therefore needs NO code change and NO deploy. `type` picks the conversation rules:
+//   agency      - ScienceThoughts' own sales assistant
+//   hospitality - stays: dates, guests, rooms, live calendar availability
+//   business    - any other client (clinic, institute, agency, shop): enquiries and callbacks
+// An id that is neither built in nor in KV is `known: false` and is answered as the agency, so a
+// made-up or retired tenant id can never pull a knowledge base out of KV.
+// ---------------------------------------------------------------------------------------------
+const TENANT_META_TTL_MS = 5 * 60 * 1000;
+const tenantMetaCache = new Map();
+
+async function getTenantMeta(companyId) {
+  const id = companyId || 'agency';
+  if (id === 'agency') return { id, name: companiesMap.agency, type: 'agency', known: true };
+  if (companiesMap[id]) return { id, name: companiesMap[id], type: 'hospitality', known: true };
+
+  const cached = tenantMetaCache.get(id);
+  if (cached && cached.expires > Date.now()) return cached.meta;
+
+  let meta = { id, name: null, type: 'agency', known: false };
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/tenant:meta:${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.result) {
+        const stored = JSON.parse(data.result);
+        if (stored && typeof stored.name === 'string' && stored.name.trim()) {
+          meta = { id, name: stored.name.trim(), type: stored.type === 'hospitality' ? 'hospitality' : 'business', known: true };
+        }
+      }
+    } catch (e) {
+      // Do not cache a failed lookup: the next message should try again.
+      console.error(`[DEMO ROUTE] Tenant meta lookup failed for ${id}:`, e);
+      return meta;
+    }
+  }
+  tenantMetaCache.set(id, { meta, expires: Date.now() + TENANT_META_TTL_MS });
+  return meta;
+}
+
 // Resolves a free-typed WhatsApp message (e.g. "join Villa Rentals Goa", "43", "ELIVAAS") to a
 // companiesMap id. Used both by the shared-sandbox "join"/"connect" flow and by the direct-name
 // routing block below. Three passes, each preferring the MOST SPECIFIC match rather than the
@@ -420,7 +465,7 @@ export async function POST(req) {
 
       // If lead extracted, attempt to push to CRM
       if (aiPayload.lead_extracted && aiPayload.lead_extracted.name) {
-        aiPayload.lead_extracted.target_builder = companiesMap[companyId] || 'Web Demo Lead';
+        aiPayload.lead_extracted.target_builder = (await getTenantMeta(companyId)).name || 'Web Demo Lead';
         aiPayload.lead_extracted.phone = 'Web Visitor';
         // The widget sends `history` capped (small, cheap — what the AI actually sees) and
         // `full_history` uncapped (the entire conversation) purely for lead-transcript logging.
@@ -439,7 +484,7 @@ export async function POST(req) {
         const webContact = aiPayload.lead_extracted?.phone && aiPayload.lead_extracted.phone !== 'Web Visitor'
           ? aiPayload.lead_extracted.phone
           : (aiPayload.lead_extracted?.email || 'Web visitor (no contact captured)');
-        const escCompanyName = companiesMap[companyId] || 'Web Demo';
+        const escCompanyName = (await getTenantMeta(companyId)).name || 'Web Demo';
         after(() => logEscalation(companyId, escCompanyName, aiPayload.escalation_question, webContact, aiPayload.reply));
         after(() => notifyEscalation(companyId, escCompanyName, aiPayload.escalation_question, webContact));
       }
@@ -669,10 +714,10 @@ export async function POST(req) {
           // /app/data-notice/page.js for the linked page and the Guest Data Notice draft's
           // own appendix for the wording this is based on.
           if (session.history.length === 0) {
-            const disclosurePropertyName = companiesMap[session.companyId];
+            const disclosurePropertyName = (await getTenantMeta(session.companyId)).name;
             const disclosureIntro = disclosurePropertyName
               ? `${disclosurePropertyName}'s AI assistant`
-              : "this property's AI assistant";
+              : "our AI assistant";
             const disclosureText = `Hi — you're chatting with ${disclosureIntro}. Anything you type is used to answer you and, if you'd like a follow-up, is passed to our team. Details: https://sciencethoughts.com/data-notice. Please don't share card or ID numbers here.`;
             await sendWhatsAppMessage(phone_number_id, from, disclosureText, session.companyId);
           }
@@ -704,7 +749,7 @@ export async function POST(req) {
             if (!leadData.phone) {
               leadData.phone = from; // Auto-populate with incoming WhatsApp number
             }
-            leadData.target_builder = companiesMap[session.companyId];
+            leadData.target_builder = (await getTenantMeta(session.companyId)).name || session.companyId;
           }
           // The AI re-extracts the lead on every turn once it knows the guest's name, which used to
           // add a duplicate sheet row per message. Only push when the booking details actually
@@ -728,7 +773,7 @@ export async function POST(req) {
           // promise instead of just words — see the dashboard at /dashboard. On WhatsApp we
           // always have the guest's real number, unlike anonymous web chat.
           if (aiResponse.escalation_question) {
-            const escCompanyName = companiesMap[session.companyId] || session.companyId;
+            const escCompanyName = (await getTenantMeta(session.companyId)).name || session.companyId;
             after(() => logEscalation(session.companyId, escCompanyName, aiResponse.escalation_question, from, aiResponseText));
             after(() => notifyEscalation(session.companyId, escCompanyName, aiResponse.escalation_question, from));
           }
@@ -745,8 +790,11 @@ export async function POST(req) {
 }
 
 // Structured Property Knowledge Bases (hospitality tenants & Agency)
-async function getCompanyKnowledge(companyId) {
-  const id = companyId || 'agency';
+async function getCompanyKnowledge(requestedCompanyId) {
+  // Unknown ids (not built in, no tenant:meta in KV) are answered as the agency. See getTenantMeta.
+  const tenantMeta = await getTenantMeta(requestedCompanyId);
+  const companyId = tenantMeta.known ? (requestedCompanyId || 'agency') : 'agency';
+  const id = companyId;
 
   // Load client-specific knowledge base from Vercel KV first (with error isolation)
   if (KV_URL && KV_TOKEN) {
@@ -1522,13 +1570,13 @@ async function getCompanyKnowledge(companyId) {
 }
 
 // Local simulation fallback engine in case both OpenAI and Gemini are offline
-function simulateOfflineResponse(companyId, history) {
+function simulateOfflineResponse(companyId, history, tenantMeta = null) {
   const lastMessageObj = history[history.length - 1];
   const lastText = lastMessageObj?.content || "";
   const lower = lastText.toLowerCase();
 
-  const companyName = companiesMap[companyId] || "Sciencethoughts";
-  const isHospitality = HOSPITALITY_IDS.has(companyId);
+  const companyName = tenantMeta?.name || companiesMap[companyId] || "Sciencethoughts";
+  const isHospitality = tenantMeta ? tenantMeta.type === 'hospitality' : HOSPITALITY_IDS.has(companyId);
 
   // Retrieve current lead state from history
   let extractedName = null;
@@ -1782,7 +1830,9 @@ function stripGenericFillerClosers(reply) {
 
 // Top-level LLM request orchestrator with fallbacks and extended CRM logging schema
 async function getOpenAIStructuredResponse(history, companyId, isWebChat = false) {
-  const isHospitality = HOSPITALITY_IDS.has(companyId);
+  const tenantMeta = await getTenantMeta(companyId);
+  const isHospitality = tenantMeta.type === 'hospitality';
+  const isAgency = tenantMeta.type === 'agency';
 
   // getCompanyKnowledge (KB) and getTenantAvailability (iCal) are independent KV round-trips —
   // run them concurrently instead of sequentially awaiting one then the other, to shave off
@@ -1833,10 +1883,14 @@ async function getOpenAIStructuredResponse(history, companyId, isWebChat = false
   1. **WHICH PROPERTY:** If the brand manages *multiple* properties/villas (check the knowledge base for this brand), you MUST ask them to confirm **which specific villa or property** they want to book (e.g. for Lohono Stays: Villa Verde or Mansion House) along with their check-in/checkout dates and number of guests.
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** so you can log the booking. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** so you can log the booking. Do NOT ask for their phone number (we already have it!)."}
   3. Once they provide the villa name, dates, name, and email, confirm warmly that their pending booking request for that specific villa has been logged and our manager will contact them to confirm. If you do not have an exact current rate in the knowledge base to quote them, ALSO tell them in that same confirmation that the property team will share the exact current rate shortly — never silently skip mentioning price just because you gathered booking details.`
-  : `If the prospect wants to book a demo, discovery call, or pilot for the AI concierge product:
+  : isAgency ? `If the prospect wants to book a demo, discovery call, or pilot for the AI concierge product:
   1. Confirm you're scheduling a discovery call about the Sciencethoughts AI WhatsApp concierge product, not a hospitality booking.
   2. ${isWebChat ? "Ask for their **Name**, **Phone Number**, and **Email** to schedule. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** and **Email** to schedule. Do NOT ask for their phone number (we already have it!)."}
-  3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`}
+  3. Once they provide their details, confirm warmly that a representative will call them shortly to finalize the schedule.`
+  : `If the customer wants to book an appointment, order, enrol, get a quote, or otherwise go ahead with this business:
+  1. Ask what they need (the service, product or course) and their preferred date or time, if that is not already clear. Do not ask about check-in dates, rooms or guests unless this business's knowledge base is about stays.
+  2. ${isWebChat ? "Ask for their **Name** and **Phone Number** so the team can confirm. You must ask for their phone number since this is an anonymous website chat." : "Ask for their **Name** so the team can confirm. Do NOT ask for their phone number (we already have it!)."}
+  3. Once they provide their details, confirm warmly that the request has been passed to the team, who will contact them to confirm. Never say an appointment, order or price is confirmed yourself. Put what they asked for in "additional_requirements" and their preferred time in "callback_time".`}
 - **UNLISTED AMENITIES/POLICIES/FACTS (use this for ANY legitimate but undocumented question about this business):** This covers amenities and policies (spa, gym, child policies, early check-in/out) AND exact current pricing/rates AND ownership, leadership, or "who owns/runs/founded this place" — any real question about THIS business that simply isn't in your knowledge base above. Do NOT say 'currently it's not mentioned', 'not in my files', or refuse to answer — that sounds robotic and, for ownership/pricing questions, is a misfire of the OUT-OF-SCOPE rule below (this is a legitimate business question, not an unrelated topic). Instead, answer warmly that you'll confirm the exact detail with the property team and get back to them shortly (e.g. "Great question — let me confirm the exact current rate with the team and get back to you shortly!"). NEVER state a specific policy, price, ownership detail, or amenity as fact unless it is explicitly present in the knowledge base above — guessing here creates real liability if a guest arrives expecting something the property doesn't actually offer. Whenever you use this deferral, you MUST also populate "escalation_question" in your JSON response (see schema below) with the guest's exact question, so the property team can review and answer it later — this is what makes the "get back to you shortly" promise real instead of an empty line.
   **WORKED EXAMPLES (follow this exact pattern, do not substitute a refusal):**
   - User: "who is the owner" / "who owns this place" / "who runs this hotel" → NOT out-of-scope, NOT a refusal. Reply like: "That's a great question — let me confirm that with the property team and get back to you shortly! In the meantime, is there anything about the rooms or amenities I can help with?"
@@ -1924,7 +1978,7 @@ You must respond in JSON format with the following keys:
   // LEVEL 3: Emergency Offline Fallback
   if (!payload) {
     console.log("[DEMO ROUTE] Triggering local simulation fallback...");
-    payload = simulateOfflineResponse(companyId, history);
+    payload = simulateOfflineResponse(companyId, history, tenantMeta);
   }
 
   // Format safeguard: remove forbidden markdown double asterisks, then strip generic filler closers

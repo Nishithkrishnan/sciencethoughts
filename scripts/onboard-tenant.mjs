@@ -5,10 +5,9 @@
  * Writes a new tenant's knowledge base, WhatsApp credentials, and (optionally) Zoho CRM
  * credentials directly into the same Vercel KV keys that app/api/whatsapp-demo/route.js and
  * lib/zoho.js already read from — tenant:knowledge:{id}, tenant:whatsapp:{id},
- * tenant:phone:{phone_number_id}, tenant:crm:zoho:{id}. No code change or redeploy needed for
- * any of that. The ONE thing this script cannot do for you is add the tenant's display name to
- * companiesMap in route.js — that's still a one-line code edit + deploy, and this script will
- * remind you at the end.
+ * tenant:phone:{phone_number_id}, tenant:crm:zoho:{id} — plus tenant:meta:{id} (display name
+ * and type), which is what makes the tenant exist for the app. No code change or redeploy is
+ * needed: the tenant is live as soon as this script finishes.
  *
  * Usage:
  *   node scripts/onboard-tenant.mjs [--env-file=.env.production.local]
@@ -83,6 +82,19 @@ async function kvSet(kvUrl, kvToken, key, value) {
   return data;
 }
 
+async function kvGet(kvUrl, kvToken, key) {
+  const res = await fetch(`${kvUrl}/get/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${kvToken}` }
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(`KV GET failed for ${key}: ${data.error}`);
+  return data.result || null;
+}
+
+// Same pattern the onboarding links use (lib/onboarding-link.js), so every tenant id created here
+// also works in a /onboard link and in the widget's data-tenant attribute.
+const TENANT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,40}$/i;
+
 function extractExistingTenantIds() {
   try {
     const routeSrc = readFileSync(path.join(REPO_ROOT, 'app/api/whatsapp-demo/route.js'), 'utf-8');
@@ -123,13 +135,25 @@ async function main() {
 
   const existingIds = extractExistingTenantIds();
 
-  let tenantId = (await ask('Tenant ID (short unique key, e.g. "47"): ')).trim();
-  while (existingIds.includes(tenantId)) {
-    console.log(`  ! "${tenantId}" already exists in companiesMap. Pick a different id.`);
+  let tenantId = (await ask('Tenant ID (short unique key, letters/numbers/-/_, e.g. "coralbay"): ')).trim();
+  while (true) {
+    if (!TENANT_ID_PATTERN.test(tenantId)) {
+      console.log('  ! Use letters, numbers, - or _ only (max 41 characters, no spaces).');
+    } else if (tenantId === 'agency' || existingIds.includes(tenantId)) {
+      console.log(`  ! "${tenantId}" is a built-in tenant. Pick a different id.`);
+    } else {
+      const existingMeta = await kvGet(KV_URL, KV_TOKEN, `tenant:meta:${tenantId}`);
+      if (!existingMeta) break;
+      const overwrite = (await ask(`  ! "${tenantId}" already exists (${existingMeta}). Update it? (y/N): `)).trim().toLowerCase() === 'y';
+      if (overwrite) break;
+    }
     tenantId = (await ask('Tenant ID: ')).trim();
   }
 
-  const displayName = (await ask('Display name (e.g. "Coral Bay Villas"): ')).trim();
+  let displayName = (await ask('Display name guests will see (e.g. "Coral Bay Villas"): ')).trim();
+  while (!displayName) displayName = (await ask('Display name (required): ')).trim();
+  const typeAnswer = (await ask('Is this a stay (villa, resort, hotel, homestay)? (y/N): ')).trim().toLowerCase();
+  const tenantType = typeAnswer === 'y' ? 'hospitality' : 'business';
   console.log('\n(Onboarded via Embedded Signup at /onboard? Leave the next two blank: the token and phone');
   console.log(' mapping are already stored, and leaving them blank keeps them untouched.)');
   const waToken = (await ask('WhatsApp access token (blank = skip): ')).trim();
@@ -166,6 +190,9 @@ async function main() {
 
   console.log('\n[onboard] Writing to KV...');
 
+  await kvSet(KV_URL, KV_TOKEN, `tenant:meta:${tenantId}`, JSON.stringify({ name: displayName, type: tenantType, createdAt: new Date().toISOString() }));
+  console.log(`  ✓ tenant:meta:${tenantId} -> ${displayName} (${tenantType})`);
+
   await kvSet(KV_URL, KV_TOKEN, `tenant:knowledge:${tenantId}`, JSON.stringify({ prompt: knowledgePrompt }));
   console.log(`  ✓ tenant:knowledge:${tenantId}`);
 
@@ -198,10 +225,10 @@ async function main() {
     console.log(`  ✓ tenant:crm:zoho:${tenantId}`);
   }
 
-  console.log('\n[onboard] Done. One manual step left:');
-  console.log(`  Add this line to companiesMap in app/api/whatsapp-demo/route.js, then commit + push:`);
-  console.log(`    '${tenantId}': '${displayName}',`);
-  console.log('\nEverything else (knowledge base' + (waToken ? ', WhatsApp token, phone routing' : '') + (zoho ? ', Zoho creds' : '') + ') is already live — no deploy needed for those.');
+  console.log(`\n[onboard] Done. "${displayName}" is live — no code change or deploy needed.`);
+  console.log('(The app caches tenant details for up to 5 minutes, so a rename can take that long to show.)');
+  console.log(`  Website widget: <script src="https://sciencethoughts.com/widget-loader.js" data-tenant="${tenantId}" async></script>`);
+  console.log(`  Private preview: https://sciencethoughts.com/embed?tenant=${tenantId}`);
   console.log('Got (or later get) their booking calendar link? Run: node scripts/set-tenant-ical.mjs\n');
 }
 

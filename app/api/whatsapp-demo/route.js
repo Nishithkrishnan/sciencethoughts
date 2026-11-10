@@ -658,6 +658,18 @@ export async function POST(req) {
               leadData.phone = from; // Auto-populate with incoming WhatsApp number
             }
             leadData.target_builder = companiesMap[session.companyId];
+          }
+          // The AI re-extracts the lead on every turn once it knows the guest's name, which used to
+          // add a duplicate sheet row per message. Only push when the booking details actually
+          // change (new dates, guests, room, contact...) for this property.
+          const leadKey = leadData && leadData.name ? JSON.stringify([
+            session.companyId, leadData.name, leadData.phone, leadData.email, leadData.check_in_date,
+            leadData.check_out_date, leadData.room_type, leadData.guests, leadData.budget,
+            leadData.additional_requirements, leadData.callback_time
+          ].map((v) => (v == null ? '' : String(v).trim().toLowerCase()))) : null;
+          if (leadKey && leadKey !== session.lastLeadKey) {
+            session.lastLeadKey = leadKey;
+            await saveSession(from, session);
             console.log(`[DEMO ROUTE] Lead Qualified! Pushing to CRM:`, leadData);
             // The WhatsApp reply itself was already sent above (step 4) — this only affects how
             // long we hold the webhook ack open for Meta, not what the user sees. Push it in the

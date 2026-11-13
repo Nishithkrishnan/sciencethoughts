@@ -1,6 +1,6 @@
 export const metadata = {
   title: "Terms of Service — Sciencethoughts",
-  description: "Terms for using the sciencethoughts.com website and its live AI concierge demo.",
+  description: "Terms for using the sciencethoughts.com website and its live AI agent demos.",
 };
 
 const sectionStyle = { marginTop: "36px" };
@@ -29,16 +29,16 @@ export default function TermsOfService() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>1. What this site is</h2>
             <p style={pStyle}>
-              This site describes and demonstrates an AI WhatsApp/web concierge product for independent hospitality
-              properties. By using it, including the live demo, you agree to these terms.
+              This site describes and demonstrates AI chat agents that ScienceThoughts builds and runs for businesses,
+              on their websites and WhatsApp. By using it, including the live demos, you agree to these terms.
             </p>
           </div>
 
           <div style={sectionStyle}>
             <h2 style={headingStyle}>2. The live demo is a demonstration, not a real booking channel</h2>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={liStyle}>Anything you ask the demo AI is answered from that demo property&rsquo;s sample knowledge base for illustration purposes. No booking, reservation, or payment made through the demo is real.</li>
-              <li style={liStyle}>The AI can make mistakes. It is designed to defer rather than guess when it lacks grounded information, but it is not guaranteed error-free — do not rely on a demo response as fact about any actual property.</li>
+              <li style={liStyle}>The demo businesses are fictional. Anything you ask a demo agent is answered from that fictional business&rsquo;s sample information, for illustration only. No booking, appointment, order or payment made through a demo is real.</li>
+              <li style={liStyle}>The AI can make mistakes. It is designed to defer rather than guess when it lacks grounded information, but it is not guaranteed error-free — do not rely on a demo response as fact about any real business.</li>
               <li style={liStyle}>How your demo conversation is processed and retained is described in the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a> and the <a href="/privacy-policy" style={linkStyle}>Privacy Policy</a>.</li>
             </ul>
           </div>
@@ -49,7 +49,7 @@ export default function TermsOfService() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}>Submit unlawful, abusive, or fraudulent content.</li>
               <li style={liStyle}>Attempt to overload, disrupt, or automate excessive requests against the demo or the site.</li>
-              <li style={liStyle}>Attempt to extract the underlying system prompts, credentials, or another property&rsquo;s data through the demo.</li>
+              <li style={liStyle}>Attempt to extract the underlying system prompts, credentials, or another client&rsquo;s data through the demo.</li>
               <li style={liStyle}>Submit anyone else&rsquo;s personal information without their knowledge, through the contact form or the demo.</li>
             </ul>
           </div>
@@ -57,10 +57,10 @@ export default function TermsOfService() {
           <div style={sectionStyle}>
             <h2 style={headingStyle}>4. If you become a paying client</h2>
             <p style={pStyle}>
-              These website terms do not govern an actual paid engagement. If a property signs up as a client, that
-              relationship — scope of work, fees, data handling, term, cancellation, liability — is governed
-              exclusively by the separate, signed Pilot Service Agreement between Sciencethoughts and that property,
-              not by this page.
+              These website terms do not govern an actual paid engagement. If you become a client, that
+              relationship — scope of work, fees, data handling, term, cancellation, liability — is governed by our{" "}
+              <a href="/client-terms" style={linkStyle}>Client Service Terms</a> (or a separate signed agreement, where
+              we have one with you), not by this page.
             </p>
           </div>
 
@@ -68,8 +68,8 @@ export default function TermsOfService() {
             <h2 style={headingStyle}>5. Intellectual property</h2>
             <p style={pStyle}>
               The site&rsquo;s content, design, and the underlying Sciencethoughts platform are owned by Nishith
-              Krishnan. Property names, logos, and content shown in case studies or demos belong to their respective
-              owners and are used for illustration of the product, not to claim an affiliation beyond what is stated.
+              Krishnan. The businesses shown in the demos are fictional and are not
+              ScienceThoughts clients; any resemblance to a real business is unintended.
             </p>
           </div>
 

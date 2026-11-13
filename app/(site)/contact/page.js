@@ -2,7 +2,7 @@ import { BUSINESS } from "../../../lib/business-info";
 
 export const metadata = {
   title: "Contact — Sciencethoughts",
-  description: "Contact Sciencethoughts about the AI WhatsApp concierge for hotels, resorts and villas.",
+  description: "Contact ScienceThoughts about AI chat agents for your website or WhatsApp, white-label agents for agencies, or a chatbot audit.",
 };
 
 const labelStyle = { color: "var(--text-muted)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" };
@@ -19,7 +19,7 @@ export default function ContactPage() {
             Contact
           </h1>
           <p style={{ color: "var(--text-secondary)", lineHeight: "1.7", marginBottom: "28px", fontSize: "1.05rem" }}>
-            Questions about the AI concierge, a trial for your property, or an existing account: email is the quickest
+            Questions about an AI agent for your business, white-label agents for your agency&rsquo;s clients, a chatbot audit, or an existing account: email is the quickest
             way to reach us, or call during business hours.
           </p>
 

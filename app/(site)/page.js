@@ -1,267 +1,249 @@
 import SearchInput from "../../components/SearchInput";
 import ContactForm from "../../components/ContactForm";
 import InteractiveWebDemo from "../../components/InteractiveWebDemo";
-import { Brain, Briefcase, Sparkles, ArrowRight, Activity, Cpu, Mail, Calendar, CheckCircle2, Home as HomeIcon } from "lucide-react";
+import { Briefcase, Sparkles, ArrowRight, Activity, Calendar, CheckCircle2, Globe, Users, MessageCircle, ShieldCheck, ListChecks } from "lucide-react";
+
+// Home page for the business model set on 10 Nov 2026 (see the project doc "ScienceThoughts:
+// Business Overview"): AI chat agents for any business that takes enquiries, website first,
+// sold directly and through agencies. Prices are deliberately not shown yet; every offer routes
+// to a call. Claims here must stay true: no clients, results or integrations we don't have.
+
+const offers = [
+  {
+    id: "website",
+    name: "Website agent",
+    who: "For small businesses: clinics, home services, coaching centres, stays and more",
+    desc: "An agent on your website that answers customers at any hour from your own prices, policies and details, and sends every enquiry to you.",
+    points: ["Live on your website in about four days", "Enquiries delivered to your Google Sheet or CRM", "Updates to its information within 2 working days"],
+    icon: <Globe size={24} />,
+    color: "var(--accent-teal)",
+  },
+  {
+    id: "white-label",
+    name: "White-label agent",
+    who: "For marketing and web agencies",
+    desc: "Your clients ask for an AI chatbot and you have nobody to build one. We build and run an agent for each client, sold under your brand and your price.",
+    points: ["Your brand, your client relationship", "We build, host and maintain it in the background", "Your first client is a free 14-day pilot"],
+    icon: <Users size={24} />,
+    color: "var(--accent-violet)",
+  },
+  {
+    id: "whatsapp",
+    name: "WhatsApp upgrade",
+    who: "For businesses whose customers message on WhatsApp",
+    desc: "The same agent on your own WhatsApp number, answering customers where they already message you and handing chats to your team when needed.",
+    points: ["Works on your own WhatsApp number", "Same information, same rules as your website agent", "Needs Meta to verify your business, which can take several days"],
+    icon: <MessageCircle size={24} />,
+    color: "var(--accent-green)",
+  },
+  {
+    id: "audit",
+    name: "Chatbot audit",
+    who: "For teams that already run a chatbot",
+    desc: "A fixed-price test of your existing chatbot against a set of real customer questions, with a report of where it gives wrong or made-up answers.",
+    points: ["A test set built from your real questions", "A clear failure report", "Fixed price, agreed up front"],
+    icon: <ShieldCheck size={24} />,
+    color: "var(--accent-teal)",
+  },
+];
+
+const steps = [
+  { day: "Day 0", text: "You fill a short form: your website, your ten most common customer questions, and a price list or policy document." },
+  { day: "Days 1–2", text: "We build the agent from that information and test it against your questions." },
+  { day: "Day 3", text: "You try a private preview and send corrections." },
+  { day: "Day 4", text: "One line of code goes on your website, and the agent is live." },
+  { day: "Day 14", text: "Your first report: what customers asked, which enquiries were captured, and what the agent could not answer." },
+];
+
+const basics = [
+  "Answers only from your own prices, policies and details",
+  "Says so when it doesn't know, and alerts your team",
+  "Records every enquiry with the full conversation",
+  "Tested against real customer questions before it goes live",
+];
+
+const h2 = { fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" };
+const iconWrap = (color) => ({ color, background: "rgba(255,255,255,0.03)", padding: "8px", borderRadius: "12px", border: "1px solid var(--border-color)" });
 
 export default async function Home() {
-
-  const agents = [
-    {
-      id: "concierge-agent",
-      name: "WhatsApp Guest Concierge",
-      desc: "A 24/7 conversational AI that answers guest questions from your property's own knowledge base, quotes accurate rates, and extracts structured lead details from the conversation automatically — name, dates, budget, and requirements.",
-      icon: <Mail size={24} />,
-      color: "var(--accent-green)",
-      badge: "Zoho CRM Native",
-      stack: ["WhatsApp Cloud API", "OpenAI GPT-4o", "Zoho CRM", "Structured Lead Extraction"],
-      borderColor: "rgba(57, 255, 20, 0.2)"
-    },
-    {
-      id: "booking-agent",
-      name: "Direct Booking Concierge",
-      desc: "A custom 24/7 conversational assistant built to quote weekend tariffs, clarify property policies, and register bookings — grounded strictly in your property's verified knowledge base, and built to defer rather than guess.",
-      icon: <HomeIcon size={24} />,
-      color: "var(--accent-teal)",
-      badge: "Multi-Tenant Architecture",
-      stack: ["Next.js Edge", "Vercel KV", "OpenAI GPT-4o", "Gemini Failover"],
-      borderColor: "rgba(0, 242, 255, 0.2)"
-    }
-  ];
-
   return (
     <div style={{ background: "var(--bg-dark)" }}>
-      
-      {/* 1. Hero Section */}
+
+      {/* 1. Hero */}
       <section style={{ padding: "140px 0 100px 0", position: "relative", overflow: "hidden" }}>
         <div className="container" style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-          
           <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-color)", padding: "8px 18px", borderRadius: "30px", marginBottom: "25px", animation: "slideUp 0.6s ease-out" }}>
             <Activity size={14} className="animate-pulse-glow" style={{ color: "var(--accent-teal)" }} />
-            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", letterSpacing: "0.05em" }}>ENTERPRISE AI CONCIERGE PLATFORM</span>
+            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", letterSpacing: "0.05em" }}>AI CHAT AGENTS, BUILT AND RUN FOR YOU</span>
           </div>
 
           <h1 style={{ fontSize: "4.2rem", fontWeight: "900", fontFamily: "var(--font-display)", letterSpacing: "-0.03em", lineHeight: "1.1", marginBottom: "25px", animation: "slideUp 0.8s ease-out" }}>
-            The 24/7 AI Concierge for <span className="gradient-text">Luxury Hospitality</span>
+            An AI agent that answers your customers <span className="gradient-text">from your own information</span>
           </h1>
 
           <p style={{ fontSize: "1.3rem", color: "var(--text-secondary)", maxWidth: "800px", margin: "0 auto 45px auto", lineHeight: "1.6", fontWeight: "400", animation: "slideUp 1s ease-out" }}>
-            Convert late-night inquiries into confirmed reservations. Our AI agents engage guests instantly on WhatsApp, ground every answer in your property's own data, and sync captured lead details directly to your CRM.
+            We build, host and maintain AI chat agents for your website and WhatsApp. They answer at any hour, say so when they don&rsquo;t know, and send every enquiry to your team. No technical staff or new software needed.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "20px", alignItems: "center", flexWrap: "wrap", animation: "slideUp 1.2s ease-out" }}>
             <a href="/case-studies" className="nav-btn" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-              Explore Case Studies <ArrowRight size={18} />
+              Try the live demos <ArrowRight size={18} />
+            </a>
+            <a href="#contact" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 24px", fontSize: "1.05rem", color: "#fff", border: "1px solid var(--border-color)", borderRadius: "999px" }}>
+              Book a 30-minute call
             </a>
             <SearchInput />
           </div>
-
         </div>
-
-        {/* Decorative Grid Mesh */}
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px)", backgroundSize: "40px 40px", maskImage: "radial-gradient(circle at 50% 50%, black, transparent 80%)", pointerEvents: "none" }}></div>
       </section>
 
-      {/* 1.5 Powered By Strip (Social Proof) */}
+      {/* 1.5 What every agent does */}
       <section style={{ padding: "40px 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container">
-          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>Currently Integrated With</p>
-          <div style={{ display: "flex", justifyContent: "center", gap: "50px", flexWrap: "wrap", opacity: 0.35 }}>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>WhatsApp Business Platform</span>
-            <span style={{ fontSize: "1.2rem", fontWeight: "700", fontFamily: "var(--font-display)", color: "var(--text-muted)" }}>Zoho CRM</span>
+          <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "20px" }}>What every agent does</p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "28px", flexWrap: "wrap" }}>
+            {basics.map((b) => (
+              <span key={b} style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+                <CheckCircle2 size={16} color="var(--accent-teal)" /> {b}
+              </span>
+            ))}
           </div>
-          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "16px" }}>Other CRMs and PMS platforms built to order for Portfolio and Enterprise plans.</p>
         </div>
       </section>
 
-      {/* 2. Agent Showcase (The Lab) */}
-      <section id="lab" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
+      {/* 2. Offers */}
+      <section id="services" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
-          
           <div style={{ textAlign: "center", marginBottom: "60px" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-              <span style={{ color: "var(--accent-teal)", background: "rgba(0,242,255,0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(0,242,255,0.1)" }}>
-                <Cpu size={24} />
-              </span>
+              <span style={iconWrap("var(--accent-green)")}><Briefcase size={24} /></span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Pre-Built Industry Adapters</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Fully configured guest concierges ready to link with your property operations.</p>
+            <h2 style={h2}>What we offer</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "760px", margin: "0 auto" }}>
+              Every agent comes with a one-time setup and a monthly fee for hosting, monitoring and updates. Monthly plans are month to month. Pricing depends on what you need, so we share it on a short call.
+            </p>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center", gap: "30px", flexWrap: "wrap" }}>
-            {agents.map((agent) => (
-              <div 
-                key={agent.id} 
-                className="glass" 
-                style={{ 
-                  padding: "35px", 
-                  borderRadius: "24px", 
-                  display: "flex", 
-                  flexDirection: "column", 
-                  maxWidth: "500px",
-                  width: "100%",
-                  borderLeft: `4px solid ${agent.color}`,
-                  background: "rgba(10, 10, 12, 0.4)"
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "12px", background: `${agent.color}15`, color: agent.color }}>
-                    {agent.icon}
-                  </div>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--text-muted)", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-color)", padding: "4px 10px", borderRadius: "8px" }}>{agent.badge}</span>
-                </div>
-
-                <h3 style={{ fontSize: "1.45rem", fontWeight: "700", marginBottom: "12px", fontFamily: "var(--font-display)" }}>{agent.name}</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "25px", flexGrow: 1 }}>{agent.desc}</p>
-                
-                <div style={{ display: "flex", gap: "8px", marginBottom: "30px", flexWrap: "wrap" }}>
-                  {agent.stack.map((tech, idx) => (
-                    <span key={idx} style={{ fontSize: "0.75rem", background: "rgba(255,255,255,0.02)", color: "var(--text-secondary)", border: "1px solid var(--border-color)", padding: "4px 10px", borderRadius: "6px" }}>{tech}</span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "26px", alignItems: "stretch" }}>
+            {offers.map((o) => (
+              <div key={o.id} className="glass" style={{ padding: "32px 26px", borderRadius: "24px", borderTop: `4px solid ${o.color}`, display: "flex", flexDirection: "column", height: "100%", background: "rgba(10, 10, 12, 0.4)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "12px", background: "rgba(255,255,255,0.04)", color: o.color, marginBottom: "18px" }}>{o.icon}</div>
+                <h3 style={{ fontSize: "1.4rem", fontWeight: "700", marginBottom: "6px", fontFamily: "var(--font-display)" }}>{o.name}</h3>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "14px" }}>{o.who}</p>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "18px", flexGrow: 1 }}>{o.desc}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px 0", color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+                  {o.points.map((pt) => (
+                    <li key={pt} style={{ marginBottom: "9px", display: "flex", alignItems: "flex-start", gap: "9px" }}><CheckCircle2 size={16} color={o.color} style={{ flexShrink: 0, marginTop: "3px" }} /> {pt}</li>
                   ))}
-                </div>
-
-                <a href={`/case-studies`} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px", fontSize: "0.95rem", fontWeight: "600", color: "#fff", transition: "var(--transition-fast)" }} className="launch-link">
-                  View Demo Hub <ArrowRight size={14} style={{ transition: "transform 0.2s" }} />
-                </a>
+                </ul>
+                <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Ask about pricing</a>
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* Live Web Chat Demo Section */}
+      {/* 3. How it works */}
+      <section id="how-it-works" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
+        <div className="container" style={{ maxWidth: "900px" }}>
+          <div style={{ textAlign: "center", marginBottom: "45px" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
+              <span style={iconWrap("var(--accent-teal)")}><ListChecks size={24} /></span>
+            </div>
+            <h2 style={h2}>Live on your website in about four days</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>You fill one form and paste one line of code. We do the rest.</p>
+          </div>
+          <ol style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {steps.map((s) => (
+              <li key={s.day} className="glass" style={{ display: "flex", gap: "22px", alignItems: "flex-start", padding: "20px 24px", borderRadius: "16px", marginBottom: "14px", background: "rgba(10, 10, 12, 0.4)" }}>
+                <span style={{ minWidth: "92px", fontWeight: "800", color: "var(--accent-teal)", fontFamily: "var(--font-display)" }}>{s.day}</span>
+                <span style={{ color: "var(--text-secondary)", lineHeight: "1.6" }}>{s.text}</span>
+              </li>
+            ))}
+          </ol>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", textAlign: "center", marginTop: "18px" }}>
+            WhatsApp can be added later on your own number, once Meta has verified your business.
+          </p>
+        </div>
+      </section>
+
+      {/* 4. Live demo */}
       <section id="live-demo" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(10, 15, 25, 0.4)" }}>
         <div className="container" style={{ maxWidth: "900px" }}>
           <div style={{ textAlign: "center", marginBottom: "40px" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-              <span style={{ color: "var(--accent-teal)", background: "rgba(0, 242, 255, 0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(0, 242, 255, 0.1)" }}>
-                <Sparkles size={24} />
-              </span>
+              <span style={iconWrap("var(--accent-teal)")}><Sparkles size={24} /></span>
             </div>
-            <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "12px" }}>Test Our AI Concierge Live</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>Chat with a live demo concierge right here in your browser.</p>
+            <h2 style={{ ...h2, fontSize: "2.5rem", marginBottom: "12px" }}>Try an agent now</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem" }}>
+              Chat with a demo agent for one of three fictional businesses. Ask what a customer would ask, including something it shouldn&rsquo;t know.
+            </p>
           </div>
-
           <InteractiveWebDemo />
         </div>
       </section>
 
-      {/* 2.5 Case Studies & Benchmarks */}
-      <section id="case-studies-cta" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
+      {/* 5. Reliability */}
+      <section id="reliability" className="section-padding" style={{ borderTop: "1px solid var(--border-color)" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>How Reliability Is Built In</h2>
+            <h2 style={h2}>Built not to make things up</h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "800px", margin: "0 auto" }}>
-              Every reply is grounded in your property's own data, and the system is designed to keep responding even when a provider goes down.
+              A wrong answer about your price or policy, in writing, is worse than no answer. Every agent is built around that.
             </p>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "25px", marginBottom: "50px" }}>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Grounded, Brand-Safe Responses</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Answers are drawn strictly from your property's own verified knowledge base — the assistant is instructed to defer to your team rather than guess when information isn't there.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Only your information</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Answers come only from the details you give us. When something isn&rsquo;t there, the agent says it will check with your team, and your team is alerted.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Real-Time Guest Engagement</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Built on Next.js edge functions so guests get answers in the same conversation, not the next morning.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Tested before it goes live</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Each agent is checked against a set of your real customer questions, including ones it should refuse or pass to a person.</p>
             </div>
             <div className="glass" style={{ padding: "30px", borderRadius: "20px", textAlign: "center", background: "rgba(10, 10, 12, 0.4)" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Triple-Fallback Reliability</h4>
-              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>If OpenAI is unavailable, the system automatically fails over to Gemini, then to a rules-based offline responder — guests get a reply instead of a dead chat.</p>
+              <h4 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "8px" }}>Keeps replying if a provider fails</h4>
+              <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>If the main AI provider is down, the agent switches to a second one, then to a simple rules-based reply, so customers aren&rsquo;t left with a dead chat.</p>
             </div>
           </div>
-
           <div style={{ textAlign: "center" }}>
             <a href="/case-studies" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-              Explore Case Studies & Demos <ArrowRight size={18} />
+              See all three demos <ArrowRight size={18} />
             </a>
           </div>
         </div>
       </section>
 
-      {/* 3. Productized Services */}
-      <section id="services" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
-        <div className="container">
-          <div style={{ textAlign: "center", marginBottom: "60px" }}>
-             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-              <span style={{ color: "var(--accent-green)", background: "rgba(57, 255, 20, 0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(57, 255, 20, 0.1)" }}>
-                <Briefcase size={24} />
-              </span>
-            </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Simple, flat pricing</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>One price per property, starting with a free 7-day trial on your own WhatsApp number.</p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "30px", alignItems: "stretch" }}>
-            {/* Service 1 */}
-            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-teal)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Boutique Plan</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>₹4,999 <span style={{fontSize: "1rem", fontWeight: "400", color: "var(--text-muted)"}}>/ month</span></p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>+ ₹9,999 one-time setup fee</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>One flat price for a single villa, resort, hotel or homestay, whatever your nightly rate. Starts with a free 7-day trial on your own WhatsApp number.</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Answers only from your property&rsquo;s facts, and checks with you when unsure</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Replies to guests 24/7 on your own WhatsApp number</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-teal)"/> Booking enquiries (name, dates, room, guests) sent to your Google Sheet</li>
-              </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Get Started</a>
-            </div>
-
-            {/* Service 2 */}
-            <div className="glass" style={{ padding: "40px 30px", borderRadius: "24px", borderTop: "4px solid var(--accent-violet)", display: "flex", flexDirection: "column", height: "100%" }}>
-              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", marginBottom: "10px" }}>Several properties?</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "800", marginBottom: "20px" }}>Custom</p>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "15px" }}>Priced per group, agreed on a call</p>
-              <p style={{ color: "var(--text-secondary)", marginBottom: "25px", flexGrow: 1 }}>For owners running more than one villa, resort or homestay. Each property gets its own knowledge base and its own lead sheet, under one agreement.</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> A separate knowledge base for each property</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Leads sent to each property&rsquo;s own Google Sheet</li>
-                <li style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}><CheckCircle2 size={16} color="var(--accent-violet)"/> Zoho CRM sync (other CRMs on request)</li>
-              </ul>
-              <a href="#contact" className="nav-btn" style={{ display: "block", textAlign: "center", marginTop: "auto" }}>Talk to us</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Contact / Work With Me Section */}
+      {/* 6. Contact */}
       <section id="contact" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
         <div className="container" style={{ maxWidth: "1000px" }}>
-          
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-              <span style={{ color: "var(--accent-teal)", background: "rgba(0,242,255,0.05)", padding: "8px", borderRadius: "12px", border: "1px solid rgba(0,242,255,0.1)" }}>
-                <Calendar size={24} />
-              </span>
+              <span style={iconWrap("var(--accent-teal)")}><Calendar size={24} /></span>
             </div>
-            <h2 style={{ fontSize: "2.8rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px" }}>Schedule a 15-Min Consultation</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Discuss integrating the AI Concierge with your current booking engine and CRM.</p>
+            <h2 style={h2}>Book a 30-minute call</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>Tell us about your business, or your agency&rsquo;s clients, and we&rsquo;ll show you what an agent would do and what it costs.</p>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "40px", alignItems: "start" }}>
-            
-            {/* Calendly Column */}
             <div className="glass-panel" style={{ padding: "0", background: "rgba(15, 15, 20, 0.6)", height: "700px", overflow: "hidden", border: "1px solid var(--border-color)" }}>
-              <iframe 
-                src="https://calendly.com/nishithmanu/30min?hide_event_type_details=1&hide_gdpr_banner=1" 
-                width="100%" 
-                height="100%" 
+              <iframe
+                src="https://calendly.com/nishithmanu/30min?hide_event_type_details=1&hide_gdpr_banner=1"
+                width="100%"
+                height="100%"
                 frameBorder="0"
                 style={{ border: "none" }}
+                title="Book a call"
               ></iframe>
             </div>
-
-            {/* Email Form Column */}
             <div className="glass-panel" style={{ padding: "40px", background: "rgba(15, 15, 20, 0.6)" }}>
-              <h3 style={{ marginBottom: "20px", fontSize: "1.4rem", fontWeight: "700", fontFamily: "var(--font-display)" }}>Send an Inquiry</h3>
+              <h3 style={{ marginBottom: "20px", fontSize: "1.4rem", fontWeight: "700", fontFamily: "var(--font-display)" }}>Send an enquiry</h3>
               <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginBottom: "30px", lineHeight: "1.6" }}>
-                Send a direct message regarding your specific property PMS/CRM integrations, custom policies, or setup timelines.
+                Tell us what your customers usually ask, where they reach you (website, WhatsApp or both), and whether you&rsquo;re an agency asking for a client.
               </p>
               <ContactForm />
             </div>
-
           </div>
-
         </div>
       </section>
 

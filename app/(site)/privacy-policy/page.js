@@ -25,10 +25,10 @@ export default function PrivacyPolicy() {
             an individual/sole proprietor based in India — not a registered company.
           </p>
           <p style={pStyle}>
-            If you are a guest of a property that uses the Sciencethoughts AI concierge on its own WhatsApp number,
+            If you are a customer messaging a business that uses a ScienceThoughts AI agent on its website or WhatsApp,
             that is covered by a separate, more specific document: the{" "}
             <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>. This policy is about people visiting this
-            website, not guests messaging a client property.
+            website, not customers messaging a client business.
           </p>
 
           <div style={sectionStyle}>
@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Contact form:</strong> if you use the contact form on this site, we collect your name, email address, the scope you select, and your message.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Booking a call:</strong> the &ldquo;Schedule a Consultation&rdquo; option embeds Calendly. Calendly collects what you enter there directly, under its own privacy policy — Sciencethoughts only sees the appointment details Calendly passes on.</li>
-              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>The live demo widget:</strong> if you try the AI concierge demo on this site, whatever you type is processed the same way a real guest&rsquo;s message would be — see the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a> for exactly how that works (which AI providers see it, how long it&rsquo;s kept). If you share your name and contact details while exploring the demo because you want to be contacted, that inquiry is treated as a genuine lead and passed on for follow-up, the same as it would be for a real property.</li>
+              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>The live demo widget:</strong> if you try an AI agent demo on this site, whatever you type is processed the same way a real guest&rsquo;s message would be — see the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a> for exactly how that works (which AI providers see it, how long it&rsquo;s kept). If you share your name and contact details while exploring the demo because you want to be contacted, that inquiry is treated as a genuine lead and passed on for follow-up, the same as it would be for a real property.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Basic usage analytics:</strong> this site uses Vercel Analytics and Vercel Speed Insights, which measure aggregate traffic and page performance without setting tracking cookies or building an individual profile of you.</li>
             </ul>
             <p style={pStyle}>We do not ask for payment details, card numbers, or government ID numbers anywhere on this site.</p>
@@ -46,7 +46,7 @@ export default function PrivacyPolicy() {
             <h2 style={headingStyle}>2. Why it is collected</h2>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}>To respond to your inquiry or booking request.</li>
-              <li style={liStyle}>To let you evaluate the AI concierge product yourself, through the live demo.</li>
+              <li style={liStyle}>To let you evaluate the AI agents yourself, through the live demos.</li>
               <li style={liStyle}>To understand how the site is used, in aggregate, so it can be improved.</li>
             </ul>
           </div>

@@ -117,17 +117,17 @@ function TermsStep({ link, onAccepted }) {
 
       <p style={{ ...p, color: "var(--text-primary)", fontWeight: 700, fontSize: "1.1rem", margin: "28px 0 8px" }}>Step 2: Our terms</p>
       <ul style={{ paddingLeft: "20px", marginBottom: "12px" }}>
-        <li style={li}>Free 7-day trial on your own number. Nothing is paid until it ends.</li>
-        <li style={li}>Then ₹9,999 one-time setup and ₹4,999 a month (one property).</li>
-        <li style={li}><strong>Minimum term: 6 months</strong> from the day after your trial, then one month&rsquo;s notice to cancel.</li>
-        <li style={li}>Setup fee refunded in full if you cancel before then.</li>
+        <li style={li}>Fees are as in your written quote: a one-time setup fee and a monthly fee.</li>
+        <li style={li}>Setup is paid 50% before we start and 50% when your agent goes live.</li>
+        <li style={li}><strong>No minimum term:</strong> month to month; cancel by email at least 7 days before the next charge.</li>
+        <li style={li}>If we can&rsquo;t deliver your agent, everything you paid for it is refunded.</li>
       </ul>
       <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", color: "var(--text-primary)", lineHeight: 1.6, cursor: "pointer" }}>
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: "5px", width: "18px", height: "18px" }} />
         <span>
           I have read and accept the{" "}
           <a href="/client-terms" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-teal)" }}>Client Service Terms</a>{" "}
-          (version {CLIENT_TERMS.version}), including the 6-month minimum term, and I am authorised to accept them for this business.
+          (version {CLIENT_TERMS.version}), and I am authorised to accept them for this business.
         </span>
       </label>
       {formError && <div style={box("#ff5c5c")}>{formError}</div>}
@@ -277,8 +277,8 @@ export default function WhatsAppOnboarding() {
       <div style={card}>
         <h1 style={h1}>Connect your WhatsApp number</h1>
         <p style={p}>
-          This connects your property&rsquo;s WhatsApp Business number to the Sciencethoughts AI concierge, so it
-          can answer your guests. You&rsquo;ll log in with Facebook and follow Meta&rsquo;s own setup steps; it takes
+          This connects your business&rsquo;s WhatsApp number to your ScienceThoughts AI agent, so it
+          can answer your customers. You&rsquo;ll log in with Facebook and follow Meta&rsquo;s own setup steps; it takes
           about 5&ndash;10 minutes.
         </p>
 
@@ -288,10 +288,10 @@ export default function WhatsAppOnboarding() {
 
         {link && status !== "invalid" && (
           <>
-            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 600, marginTop: "20px" }}>Which number will guests message?</p>
+            <p style={{ ...p, color: "var(--text-primary)", fontWeight: 600, marginTop: "20px" }}>Which number will customers message?</p>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={li}>
-                <strong>Your current WhatsApp Business app number (recommended).</strong> You keep using the app as normal; your chats and contacts stay. Our assistant answers guests on the same number, and you see every reply in your app. When you reply to a guest yourself, the assistant stays quiet in that chat for 12 hours.
+                <strong>Your current WhatsApp Business app number (recommended).</strong> You keep using the app as normal; your chats and contacts stay. Our assistant answers customers on the same number, and you see every reply in your app. When you reply to a guest yourself, the assistant stays quiet in that chat for 12 hours.
                 <ul style={{ paddingLeft: "18px", marginTop: "6px" }}>
                   <li style={li}>Update the WhatsApp Business app first (version 2.24.17 or newer). The number should have been in use on the app for at least a week.</li>
                   <li style={li}>Keep your phone in hand: you&rsquo;ll confirm the connection inside the app.</li>
@@ -309,7 +309,7 @@ export default function WhatsAppOnboarding() {
               <li style={li}>Your business name exactly as registered, your website, and your business details.</li>
             </ul>
             <p style={{ ...p, fontSize: "0.92rem", color: "var(--text-muted)" }}>
-              After this, Meta also needs to verify your business (registration documents) before guests receive
+              After this, Meta also needs to verify your business (registration documents) before customers receive
               replies. We&rsquo;ll guide you through that separately.
             </p>
           </>

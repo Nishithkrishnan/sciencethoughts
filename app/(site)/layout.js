@@ -5,11 +5,11 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
-  title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
-  description: "AI-powered WhatsApp concierge for luxury villas, resorts, and boutique hotels. Instant guest replies, accurate rates from your own knowledge base, and qualified booking leads — 24/7, zero missed inquiries.",
+  title: "ScienceThoughts - AI chat agents for your website and WhatsApp",
+  description: "We build, host and maintain AI chat agents that answer your customers from your own information, say so when they don't know, and send every enquiry to your team. For small businesses and agencies.",
   openGraph: {
-    title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
-    description: "See how an AI concierge answers guest questions, quotes rates, and captures booking leads on WhatsApp. Try the live demo for a luxury villa or resort.",
+    title: "ScienceThoughts - AI chat agents for your website and WhatsApp",
+    description: "Try live demo agents for three fictional businesses and see how they answer, defer and record enquiries.",
     url: "https://sciencethoughts.com",
     siteName: "Sciencethoughts",
     images: [
@@ -17,7 +17,7 @@ export const metadata = {
         url: "https://sciencethoughts.com/og-image.jpg", // Add an og-image.jpg to your public folder later
         width: 1200,
         height: 630,
-        alt: "Sciencethoughts AI WhatsApp Concierge",
+        alt: "ScienceThoughts AI chat agents",
       },
     ],
     locale: "en_US",
@@ -25,8 +25,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sciencethoughts - AI WhatsApp Concierge for Luxury Hospitality",
-    description: "AI-powered WhatsApp concierge for luxury villas, resorts, and boutique hotels.",
+    title: "ScienceThoughts - AI chat agents for your website and WhatsApp",
+    description: "AI chat agents that answer your customers from your own information, built and run for you.",
   },
   icons: {
     icon: "/favicon.ico",
@@ -66,7 +66,7 @@ export default function RootLayout({ children }) {
                   <span className="logo-grey">THOUGHTS</span>
                 </a>
                 <p style={{ color: "var(--text-secondary)" }}>
-                  24/7 AI Concierge solutions for luxury hospitality, resorts, and premium vacation villa networks. Increase direct bookings and automate guest operations.
+                  AI chat agents for your website and WhatsApp, built, hosted and maintained for you. For small businesses and the agencies that serve them.
                 </p>
               </div>
               <div>

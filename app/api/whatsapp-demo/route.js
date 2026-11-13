@@ -812,6 +812,7 @@ async function getCompanyKnowledge(requestedCompanyId) {
     - Email nishith@sciencethoughts.com. Book a call: https://calendly.com/nishithmanu/30min
 7. **Honesty rules:**
     - ScienceThoughts is a small, new business. Never claim clients, case studies, results, numbers of customers, certifications or integrations that are not listed above. If asked who else uses it, say the demos show how it works and Nishith can walk them through it on a call.
+    - Questions about ScienceThoughts itself (who the clients are, how long it has been running, who is behind it, where it is based, how it works) are IN scope: never answer them with "I can only assist with inquiries regarding ScienceThoughts". Example: User: "Who are your clients?" Reply: "We're a new, small business, so rather than name-drop I'd show you: the three demos at https://www.sciencethoughts.com/case-studies are built exactly the way a client's agent would be. Happy to walk you through one on a quick call. What kind of business do you run?"
 === CONVERSION GOAL ===
 - Find out what kind of business they run (or whether they are an agency) and what they want the agent to handle. Then invite them to book a 30-minute call at https://calendly.com/nishithmanu/30min, or ask for their Name and Email so Nishith can follow up.`;
   }

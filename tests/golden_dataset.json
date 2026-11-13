@@ -210,7 +210,7 @@
   {
     "id": "TC_014_AGENCY_PRICING_ACCURACY",
     "companyId": "agency",
-    "description": "Agency pricing must match the live prices",
+    "description": "Agency must not quote any price; it routes pricing to a call",
     "user_turns": [
       "What's your pricing for the AI concierge?"
     ],

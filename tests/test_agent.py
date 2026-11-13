@@ -1,3 +1,4 @@
+import re
 import pytest
 from asserts.hard_asserts import HardAsserter
 from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric
@@ -50,9 +51,9 @@ RAG_CONTEXT_MAP = {
         # cause exactly that false failure. Keep this in sync with the live prompt by hand until
         # there's a single source of truth both the app and the tests read from — this is the
         # third time it's drifted.
-        "Pricing: every property starts with a free 7-day trial on its own WhatsApp number, no cost, no commitment.",
-        "After the trial, pricing is one flat rate per single property, regardless of nightly rate: ₹9,999 one-time onboarding fee plus ₹4,999/month. Groups get custom pricing.",
-        "Pilot offer: free 7-day trial connected live to the prospect's own WhatsApp number."
+        "Pricing depends on the offer and is shared by Nishith on a short call; the assistant never quotes figures.",
+        "Book a 30-minute call at https://calendly.com/nishithmanu/30min, or leave a name and email for follow-up.",
+        "An agency's first client is a free 14-day pilot."
     ]
 }
 
@@ -64,8 +65,12 @@ RAG_CONTEXT_MAP = {
 # exact flat figures appear, and guards against either retired structure reappearing — the
 # original flat 75k/25k pricing, and the 5 Sep tiered range's low end.
 # 23 Oct 2026: lowered to Rs 9,999 one-time + Rs 4,999/month per single property (groups: custom).
-LIVE_AGENCY_SETUP_FEE = "9,999"
-LIVE_AGENCY_MONTHLY_FEE = "4,999"
+# 13 Nov 2026: new business model (website agents, white-label for agencies, WhatsApp upgrade,
+# audits). The assistant quotes NO prices; it routes pricing to a call. So every old price is
+# retired, and the pricing check asserts no figure appears and the call is offered.
+RETIRED_OCT_SETUP_FEE = "9,999"
+RETIRED_OCT_MONTHLY_FEE = "4,999"
+PRICING_CALL_LINK = "calendly.com/nishithmanu/30min"
 RETIRED_SEP_SETUP_FEE = "25,000"
 RETIRED_SEP_MONTHLY_FEE = "12,000"
 RETIRED_FLAT_SETUP_FEE = "75,000"
@@ -190,13 +195,12 @@ class TestWhatsAppAgent:
                 f"Reply quoted the retired tiered range's low end ({RETIRED_TIERED_MONTHLY_FEE_LOW}) — pricing prompt may have reverted to tiered pricing: {final_reply}"
             assert RETIRED_SEP_SETUP_FEE not in final_reply and RETIRED_SEP_MONTHLY_FEE not in final_reply, \
                 f"Reply quoted the retired Sep pricing (25,000 / 12,000) — pricing prompt may have reverted: {final_reply}"
-            assert LIVE_AGENCY_SETUP_FEE in final_reply, \
-                f"Expected the current flat setup fee ({LIVE_AGENCY_SETUP_FEE}) in reply, got: {final_reply}"
-            assert LIVE_AGENCY_MONTHLY_FEE in final_reply, \
-                f"Expected the current flat monthly fee ({LIVE_AGENCY_MONTHLY_FEE}) in reply, got: {final_reply}"
-            trial_phrases = ["trial", "free"]
-            assert any(phrase in final_reply.lower() for phrase in trial_phrases), \
-                f"Expected the free trial to be mentioned before/alongside pricing, got: {final_reply}"
+            assert RETIRED_OCT_SETUP_FEE not in final_reply and RETIRED_OCT_MONTHLY_FEE not in final_reply, \
+                f"Reply quoted the retired Oct pricing (9,999 / 4,999): {final_reply}"
+            assert not re.search(r"(₹|\$|rs\.?\s?|inr|usd)\s?\d", final_reply, re.IGNORECASE), \
+                f"The assistant must not quote any price yet, got: {final_reply}"
+            assert PRICING_CALL_LINK in final_reply or "call" in final_reply.lower(), \
+                f"Expected pricing to be routed to a call, got: {final_reply}"
 
         # ---- 5c. Hallucination-guard phrasing check for "not in the knowledge base" cases ----
         # Regression check for the earlier fix that stopped the agent from inventing Wi-Fi/

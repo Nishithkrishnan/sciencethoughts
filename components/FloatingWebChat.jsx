@@ -9,7 +9,7 @@ export default function FloatingWebChat() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hello! I am the ScienceThoughts AI Business Assistant. How can I help you automate your client onboarding, lead generation, or CRM sync today?"
+      content: "Hi! I'm the ScienceThoughts assistant. We build AI chat agents that answer your customers on your website or WhatsApp, from your own information. What kind of business do you run?"
     }
   ]);
   const [input, setInput] = useState("");

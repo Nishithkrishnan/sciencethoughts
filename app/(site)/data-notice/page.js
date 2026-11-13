@@ -1,158 +1,161 @@
+import { BUSINESS } from "../../../lib/business-info";
+
+// Customer-facing notice for anyone chatting with an AI agent that ScienceThoughts builds and runs
+// (a client's website or WhatsApp, or the demos on this site). Every agent links here in its first
+// message. Keep section 5 in step with the code: session TTL (24h) in app/api/whatsapp-demo/route.js,
+// escalations (14 days), owner-takeover marker (12h, lib/coexistence.js), web rate limit (24h).
 export const metadata = {
-  title: "Guest Data Notice — Sciencethoughts",
-  description: "How the Sciencethoughts AI concierge handles information shared by guests on WhatsApp.",
+  title: "Customer Data Notice — ScienceThoughts",
+  description: "How ScienceThoughts AI chat agents handle the information you share on a business's website or WhatsApp.",
 };
 
 const sectionStyle = { marginTop: "36px" };
 const headingStyle = { fontSize: "1.3rem", fontWeight: "700", color: "var(--text-primary)", marginBottom: "12px", fontFamily: "var(--font-display)" };
 const pStyle = { color: "var(--text-secondary)", lineHeight: "1.7", marginBottom: "14px", fontSize: "1rem" };
 const liStyle = { color: "var(--text-secondary)", lineHeight: "1.7", marginBottom: "10px" };
+const linkStyle = { color: "var(--accent-teal)" };
+const strong = { color: "var(--text-primary)" };
+const cell = { borderBottom: "1px solid var(--border-color)", padding: "10px 12px", color: "var(--text-secondary)", verticalAlign: "top", lineHeight: "1.6" };
+const headCell = { ...cell, color: "var(--text-primary)", fontWeight: 700, textAlign: "left" };
 
-export default function GuestDataNotice() {
+const RETENTION = [
+  ["Chat history on WhatsApp (used to keep the conversation going)", "Deleted 24 hours after your last message"],
+  ["Website chat", "Your browser holds the conversation; we do not keep it after replying, except the records below"],
+  ["Enquiry record (your details and the conversation, if you ask to be contacted or book)", "Kept while the business uses our service; deleted from our systems within 30 days after it stops"],
+  ["A question the agent could not answer, with any contact details you gave", "Deleted automatically after 14 days"],
+  ["Marker that staff have replied to you on WhatsApp (so the agent stays quiet)", "Deleted automatically after 12 hours"],
+  ["Website chat: your IP address, counted for a daily anti-abuse limit", "Deleted automatically after 24 hours"],
+  ["Copies held by the AI providers that generate replies", "Up to about 30 days, for security and abuse monitoring"],
+];
+
+export default function CustomerDataNotice() {
   return (
     <div style={{ background: "var(--bg-dark)", minHeight: "100vh" }}>
       <section style={{ padding: "120px 0 60px 0" }}>
         <div className="container" style={{ maxWidth: "780px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "2.4rem", fontWeight: "900", fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "10px" }}>
-            Guest Data Notice
+            Customer Data Notice
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "1rem", marginBottom: "10px" }}>
-            How the Sciencethoughts AI concierge handles information you share on WhatsApp
+            How our AI chat agents handle the information you share
           </p>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>
-            Last updated: 23 October 2026
-          </p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 13 November 2026</p>
 
           <p style={pStyle}>
-            This notice explains what happens to information you share when you message a property&rsquo;s AI concierge
-            on WhatsApp, where that concierge is built and run by Sciencethoughts. It applies to every property that
-            uses this service, and is meant to be read alongside, not instead of, that property&rsquo;s own privacy policy.
+            This notice applies when you chat with an AI agent that {BUSINESS.name} builds and runs for a business, on that
+            business&rsquo;s website or WhatsApp, and when you try one of the demo agents on sciencethoughts.com. Read it
+            alongside the privacy policy of the business you are contacting.
           </p>
 
           <div style={sectionStyle}>
-            <h2 style={headingStyle}>1. What is collected</h2>
-            <p style={pStyle}>During a conversation, the concierge may collect:</p>
+            <h2 style={headingStyle}>1. Who is responsible</h2>
+            <p style={pStyle}>
+              The business you are contacting decides how your information is used and is responsible for it (it is the
+              &ldquo;data fiduciary&rdquo; under India&rsquo;s Digital Personal Data Protection Act, 2023, and the
+              &ldquo;controller&rdquo; under the UK or EU GDPR where they apply). {BUSINESS.name} ({BUSINESS.owner}, sole
+              proprietor, {BUSINESS.location}) runs the agent and processes your information only on the business&rsquo;s
+              behalf. For the demos on this site, {BUSINESS.name} is responsible.
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>2. What is collected</h2>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={liStyle}>Information you choose to share: your name, phone number, email address, travel dates, number of guests, and any preferences or questions you type into the chat.</li>
-              <li style={liStyle}>The WhatsApp number the message came from, and the time of the conversation.</li>
+              <li style={liStyle}>What you choose to type: your questions and, if you share them, your name, phone number, email address, preferred dates or times, and details of what you need.</li>
+              <li style={liStyle}>On WhatsApp: the number you message from and the time of the conversation.</li>
+              <li style={liStyle}>On a website: your IP address, used only to apply a daily limit that stops automated abuse.</li>
             </ul>
             <p style={pStyle}>
-              We do not ask for payment details, card numbers, government ID numbers, health information, or other
-              sensitive personal data through this chat, and you should not share them here.
+              The agent does not ask for payment details, card numbers, government ID numbers, health information or other
+              sensitive information. Please do not share them in the chat.
             </p>
           </div>
 
           <div style={sectionStyle}>
-            <h2 style={headingStyle}>2. Why it is collected</h2>
+            <h2 style={headingStyle}>3. Why it is used</h2>
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={liStyle}>To answer your question in real time — rates, amenities, activities, policies.</li>
-              <li style={liStyle}>To pass a booking inquiry, or a question the assistant cannot confidently answer, to the property&rsquo;s team so a person can follow up.</li>
-              <li style={liStyle}>To improve the accuracy of answers for that property.</li>
-            </ul>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>3. Where the information goes</h2>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text-primary)" }}>To generate a reply.</strong> Conversation text is sent
-              to OpenAI, and if that is unavailable to Google (Gemini), solely to produce an answer. If both are
-              unavailable, a limited set of pre-written responses is used and nothing leaves our system. Under these
-              providers&rsquo; API terms, content sent this way is not used to train their models. They may retain it
-              briefly — typically up to 30 days — for security and abuse monitoring, after which it is deleted.
-            </p>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text-primary)" }}>Processing outside India.</strong> These providers
-              process the text on servers located outside India, principally in the United States.
-            </p>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text-primary)" }}>Questions the assistant cannot answer.</strong> The
-              question, and your contact details if you gave them, are stored so the property&rsquo;s team can follow
-              up. These records are held in an encrypted database and are automatically deleted 14 days after they
-              are created.
-            </p>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text-primary)" }}>Booking inquiries.</strong> If you are making an
-              inquiry, your details (name, contact information, dates, and what you asked about) are recorded in a
-              dedicated record for that property that only the property&rsquo;s team can access, so a person there
-              can follow up. A copy is also kept in Sciencethoughts&rsquo; own systems for as long as the property is
-              a Sciencethoughts client, so the service can keep working and so the property has a backup record — see
-              Section 4 for how long this is kept.
-            </p>
-            <p style={pStyle}>
-              <strong style={{ color: "var(--text-primary)" }}>Never.</strong> We do not sell guest information, we
-              do not share it with other properties, and we do not market to you on our own behalf.
-            </p>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>4. How long it is kept</h2>
-            <p style={pStyle}>
-              Information used only to generate a live reply is not stored by us beyond the conversation. Questions
-              the assistant could not confidently answer, and any contact details given with them, are kept for 14
-              days and then deleted automatically. Booking-inquiry details are different: we keep those for as long
-              as the property is a Sciencethoughts client, so the service and the property&rsquo;s own record of the
-              inquiry keep working, and delete them within 30 days of that relationship ending, except where the law
-              requires us to keep something longer. This matches standard practice among hosted guest-messaging
-              services. Once your details reach the property&rsquo;s own systems, how long the property itself keeps
-              them is governed by its own policy, separate from ours.
-            </p>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>5. Security</h2>
-            <p style={pStyle}>
-              Messages travel over encrypted connections, including WhatsApp&rsquo;s own encrypted transport to Meta.
-              Property credentials are stored encrypted. Access to system configuration and to stored escalation
-              records is limited to the Service Provider. If a breach affecting guest information occurs, the
-              property is notified promptly so it can meet its own obligations.
-            </p>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>6. Children</h2>
-            <p style={pStyle}>
-              This chat is not intended for use by anyone under 18. We do not knowingly collect personal information
-              from a child through it. Where a booking inquiry mentions children travelling, only the information the
-              adult chooses to provide is captured. If you believe a child has shared personal information here,
-              contact us using the details in Section 8 and it will be deleted.
-            </p>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>7. Your choices</h2>
-            <p style={pStyle}>
-              Sharing your name, phone number or email in this chat is entirely up to you. You can ask a question and
-              get an answer without giving any contact details — they are only needed if you want the property&rsquo;s
-              team to get back to you.
-            </p>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={headingStyle}>8. Your rights, and who to contact</h2>
-            <p style={pStyle}>
-              Under India&rsquo;s Digital Personal Data Protection Act, 2023 you may ask for access to the
-              information held about you, ask for it to be corrected or erased, raise a grievance, and nominate
-              someone to exercise these rights on your behalf. To do any of these:
-            </p>
-            <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
-              <li style={liStyle}>For information already passed to the property — contact that property&rsquo;s own guest services or reservations team directly.</li>
-              <li style={liStyle}>For anything still held in our own systems — the 14-day escalation window, or a booking-inquiry copy kept while the property is a client, both described in Section 4 — contact Sciencethoughts at <a href="mailto:nishith@sciencethoughts.com" style={{ color: "var(--accent-teal)" }}>nishith@sciencethoughts.com</a>.</li>
+              <li style={liStyle}>To answer your question straight away, from the business&rsquo;s own information.</li>
+              <li style={liStyle}>To pass your enquiry, or a question the agent cannot answer, to the business&rsquo;s team so a person can reply.</li>
+              <li style={liStyle}>To check and improve the accuracy of that business&rsquo;s agent.</li>
             </ul>
             <p style={pStyle}>
-              Grievances are acknowledged and responded to within 30 days. The person responsible is Nishith
-              Krishnan, reachable at <a href="mailto:nishith@sciencethoughts.com" style={{ color: "var(--accent-teal)" }}>nishith@sciencethoughts.com</a>.
+              The business&rsquo;s reason for using your information is to respond to your request; under the UK or EU
+              GDPR this is normally its legitimate interest or steps you ask for before a contract.
             </p>
           </div>
 
           <div style={sectionStyle}>
-            <h2 style={headingStyle}>9. Our approach to Indian data protection law</h2>
+            <h2 style={headingStyle}>4. Where it goes</h2>
+            <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
+              <li style={liStyle}><strong style={strong}>To generate a reply:</strong> the conversation text is sent to OpenAI, or to Google (Gemini) if OpenAI is unavailable. Under their API terms, this content is not used to train their models. If both are unavailable, a simple pre-written reply is used instead.</li>
+              <li style={liStyle}><strong style={strong}>Enquiries:</strong> sent to the business, usually as a row in its Google Sheet or a record in its CRM, through an automation service.</li>
+              <li style={liStyle}><strong style={strong}>Hosting:</strong> our systems run on cloud hosting and an encrypted cloud database. WhatsApp messages also pass through Meta, WhatsApp&rsquo;s owner.</li>
+              <li style={liStyle}><strong style={strong}>Never:</strong> your information is not sold, not shared with other businesses, and not used by {BUSINESS.name} to market to you.</li>
+            </ul>
             <p style={pStyle}>
-              This notice and the underlying system are designed around the core principles of the Digital Personal
-              Data Protection Act, 2023 — collecting only what is needed, using it only for the stated purpose, and
-              not keeping it longer than necessary. The property you are messaging is the data fiduciary for guest
-              information collected through this chat; Sciencethoughts processes it on the property&rsquo;s behalf.
-              This is a good-faith design approach and a description of how the system actually works, not a formal
-              compliance certification.
+              <strong style={strong}>Outside your country:</strong> these services may process your information outside
+              the country you are in, including in India and the United States. Where the UK or EU GDPR applies, such
+              transfers rely on recognised safeguards, such as standard contractual clauses.
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>5. How long it is kept</h2>
+            <div style={{ overflowX: "auto", marginBottom: "14px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.95rem" }}>
+                <thead>
+                  <tr><th style={headCell}>Information</th><th style={headCell}>How long we keep it</th></tr>
+                </thead>
+                <tbody>
+                  {RETENTION.map(([what, how]) => (
+                    <tr key={what}><td style={cell}>{what}</td><td style={cell}>{how}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p style={pStyle}>
+              Once an enquiry reaches the business&rsquo;s own sheet or systems, how long the business keeps it is set by
+              its own policy. Our server logs do not record message text or full phone numbers.
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>6. Security</h2>
+            <p style={pStyle}>
+              Messages travel over encrypted connections. Business credentials are stored encrypted, each business&rsquo;s
+              data is kept separate, and access is limited to the people who run the service. If a breach affects your
+              information, we tell the business promptly so it can meet its own duties.
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>7. Children</h2>
+            <p style={pStyle}>
+              These chats are not meant for anyone under 18. If you believe a child has shared personal information through
+              one, contact us (section 9) and it will be deleted.
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>8. Your choices and rights</h2>
+            <p style={pStyle}>
+              You can ask questions without giving any contact details; they are needed only if you want the business to
+              get back to you. Depending on where you live, you may have the right to access your information, correct it,
+              have it erased, restrict or object to its use, receive a copy, withdraw consent, and nominate someone to act
+              for you. In the UK or EU you may also complain to your data protection authority (in the UK, the
+              Information Commissioner&rsquo;s Office).
+            </p>
+          </div>
+
+          <div style={sectionStyle}>
+            <h2 style={headingStyle}>9. Who to contact</h2>
+            <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
+              <li style={liStyle}>For information the business already holds, contact that business directly.</li>
+              <li style={liStyle}>For anything held in our systems, or for the demos on this site, email <a href={`mailto:${BUSINESS.email}`} style={linkStyle}>{BUSINESS.email}</a>. We pass requests about a business&rsquo;s customers to that business and help it respond.</li>
+            </ul>
+            <p style={pStyle}>
+              Requests and grievances are acknowledged and answered within 30 days. The person responsible is
+              {" "}{BUSINESS.owner}, at <a href={`mailto:${BUSINESS.email}`} style={linkStyle}>{BUSINESS.email}</a>.
             </p>
           </div>
         </div>

@@ -60,9 +60,9 @@ export default function CaseStudies() {
                 </div>
 
                 <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px 0", color: "var(--text-secondary)", fontSize: "1rem" }}>
-                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Grounded Tariff & Policy Answers:</strong> Instructed to defer to the property team rather than guess when information isn't in the verified knowledge base.</li>
-                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Zoho CRM Sync:</strong> Pushes captured guest and lead details directly to Zoho when connected.</li>
-                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>WhatsApp Native:</strong> Communicates through the guest's preferred channel with zero app downloads required.</li>
+                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Answers from its own facts:</strong> told to pass a question to the team rather than guess when the answer isn&apos;t in the business&apos;s information.</li>
+                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Enquiries recorded:</strong> a customer&apos;s details and the conversation go to the business&apos;s Google Sheet or CRM.</li>
+                  <li style={{ marginBottom: "12px", display: "flex", alignItems: "flex-start", gap: "10px" }}><CheckCircle2 size={20} color="var(--accent-teal)" style={{ flexShrink: 0, marginTop: "2px" }}/> <strong>Website or WhatsApp:</strong> works in a website chat or on WhatsApp, with nothing for the customer to install.</li>
                 </ul>
 
                 {/* Note: this is a proof-of-concept demo, not a completed client engagement with
@@ -71,7 +71,7 @@ export default function CaseStudies() {
                     against real guest traffic and shouldn't be presented as a case-study result. */}
                 <h3 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "15px", color: "#fff" }}>What This Demo Shows</h3>
                 <p style={{ color: "var(--text-secondary)", lineHeight: "1.6" }}>
-                  A guest can ask about amenities, pet policy, or rates at any hour and get an accurate, grounded answer immediately — instead of waiting until the property team is available the next morning. Try it yourself in the live demo.
+                  A customer can ask about rates, house rules or meals at any hour and get an accurate answer straight away, instead of waiting until the owner is free the next morning. Try it yourself in the live demo, including a question it shouldn&apos;t know.
                 </p>
               </div>
 
@@ -92,14 +92,14 @@ export default function CaseStudies() {
         <div className="container" style={{ textAlign: "center" }}>
           <div className="glass" style={{ padding: "40px", borderRadius: "24px", maxWidth: "800px", margin: "0 auto", border: "1px solid rgba(37, 211, 102, 0.2)" }}>
             <h2 style={{ fontSize: "2rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "15px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-              <span style={{ color: "#25D366" }}>📱</span> Test WhatsApp Cloud Integration
+              <span style={{ color: "#25D366" }}>📱</span> Try the demos on WhatsApp
             </h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: "1.6", marginBottom: "30px" }}>
-              Experience the response speed, multilingual accuracy, and conversion-flow triggers directly on your phone. Chat with the same demo assistants on WhatsApp.
+              Chat with the same three demo agents on your phone. Type a number from the menu to pick one.
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", alignItems: "center" }}>
               <a 
-                href="https://wa.me/15550118852?text=%2Freset" 
+                href="https://wa.me/918015424935?text=%2Freset" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 style={{ 
@@ -129,12 +129,12 @@ export default function CaseStudies() {
       {/* CTA Section */}
       <section className="section-padding" style={{ background: "rgba(0, 242, 255, 0.03)", borderTop: "1px solid var(--border-color)", borderBottom: "1px solid var(--border-color)" }}>
         <div className="container" style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "20px" }}>Ready for Your Own Sandbox?</h2>
+          <h2 style={{ fontSize: "2.5rem", fontWeight: "800", fontFamily: "var(--font-display)", marginBottom: "20px" }}>Want an agent for your business?</h2>
           <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", maxWidth: "600px", margin: "0 auto 30px auto" }}>
-            We build custom 14-day staging pilots pre-loaded with your property policies and tariffs so your team can test the engine risk-free.
+            Tell us what your customers ask. We build a private preview from your own information, so you can test it before anything goes live.
           </p>
           <a href="/#contact" className="nav-btn" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "16px 32px", fontSize: "1.05rem" }}>
-            Request a Free Pilot <ArrowRight size={18} />
+            Book a call <ArrowRight size={18} />
           </a>
         </div>
       </section>

@@ -20,7 +20,7 @@ export default function ContactPage() {
           </h1>
           <p style={{ color: "var(--text-secondary)", lineHeight: "1.7", marginBottom: "28px", fontSize: "1.05rem" }}>
             Questions about an AI agent for your business, white-label agents for your agency&rsquo;s clients, a chatbot audit, or an existing account: email is the quickest
-            way to reach us, or call during business hours.
+            way to reach us. We reply within one working day.
           </p>
 
           <div style={rowStyle}>
@@ -53,7 +53,7 @@ export default function ContactPage() {
               <a href="/privacy-policy" style={linkStyle}>Privacy Policy</a> &middot;{" "}
               <a href="/client-terms" style={linkStyle}>Client Service Terms</a> &middot;{" "}
               <a href="/refund-policy" style={linkStyle}>Cancellation &amp; Refund Policy</a> &middot;{" "}
-              <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>
+              <a href="/data-notice" style={linkStyle}>Customer Data Notice</a>
             </div>
           </div>
         </div>

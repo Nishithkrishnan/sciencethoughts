@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
           <h1 style={{ fontSize: "2.4rem", fontWeight: "900", fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "10px" }}>
             Privacy Policy
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 23 October 2026</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 13 November 2026</p>
 
           <p style={pStyle}>
             This policy covers sciencethoughts.com itself — the marketing site, the live demo widget, and the
@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
           <p style={pStyle}>
             If you are a customer messaging a business that uses a ScienceThoughts AI agent on its website or WhatsApp,
             that is covered by a separate, more specific document: the{" "}
-            <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>. This policy is about people visiting this
+            <a href="/data-notice" style={linkStyle}>Customer Data Notice</a>. This policy is about people visiting this
             website, not customers messaging a client business.
           </p>
 
@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Contact form:</strong> if you use the contact form on this site, we collect your name, email address, the scope you select, and your message.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Booking a call:</strong> the &ldquo;Schedule a Consultation&rdquo; option embeds Calendly. Calendly collects what you enter there directly, under its own privacy policy — Sciencethoughts only sees the appointment details Calendly passes on.</li>
-              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>The live demo widget:</strong> if you try an AI agent demo on this site, whatever you type is processed the same way a real guest&rsquo;s message would be — see the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a> for exactly how that works (which AI providers see it, how long it&rsquo;s kept). If you share your name and contact details while exploring the demo because you want to be contacted, that inquiry is treated as a genuine lead and passed on for follow-up, the same as it would be for a real property.</li>
+              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>The live demo widget:</strong> if you try an AI agent demo on this site, whatever you type is processed the same way a real customer&rsquo;s message would be — see the <a href="/data-notice" style={linkStyle}>Customer Data Notice</a> for exactly how that works (which AI providers see it, how long it&rsquo;s kept). If you share your name and contact details while exploring the demo because you want to be contacted, that inquiry is treated as a genuine lead and passed on for follow-up, the same as it would be for a real property.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Basic usage analytics:</strong> this site uses Vercel Analytics and Vercel Speed Insights, which measure aggregate traffic and page performance without setting tracking cookies or building an individual profile of you.</li>
             </ul>
             <p style={pStyle}>We do not ask for payment details, card numbers, or government ID numbers anywhere on this site.</p>
@@ -56,7 +56,7 @@ export default function PrivacyPolicy() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Contact form</strong> submissions are relayed by Web3Forms, a third-party form-processing service, straight to Nishith&rsquo;s own inbox. Web3Forms processes the submission in transit; Sciencethoughts does not maintain a separate contact-form database beyond that inbox.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Calendly bookings</strong> are handled entirely by Calendly under its own privacy policy.</li>
-              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Demo widget conversations</strong> are sent to OpenAI, and if unavailable, Google (Gemini), solely to generate a reply — see the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>, Section 3, for the detail on retention and processing location. A demo lead that shares contact details may also be logged to Sciencethoughts&rsquo; own CRM, the same as a real property inquiry would be.</li>
+              <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Demo widget conversations</strong> are sent to OpenAI, and if unavailable, Google (Gemini), solely to generate a reply — see the <a href="/data-notice" style={linkStyle}>Customer Data Notice</a>, Section 3, for the detail on retention and processing location. A demo lead that shares contact details may also be logged to Sciencethoughts&rsquo; own CRM, the same as a real property inquiry would be.</li>
               <li style={liStyle}><strong style={{ color: "var(--text-primary)" }}>Analytics</strong> data stays within Vercel&rsquo;s aggregate reporting; it is not sold or shared for advertising.</li>
             </ul>
             <p style={pStyle}>We do not sell any of this information, and we do not use it to advertise to you elsewhere.</p>
@@ -76,9 +76,9 @@ export default function PrivacyPolicy() {
             <p style={pStyle}>
               Contact-form messages are kept as long as needed to respond to you and for a reasonable record of the
               conversation afterward. Demo-widget conversation data follows the same retention described in the{" "}
-              <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>: live-reply text is not stored beyond
-              the conversation itself, unanswered questions are kept 14 days, and a captured lead/inquiry is kept
-              while there is an active conversation about your inquiry and deleted within 30 days after that ends.
+              <a href="/data-notice" style={linkStyle}>Customer Data Notice</a>: the website chat is not kept by us after
+              replying, unanswered questions are kept 14 days, and an enquiry you ask us to follow up is kept while we
+              are in touch about it and deleted within 30 days after that ends.
             </p>
           </div>
 

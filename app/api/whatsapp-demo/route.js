@@ -68,7 +68,7 @@ function escapeHtml(str) {
 }
 
 // How long a chat session (recent history + transcript) is kept after the guest's LAST message.
-// 24 hours is WhatsApp's own customer-service window, i.e. one conversation. The Guest Data Notice
+// 24 hours is WhatsApp's own customer-service window, i.e. one conversation. The Customer Data Notice
 // (/data-notice) says live-reply content is not kept beyond the conversation; this used to be 60
 // days, which contradicted it. Booking enquiries and escalations are stored separately.
 const SESSION_TTL_SECONDS = String(24 * 60 * 60);
@@ -365,6 +365,15 @@ export async function POST(req) {
       }
 
       const { text, companyId = "agency", history = [], full_history } = body;
+
+      // A retired or unknown demo id (an old ?tenant= link, or an embed snippet for a tenant that no
+      // longer exists): say the demo has moved instead of answering as some other business.
+      if (companyId !== 'agency' && !(await getTenantMeta(companyId)).known) {
+        return NextResponse.json({
+          reply: "This demo is no longer available. You can try the current demo agents at https://www.sciencethoughts.com/case-studies, or email nishith@sciencethoughts.com if you were sent this link for your own business.",
+          lead_extracted: null
+        });
+      }
       const formattedHistory = [...history, { role: "user", content: text }];
       const aiPayload = await getOpenAIStructuredResponse(formattedHistory, companyId, true);
 
@@ -613,10 +622,10 @@ export async function POST(req) {
             }
 
           // 1b. One-time guest-data disclosure — fires once per new conversation (history is
-          // empty), not on every message. A published Guest Data Notice a guest never sees
+          // empty), not on every message. A published Customer Data Notice a customer never sees
           // doesn't amount to disclosure at the point of collection, so this sends a short
           // heads-up as its own WhatsApp message before the AI's actual reply. See
-          // /app/data-notice/page.js for the linked page and the Guest Data Notice draft's
+          // /app/data-notice/page.js for the linked page and the Customer Data Notice draft's
           // own appendix for the wording this is based on.
           if (session.history.length === 0) {
             const disclosurePropertyName = (await getTenantMeta(session.companyId)).name;

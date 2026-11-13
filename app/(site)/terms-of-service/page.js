@@ -17,7 +17,7 @@ export default function TermsOfService() {
           <h1 style={{ fontSize: "2.4rem", fontWeight: "900", fontFamily: "var(--font-display)", color: "var(--text-primary)", marginBottom: "10px" }}>
             Terms of Service
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 23 October 2026</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "10px" }}>Last updated: 13 November 2026</p>
 
           <p style={pStyle}>
             These terms cover your use of sciencethoughts.com — the marketing site and its live demo — and are
@@ -39,7 +39,7 @@ export default function TermsOfService() {
             <ul style={{ paddingLeft: "20px", marginBottom: "14px" }}>
               <li style={liStyle}>The demo businesses are fictional. Anything you ask a demo agent is answered from that fictional business&rsquo;s sample information, for illustration only. No booking, appointment, order or payment made through a demo is real.</li>
               <li style={liStyle}>The AI can make mistakes. It is designed to defer rather than guess when it lacks grounded information, but it is not guaranteed error-free — do not rely on a demo response as fact about any real business.</li>
-              <li style={liStyle}>How your demo conversation is processed and retained is described in the <a href="/data-notice" style={linkStyle}>Guest Data Notice</a> and the <a href="/privacy-policy" style={linkStyle}>Privacy Policy</a>.</li>
+              <li style={liStyle}>How your demo conversation is processed and retained is described in the <a href="/data-notice" style={linkStyle}>Customer Data Notice</a> and the <a href="/privacy-policy" style={linkStyle}>Privacy Policy</a>.</li>
             </ul>
           </div>
 

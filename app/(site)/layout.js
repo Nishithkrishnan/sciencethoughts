@@ -47,7 +47,7 @@ export default function RootLayout({ children }) {
             </a>
             <nav className="nav-links">
               <a href="/" className="nav-link">Home</a>
-              <a href="/case-studies" className="nav-link">Case Studies</a>
+              <a href="/case-studies" className="nav-link">Demos</a>
               <a href="/#contact" className="nav-btn">Consultation</a>
             </nav>
           </div>
@@ -73,7 +73,7 @@ export default function RootLayout({ children }) {
                 <h4 className="footer-heading">Navigation</h4>
                 <ul className="footer-links">
                   <li><a href="/" className="footer-link">Home</a></li>
-                  <li><a href="/case-studies" className="footer-link">Case Studies & Demos</a></li>
+                  <li><a href="/case-studies" className="footer-link">Live demos</a></li>
                 </ul>
               </div>
               <div>
@@ -98,7 +98,7 @@ export default function RootLayout({ children }) {
                 <span>&middot;</span>
                 <a href="/refund-policy" className="footer-link">Cancellation &amp; Refunds</a>
                 <span>&middot;</span>
-                <a href="/data-notice" className="footer-link">Guest Data Notice</a>
+                <a href="/data-notice" className="footer-link">Customer Data Notice</a>
                 <span>&middot;</span>
                 <a href="/contact" className="footer-link">Contact</a>
               </p>

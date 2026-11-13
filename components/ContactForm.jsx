@@ -6,7 +6,7 @@ import { Send, CheckCircle2 } from "lucide-react";
 export default function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [scope, setScope] = useState("workflow-automation");
+  const [scope, setScope] = useState("website-agent");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "8px", textTransform: "uppercase" }}>Project Scope / Inquiry</label>
+        <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "8px", textTransform: "uppercase" }}>What do you need?</label>
         <select 
           value={scope}
           onChange={(e) => setScope(e.target.value)}
@@ -98,10 +98,11 @@ export default function ContactForm() {
           onFocus={(e) => e.target.style.borderColor = "var(--accent-teal)"}
           onBlur={(e) => e.target.style.borderColor = "var(--border-color)"}
         >
-          <option value="workflow-automation">Custom AI Agent / Workflow Automation</option>
-          <option value="technical-writing">Technical Blog Writing / Thought Leadership</option>
-          <option value="consulting">General Consulting</option>
-          <option value="collaboration">Research Collaboration</option>
+          <option value="website-agent">An AI agent for my business&apos;s website</option>
+          <option value="white-label">White-label agents for my agency&apos;s clients</option>
+          <option value="whatsapp">Adding an agent on WhatsApp</option>
+          <option value="audit">An audit of a chatbot we already run</option>
+          <option value="other">Something else</option>
         </select>
       </div>
 

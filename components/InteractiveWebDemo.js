@@ -51,6 +51,12 @@ export default function InteractiveWebDemo() {
         setMessages([
           { role: "assistant", content: welcomeMsg }
         ]);
+      } else if (urlCompanyId) {
+        // An old link (e.g. ?tenant=18 from before the demos changed on 10 Nov 2026). Say so plainly
+        // instead of silently answering as a different business.
+        setMessages([
+          { role: "assistant", content: "The demo at this link has moved. Pick one of the three fictional demo businesses above and ask what a customer would ask. If you were sent this link for your own business, email nishith@sciencethoughts.com for a fresh one." }
+        ]);
       }
     }
   }, []); // `companies` is a module-level constant, not a reactive value — nothing to list here.
@@ -122,8 +128,8 @@ export default function InteractiveWebDemo() {
           </div>
           <div>
             <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
-              Live AI Concierge Interactive Demo
-              <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>KB-GROUNDED</span>
+              Try a demo agent
+              <span style={{ fontSize: "0.7rem", padding: "2px 8px", borderRadius: "20px", background: "rgba(57, 255, 20, 0.15)", color: "var(--accent-green)", border: "1px solid rgba(57, 255, 20, 0.3)" }}>FICTIONAL BUSINESSES</span>
             </h3>
             <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>Pick a demo business and ask what a customer would ask. All three are fictional.</p>
           </div>
@@ -188,7 +194,7 @@ export default function InteractiveWebDemo() {
               <Bot size={18} />
             </div>
             <div style={{ padding: "12px 18px", borderRadius: "18px", background: "rgba(20, 25, 35, 0.8)", border: "1px solid rgba(255, 255, 255, 0.08)", color: "var(--text-muted)", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Sparkles size={14} className="animate-spin" /> Querying custom property knowledge base...
+              <Sparkles size={14} className="animate-spin" /> Checking the business&apos;s information...
             </div>
           </div>
         )}

@@ -29,7 +29,7 @@ const SECTIONS = [
     clauses: [
       ["2.1", "Agent: we build, host and maintain an AI chat agent (the \"Agent\") that answers your customers on your website and, if you choose the WhatsApp upgrade, on your own WhatsApp number. It answers from the information you give us, says so when it does not know, alerts your team, and records each enquiry (the customer's details and the conversation) in a Google Sheet or CRM."],
       ["2.2", "Setup: you send us your website, your common customer questions and your price list or policies. We build and test the Agent, you review a private preview, and it goes live when you approve it (the \"Go-Live Date\")."],
-      ["2.3", "Updates: changes to the Agent's information are included and made within 2 working days of your request. Support is by email and WhatsApp on working days (Monday to Saturday, 10:00 to 18:00 IST)."],
+      ["2.3", "Updates: changes to the Agent's information are included and made within 2 working days of your request. We reply to support requests by email or WhatsApp within one working day."],
       ["2.4", "WhatsApp upgrade: this needs Meta (WhatsApp's owner) to verify your business and approve your display name. We guide you through it but cannot speed up or guarantee Meta's review."],
       ["2.5", "Chatbot audit: we test a chatbot you already run against a set of real customer questions and give you a written report of what it got wrong. An audit is a one-off service; sections 4.3 to 4.6 on monthly fees do not apply to it."],
       ["2.6", "The Agent does not take payments, confirm bookings, appointments or orders, or change your own systems. Those decisions stay with you."],
@@ -41,7 +41,7 @@ const SECTIONS = [
     clauses: [
       ["3.1", "If you are an agency, you may sell Agents to your own customers (\"End Clients\") under your own brand and at your own prices. You are our Client; each End Client is your customer, not ours. We do not contact your End Clients unless you ask us to."],
       ["3.2", "You are responsible for your agreement with each End Client, for collecting their information and approvals, and for making sure they are allowed to use the Agent the way they do. You must not promise End Clients anything these Terms do not provide."],
-      ["3.3", "Your first End Client's Agent is a free 14-day pilot from its Go-Live Date. After the pilot, the fees in our quote apply unless you tell us in writing before it ends that you do not want to continue."],
+      ["3.3", "Your first End Client's Agent is a free 14-day pilot from its Go-Live Date. Fees start only if you confirm in writing (email is enough) that you want to continue. If you have not confirmed by the end of the pilot, the Agent is switched off and nothing is owed."],
       ["3.4", "For your End Clients' customer data, the End Client decides why and how it is used, you act for the End Client, and we act for you as your sub-processor under section 7."],
     ],
   },
@@ -147,7 +147,7 @@ export default function ClientTerms() {
             <p style={pStyle}>
               Questions about these Terms: <a href={`mailto:${BUSINESS.email}`} style={linkStyle}>{BUSINESS.email}</a>.
               See also our <a href="/refund-policy" style={linkStyle}>Cancellation &amp; Refund Policy</a> and{" "}
-              <a href="/data-notice" style={linkStyle}>Guest Data Notice</a>.
+              <a href="/data-notice" style={linkStyle}>Customer Data Notice</a>.
             </p>
           </div>
         </div>

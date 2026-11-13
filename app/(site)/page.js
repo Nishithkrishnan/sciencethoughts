@@ -1,7 +1,7 @@
 import SearchInput from "../../components/SearchInput";
 import ContactForm from "../../components/ContactForm";
 import InteractiveWebDemo from "../../components/InteractiveWebDemo";
-import { Briefcase, Sparkles, ArrowRight, Activity, Calendar, CheckCircle2, Globe, Users, MessageCircle, ShieldCheck, ListChecks } from "lucide-react";
+import { Briefcase, Sparkles, ArrowRight, Activity, Calendar, CheckCircle2, Globe, Users, MessageCircle, ShieldCheck } from "lucide-react";
 
 // Home page for the business model set on 10 Nov 2026 (see the project doc "ScienceThoughts:
 // Business Overview"): AI chat agents for any business that takes enquiries, website first,
@@ -45,14 +45,6 @@ const offers = [
     icon: <ShieldCheck size={24} />,
     color: "var(--accent-teal)",
   },
-];
-
-const steps = [
-  { day: "Day 0", text: "You fill a short form: your website, your ten most common customer questions, and a price list or policy document." },
-  { day: "Days 1–2", text: "We build the agent from that information and test it against your questions." },
-  { day: "Day 3", text: "You try a private preview and send corrections." },
-  { day: "Day 4", text: "One line of code goes on your website, and the agent is live." },
-  { day: "Day 14", text: "Your first report: what customers asked, which enquiries were captured, and what the agent could not answer." },
 ];
 
 const basics = [
@@ -141,30 +133,6 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 3. How it works */}
-      <section id="how-it-works" className="section-padding" style={{ borderTop: "1px solid var(--border-color)", background: "rgba(5, 5, 8, 0.4)" }}>
-        <div className="container" style={{ maxWidth: "900px" }}>
-          <div style={{ textAlign: "center", marginBottom: "45px" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-              <span style={iconWrap("var(--accent-teal)")}><ListChecks size={24} /></span>
-            </div>
-            <h2 style={h2}>Live on your website in about four days</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>You fill one form and paste one line of code. We do the rest.</p>
-          </div>
-          <ol style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {steps.map((s) => (
-              <li key={s.day} className="glass" style={{ display: "flex", gap: "22px", alignItems: "flex-start", padding: "20px 24px", borderRadius: "16px", marginBottom: "14px", background: "rgba(10, 10, 12, 0.4)" }}>
-                <span style={{ minWidth: "92px", fontWeight: "800", color: "var(--accent-teal)", fontFamily: "var(--font-display)" }}>{s.day}</span>
-                <span style={{ color: "var(--text-secondary)", lineHeight: "1.6" }}>{s.text}</span>
-              </li>
-            ))}
-          </ol>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", textAlign: "center", marginTop: "18px" }}>
-            WhatsApp can be added later on your own number, once Meta has verified your business.
-          </p>
         </div>
       </section>
 
